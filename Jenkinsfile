@@ -14,7 +14,6 @@ node {
         def remoteDir = "BE-ToolsDeploy"
         def process = new ProcessBuilder("ssh", "-o", "StrictHostKeyChecking=no", "-i", "ssh_id_rsa", "quang_vt204299@35.213.147.74", "[", "-d", "\"$remoteDir\"", "]", "&&", "echo", "\"exist\"", "||", "echo", "\"not exist\"").start()
         def dirStatus = process.inputStream.text.trim()
-        def dirStatus = checkDirCommand.text.trim()
 
         if (dirStatus == "not exist") {
             sh "ssh -o StrictHostKeyChecking=no -i ssh_id_rsa quang_vt204299@35.213.147.74 'git clone https://github.com/quangh0409/BE-ToolsDeploy.git'"
