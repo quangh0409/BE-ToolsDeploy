@@ -11,6 +11,5 @@ node {
   }
    stage("Test"){
     println("I'm Test")
-     
   }
 }
