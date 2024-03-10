@@ -8,7 +8,7 @@ services:
       context: .
       dockerfile: ./nginx/Dockerfile
     env_file: ./nginx/.env
-    image: docker.io/vutrongquang/gateway
+    image: vutrongquang/gateway
 
   auth:
     container_name: auth 
@@ -19,7 +19,7 @@ services:
       args:
         module: auth
     env_file: ./apps/auth/.env
-    image: docker.io/vutrongquang/auth
+    image: vutrongquang/auth
 
   # file:
   #   container_name: file

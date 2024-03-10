@@ -3,22 +3,22 @@ version: "3.8"
 services:
   gateway:
     container_name: gateway 
-    image: docker.io/vutrongquang/gateway
+    image: vutrongquang/gateway
     restart: always
     ports:
       - 8000:8000
-    # env_file: ./nginx/.env
+    env_file: ./nginx/.env
     depends_on:
       - auth
 
   auth:
     container_name: auth 
-    image: docker.io/vutrongquang/auth
+    image: vutrongquang/auth
     restart: always
     ports:
       - 6801:6801
     user: root
-    # env_file: ./apps/auth/.env
+    env_file: ./apps/auth/.env
 
 networks:
   default:
