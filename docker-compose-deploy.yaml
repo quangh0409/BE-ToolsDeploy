@@ -10,8 +10,6 @@ services:
     env_file: ./nginx/.env
     depends_on:
       - auth
-      - mail
-      - file
 
   auth:
     container_name: auth 
