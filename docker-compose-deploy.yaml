@@ -7,7 +7,7 @@ services:
     restart: always
     ports:
       - 8000:8000
-    env_file: ./nginx/.env
+    # env_file: ./nginx/.env
     depends_on:
       - auth
 
@@ -18,7 +18,7 @@ services:
     ports:
       - 6801:6801
     user: root
-    env_file: ./apps/auth/.env
+    # env_file: ./apps/auth/.env
 
 networks:
   default:
