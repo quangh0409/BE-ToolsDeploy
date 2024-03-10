@@ -1,0 +1,10 @@
+{
+  "name": "tsconfig",
+  "version": "1.0.0",
+  "author": "Vũ Trọng Quảng",
+  "license": "MIT",
+  "private": true,
+  "publishConfig": {
+    "access": "public"
+  }
+}

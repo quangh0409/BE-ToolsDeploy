@@ -1,0 +1,67 @@
+version: "3.8"
+
+services:
+  gateway:
+    container_name: gateway 
+    hostname: ca.gateway
+    build:
+      context: .
+      dockerfile: ./nginx/Dockerfile
+    restart: always
+    ports:
+      - 8080:8080
+    env_file: ./nginx/.env
+    depends_on:
+      - auth
+      - mail
+      - file
+    image: docker.io/vutrongquang/gateway
+
+  auth:
+    container_name: auth 
+    hostname: ca.auth
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        module: auth
+    restart: always
+    ports:
+      - 6801:6801
+    user: root
+    env_file: ./apps/auth/.env
+    image: docker.io/vutrongquang/auth
+
+  file:
+    container_name: file
+    hostname: ca.file
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        module: file
+    restart: always
+    ports:
+      - 6807:6807
+    user: root
+    env_file: ./apps/file/.env
+    image: docker.io/vutrongquang/file
+
+  mail:
+    container_name: mail
+    hostname: ca.mail
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        module: mail
+    restart: always
+    ports:
+      - 6803:6803
+    user: root
+    env_file: ./apps/mail/.env
+    image: docker.io/vutrongquang/mail
+
+networks:
+  default:
+    name: ca-network
