@@ -13,8 +13,6 @@ services:
     env_file: ./nginx/.env
     depends_on:
       - auth
-      - mail
-      - file
     image: docker.io/vutrongquang/gateway
 
   auth:
@@ -30,37 +28,8 @@ services:
       - 6801:6801
     user: root
     env_file: ./apps/auth/.env
-    # image: docker.io/vutrongquang/auth
+    image: docker.io/vutrongquang/auth
 
-  # file:
-  #   container_name: file
-  #   hostname: ca.file
-  #   build:
-  #     context: .
-  #     dockerfile: ./Dockerfile
-  #     args:
-  #       module: file
-  #   restart: always
-  #   ports:
-  #     - 6807:6807
-  #   user: root
-  #   env_file: ./apps/file/.env
-  #   image: docker.io/vutrongquang/file
-
-  # mail:
-  #   container_name: mail
-  #   hostname: ca.mail
-  #   build:
-  #     context: .
-  #     dockerfile: ./Dockerfile
-  #     args:
-  #       module: mail
-  #   restart: always
-  #   ports:
-  #     - 6803:6803
-  #   user: root
-  #   env_file: ./apps/mail/.env
-  #   image: docker.io/vutrongquang/mail
 
 networks:
   default:
