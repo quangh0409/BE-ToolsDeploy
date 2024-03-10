@@ -38,10 +38,7 @@ node {
     withCredentials([file(credentialsId: 'ssh-key', variable: 'ssh_key_remote')]) {
         sh "cat $ssh_key_remote > ssh_id_rsa"
         sh "chmod 400 ssh_id_rsa"
-        sh "ssh -o StrictHostKeyChecking=no -i ssh_id_rsa quang_vt204299@35.213.147.74 'docker run --name vutrongquang/auth --health-cmd=\"curl -f http://localhost\" --health-interval=1m30s --health-timeout=10s --health-retries=3'"
+        sh "ssh -o StrictHostKeyChecking=no -i ssh_id_rsa quang_vt204299@35.213.147.74 'docker-compose up --scale myservice=0'"
      }    
-
-
-
   }
 }
