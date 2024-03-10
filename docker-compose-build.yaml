@@ -1,0 +1,40 @@
+version: "3.8"
+
+services:
+  gateway:
+    container_name: gateway 
+    build:
+      context: .
+      dockerfile: ./nginx/Dockerfile
+    image: docker.io/vutrongquang/gateway
+
+  auth:
+    container_name: auth 
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        module: auth
+    # image: docker.io/vutrongquang/auth
+
+  # file:
+  #   container_name: file
+  #   build:
+  #     context: .
+  #     dockerfile: ./Dockerfile
+  #     args:
+  #       module: file
+  #   image: docker.io/vutrongquang/file
+
+  # mail:
+  #   container_name: mail
+  #   build:
+  #     context: .
+  #     dockerfile: ./Dockerfile
+  #     args:
+  #       module: mail
+  #   image: docker.io/vutrongquang/mail
+
+networks:
+  default:
+    name: ca-network
