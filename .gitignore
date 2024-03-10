@@ -2,7 +2,7 @@
 **/logs
 **/build
 
-**/.env
+# **/.env
 
 **/tsconfig.tsbuildinfo
 **/.eslintcache
