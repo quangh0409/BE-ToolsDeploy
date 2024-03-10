@@ -11,20 +11,16 @@ node {
         sh "cat $ssh_key_remote > ssh_id_rsa"
         sh "chmod 400 ssh_id_rsa"
         // sh "ssh -o StrictHostKeyChecking=no -i ssh_id_rsa quang_vt204299@35.213.147.74 'git clone https://github.com/quangh0409/BE-ToolsDeploy.git'"
-        steps {
-                script {
-                    def remoteDir = "BE-ToolsDeploy"
-                    def checkDirCommand = "ssh -o StrictHostKeyChecking=no -i ssh_id_rsa quang_vt204299@35.213.147.74 '[ -d \"$remoteDir\" ] && echo \"exist\" || echo \"not exist\"'".execute()
-                    def dirStatus = checkDirCommand.text.trim()
+        def remoteDir = "BE-ToolsDeploy"
+        def checkDirCommand = "ssh -o StrictHostKeyChecking=no -i ssh_id_rsa quang_vt204299@35.213.147.74 '[ -d \"$remoteDir\" ] && echo \"exist\" || echo \"not exist\"'".execute()
+        def dirStatus = checkDirCommand.text.trim()
 
-                    if (dirStatus == "not exist") {
-                        sh "ssh -o StrictHostKeyChecking=no -i ssh_id_rsa quang_vt204299@35.213.147.74 'git clone https://github.com/quangh0409/BE-ToolsDeploy.git'"
-                    } else {
-                        echo "Directory already exists, skipping git clone"
-                        sh "ssh -o StrictHostKeyChecking=no -i ssh_id_rsa quang_vt204299@35.213.147.74 'git pull'"
-                    }
-                }
-            }
+        if (dirStatus == "not exist") {
+            sh "ssh -o StrictHostKeyChecking=no -i ssh_id_rsa quang_vt204299@35.213.147.74 'git clone https://github.com/quangh0409/BE-ToolsDeploy.git'"
+        } else {
+            echo "Directory already exists, skipping git clone"
+            sh "ssh -o StrictHostKeyChecking=no -i ssh_id_rsa quang_vt204299@35.213.147.74 'git pull'"
+        }
     }
   }
   stage("Build"){
