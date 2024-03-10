@@ -3,6 +3,7 @@ version: "3.8"
 services:
   gateway:
     container_name: gateway 
+    hostname: gateway
     build:
       context: .
       dockerfile: ./nginx/Dockerfile
@@ -10,6 +11,7 @@ services:
 
   auth:
     container_name: auth 
+    hostname: auth
     build:
       context: .
       dockerfile: ./Dockerfile
