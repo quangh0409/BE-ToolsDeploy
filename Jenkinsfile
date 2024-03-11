@@ -40,7 +40,8 @@ node {
     //     sh "chmod 400 ssh_id_rsa"
     //     sh "ssh -o StrictHostKeyChecking=no -i ssh_id_rsa quang_vt204299@35.213.147.74 'cd BE-ToolsDeploy && docker compose -f ./docker-compose.yaml up --scale auth=0 gateway=0'"
     //  }    
-    sh "pwd"
-    sh "docker compose -f /home/quang_vt204299/CHECK-P-ToolsDeploy/docker-compose.yaml up  --build"
+        println("I am Test")
+        sh "pwd"
+        sh "cd ~ &&  cd ../home/quang_vt204299/CHECK-P-ToolsDeploy && ls && docker compose up  --build"
   }
 }

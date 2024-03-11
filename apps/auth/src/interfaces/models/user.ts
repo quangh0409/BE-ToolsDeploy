@@ -27,3 +27,5 @@ export interface IUser {
     // git:
     activities: IUserActivity[];
 }
+
+
