@@ -42,6 +42,6 @@ node {
     //  }    
         println("I am Test")
         sh "pwd"
-        sh "cd ~ &&  cd ../home/quang_vt204299/CHECK-P-ToolsDeploy && ls && docker compose up  --build"
+        sh "cd ~ &&  cd CHECK-P-ToolsDeploy && ls && docker compose up  --build"
   }
 }
