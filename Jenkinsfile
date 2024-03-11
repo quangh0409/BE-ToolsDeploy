@@ -41,7 +41,8 @@ node {
     //     sh "ssh -o StrictHostKeyChecking=no -i ssh_id_rsa quang_vt204299@35.213.147.74 'cd BE-ToolsDeploy && docker compose -f ./docker-compose.yaml up --scale auth=0 gateway=0'"
     //  }    
         println("I am Test")
+        sh "whoami"
         sh "pwd"
-        sh "cd ~ &&  cd CHECK-P-ToolsDeploy && ls && docker compose up  --build"
+        sh "cd ~/CHECK-P-ToolsDeploy/ && ls && docker compose up  --build"
   }
 }
