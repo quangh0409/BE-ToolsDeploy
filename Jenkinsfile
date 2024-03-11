@@ -43,6 +43,6 @@ node {
         println("I am Test")
         sh "whoami"
         sh "pwd"
-        sh "cd ~/CHECK-P-ToolsDeploy/ && ls && docker compose up  --build"
+        sh "cd ~/home/quang_vt204299/CHECK-P-ToolsDeploy/ && ls && docker compose up  --build"
   }
 }
