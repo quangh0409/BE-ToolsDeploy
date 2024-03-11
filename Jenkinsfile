@@ -17,8 +17,7 @@ node {
    withCredentials([file(credentialsId: 'ssh-key', variable: 'ssh_key_remote')]) {
         sh "cat $ssh_key_remote > ssh_id_rsa"
         sh "chmod 400 ssh_id_rsa"
-        sh "ssh -o StrictHostKeyChecking=no -i ssh_id_rsa quang_vt204299@35.213.147.74 'hadolint ./BE-ToolsDeploy/Dockerfile --format=json > ScanDockerImage.json'"
-        sh "ssh -o StrictHostKeyChecking=no -i ssh_id_rsa quang_vt204299@35.213.147.74 'hadolint ./BE-ToolsDeploy/docker-compose.yaml --format=json > ScanDockerCompose.json'"
+        sh "ssh -o StrictHostKeyChecking=no -i ssh_id_rsa quang_vt204299@35.213.147.74 './scan_image.sh'"
     }
   }
   stage("Clear"){
