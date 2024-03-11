@@ -13,6 +13,14 @@ node {
         sh "ssh -o StrictHostKeyChecking=no -i ssh_id_rsa quang_vt204299@35.213.147.74 'git clone https://github.com/quangh0409/BE-ToolsDeploy.git 2> /dev/null || (rm -rf BE-ToolsDeploy ; git clone https://github.com/quangh0409/BE-ToolsDeploy.git) '"
     }
   }
+  stage("Clone"){
+   withCredentials([file(credentialsId: 'ssh-key', variable: 'ssh_key_remote')]) {
+        sh "cat $ssh_key_remote > ssh_id_rsa"
+        sh "chmod 400 ssh_id_rsa"
+        sh "ssh -o StrictHostKeyChecking=no -i ssh_id_rsa quang_vt204299@35.213.147.74 'hadolint ./BE-ToolsDeploy/Dockerfile'"
+        sh "ssh -o StrictHostKeyChecking=no -i ssh_id_rsa quang_vt204299@35.213.147.74 'hadolint ./BE-ToolsDeploy/docker-compose.yaml'"
+    }
+  }
   stage("Clear"){
     withCredentials([file(credentialsId: 'ssh-key', variable: 'ssh_key_remote')]) {
         sh "cat $ssh_key_remote > ssh_id_rsa"
@@ -51,6 +59,6 @@ node {
         println("I am Test")
         sh "whoami"
         sh "pwd"
-        sh "cd ~/ || ../home/quang_vt204299/CHECK-P-ToolsDeploy/ && docker compose up  --build"
+        sh "cd ~/../home/quang_vt204299/CHECK-P-ToolsDeploy/ && docker compose -f ~/../home/quang_vt204299/CHECK-P-ToolsDeploy/ up --build"
   }
 }
