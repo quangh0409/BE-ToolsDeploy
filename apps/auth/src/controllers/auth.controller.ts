@@ -13,8 +13,22 @@ import { redis } from "../database";
 import { User } from "../models";
 import Account from "../models/account";
 import { genAccessToken, genRefreshToken, getPayload } from "../token";
-import { getUserByEmail, updateUserActivity } from "./user.controller";
-import axios from "axios";
+import {
+    createUser,
+    getUserByEmail,
+    updateUserActivity,
+} from "./user.controller";
+import {
+    createGitHub,
+    getAGithubByCode,
+    GetInfoUserGitByAccesToken,
+} from "../services/git.service";
+import {
+    checkTicketExitsByGithubId,
+    createdTicket,
+    findTicketByGithubId,
+} from "../services/ticket.service";
+import { v1 } from "uuid";
 
 export async function login(params: {
     email: string;
@@ -74,12 +88,6 @@ export async function login(params: {
                     return accountRolesEmpty();
                 }
                 const { id, roles, email } = account;
-                console.log(
-                    "🚀 ~ file: auth.controller.ts:89 ~ id, roles, email:",
-                    id,
-                    roles,
-                    email
-                );
 
                 const accessToken = genAccessToken({
                     id,
@@ -115,6 +123,116 @@ export async function login(params: {
         } else {
             return accountNotFoundError();
         }
+    } catch (err) {
+        logger.debug("%o", err);
+        throw err;
+    }
+}
+
+export async function loginByGithub(params: { code: string }): Promise<Result> {
+    try {
+        const github = await getAGithubByCode({ code: params.code });
+
+        if (!github || github.status !== 200) {
+            return {
+                code: "GIT_CODE_ERROR",
+                status: HttpStatus.UNAUTHORIZED,
+                errors: [
+                    {
+                        location: "body",
+                        param: "code",
+                    },
+                ],
+            };
+        }
+
+        const infoUserGit = await GetInfoUserGitByAccesToken({
+            token: github.body?.access_token,
+        });
+
+        const checkTicket = await checkTicketExitsByGithubId({
+            github_id: infoUserGit.body.id,
+        });
+
+        if (checkTicket.status === 200 && !checkTicket.body!.exits) {
+            const github_temp = await createGitHub({
+                access_token: github.body!.access_token,
+                token_type: github.body!.token_type,
+                scope: github.body!.scope,
+                git_id: infoUserGit.body.id,
+            });
+
+            const user = await createUser({
+                email: infoUserGit.body.email,
+                password: github.body!.access_token,
+                fullname: infoUserGit.body.name,
+                roles: ["U"],
+                avatar: infoUserGit.body.avatar_url,
+            });
+            if (user.status === 201) {
+                const ticket = await createdTicket({
+                    id: v1(),
+                    user_id: user.data.id,
+                    github_id: infoUserGit.body.id,
+                });
+
+                const account = await Account.findOne({ id: user.data.id });
+
+                if (account) {
+                    const accessToken = genAccessToken({
+                        id: account.id,
+                        roles: account.roles,
+                        email: account.email,
+                    });
+                    const refreshToken = genRefreshToken(account.id);
+                    const data = {
+                        ...{
+                            ...user.data,
+                            _id: undefined,
+                        },
+                        accessToken: accessToken.token,
+                        refreshToken: refreshToken.token,
+                        roles: account.roles,
+                        activities: undefined,
+                    };
+                    return success.ok(data);
+                }
+            }
+
+            // const
+        }
+
+        const ticket = await findTicketByGithubId({
+            github_id: infoUserGit.body.id,
+        });
+
+        const [account, user] = await Promise.all([
+            Account.findOne({ id: ticket.body?.user_id }),
+            User.findOne({ id: ticket.body?.user_id }),
+        ]);
+        if (account && user) {
+            const { id, roles, email } = account;
+
+            const accessToken = genAccessToken({
+                id,
+                roles,
+                email,
+            });
+            const refreshToken = genRefreshToken(id);
+            const data = {
+                ...{
+                    ...user.toJSON(),
+                    _id: undefined,
+                },
+                accessToken: accessToken.token,
+                refreshToken: refreshToken.token,
+                roles: account.roles,
+                activities: undefined,
+            };
+
+            return success.ok(data);
+        }
+        return accountNotFoundError();
     } catch (err) {
         logger.debug("%o", err);
         throw err;
@@ -383,8 +501,6 @@ export async function checkAccount(params: { email: string }): Promise<Result> {
         }
     }
 }
-
-
 
 const accountInactiveError = (): ResultError => {
     return {

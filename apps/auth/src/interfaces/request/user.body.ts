@@ -34,19 +34,4 @@ export interface UserImport {
     fullname: string;
     phone?: string;
     roles: string[];
-    avatar?: string;
-    cccd?: string;
-    class?: string;
-    school?: string;
-    gen?: string;
-    degree?: string;
-    semester?: string;
-    is_active: boolean;
 }
-
-export interface UpdateUserActivationReqBody {
-    ids: string[];
-    status: boolean;
-}
-
-export type ImportUserReqBody = UserImport[];

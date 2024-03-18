@@ -6,7 +6,7 @@ import {
     setPassword,
     updatePassword,
     checkAccount,
-    GetAccessTokenByCode,
+    loginByGithub,
 } from "../../controllers";
 import {
     CheckReqBody,
@@ -36,10 +36,10 @@ router.post(
 );
 
 router.get(
-    "/callback",
+    "/login-github",
     async (req: Request, _: Response, next: NextFunction) => {
         const code = req.query.code as string;
-        const result = await GetAccessTokenByCode({ code: code });
+        const result = await loginByGithub({ code });
         next(result);
     }
 );

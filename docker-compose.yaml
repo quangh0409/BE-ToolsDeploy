@@ -13,6 +13,8 @@ services:
     env_file: ./nginx/.env
     depends_on:
       - auth
+      - git
+      - ticket
     image: docker.io/vutrongquang/gateway
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost"]
@@ -34,6 +36,44 @@ services:
     user: root
     env_file: ./apps/auth/.env
     image: docker.io/vutrongquang/auth
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+  git:
+    container_name: git 
+    hostname: ca.git
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        module: git
+    restart: always
+    ports:
+      - 6802:6802
+    user: root
+    env_file: ./apps/git/.env
+    image: docker.io/vutrongquang/git
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+  ticket:
+    container_name: ticket 
+    hostname: ca.ticket
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        module: ticket
+    restart: always
+    ports:
+      - 6803:6803
+    user: root
+    env_file: ./apps/ticket/.env
+    image: docker.io/vutrongquang/ticket
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost"]
       interval: 1m30s

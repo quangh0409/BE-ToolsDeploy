@@ -11,17 +11,9 @@ const userSchema = new mongoose.Schema(
             type: String,
             required: false,
         },
-        number: {
-            type: String,
-            required: false,
-        },
         email: {
             type: String,
             required: true,
-        },
-        phone: {
-            type: String,
-            required: false,
         },
         is_active: {
             type: Boolean,
@@ -38,10 +30,6 @@ const userSchema = new mongoose.Schema(
         },
         created_time: {
             type: Date,
-            required: true,
-        },
-        created_by: {
-            type: String,
             required: true,
         },
         activities: {
