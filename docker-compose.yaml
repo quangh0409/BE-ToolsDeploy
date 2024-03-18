@@ -3,7 +3,7 @@ version: "3.8"
 services:
   gateway:
     container_name: gateway 
-    hostname: ca.gateway
+    hostname: gateway
     build:
       context: .
       dockerfile: ./nginx/Dockerfile
@@ -16,10 +16,10 @@ services:
       - git
       - ticket
     image: docker.io/vutrongquang/gateway
-    
+
   auth:
     container_name: auth 
-    hostname: ca.auth
+    hostname: auth
     build:
       context: .
       dockerfile: ./Dockerfile
@@ -34,7 +34,7 @@ services:
 
   git:
     container_name: git 
-    hostname: ca.git
+    hostname: git
     build:
       context: .
       dockerfile: ./Dockerfile
@@ -49,7 +49,7 @@ services:
 
   ticket:
     container_name: ticket 
-    hostname: ca.ticket
+    hostname: ticket
     build:
       context: .
       dockerfile: ./Dockerfile
