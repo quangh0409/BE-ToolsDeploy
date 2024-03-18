@@ -1,7 +1,7 @@
 import "dotenv/config";
 
 export const configs = {
-    service: "tickets",
+    service: "ticket",
     environment: process.env.CA_TICKET_ENVIRONMENT || "dev",
     app: {
         prefix: "/api/v1",

@@ -1,5 +1,5 @@
 {
-    "name": "tickets",
+    "name": "ticket",
     "version": "1.0.0",
     "main": "build/ca.ticket.js",
     "scripts": {
