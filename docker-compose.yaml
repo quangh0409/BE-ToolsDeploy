@@ -30,6 +30,9 @@ services:
       - 6801:6801
     user: root
     env_file: ./apps/auth/.env
+    environment:
+      - CA_AUTH_TICKET_SERVICE_HOST=ticket
+      - CA_AUTH_GIT_SERVICE_HOST=git
     image: docker.io/vutrongquang/auth
 
   git:
@@ -60,6 +63,8 @@ services:
       - 6803:6803
     user: root
     env_file: ./apps/ticket/.env
+    environment: 
+      - CA_TICKET_GIT_SERVICE_HOST=git
     image: docker.io/vutrongquang/ticket
 
 
