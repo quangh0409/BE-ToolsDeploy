@@ -16,12 +16,7 @@ services:
       - git
       - ticket
     image: docker.io/vutrongquang/gateway
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost"]
-      interval: 1m30s
-      timeout: 10s
-      retries: 3
-
+    
   auth:
     container_name: auth 
     hostname: ca.auth
@@ -36,7 +31,7 @@ services:
     user: root
     env_file: ./apps/auth/.env
     image: docker.io/vutrongquang/auth
-    
+
   git:
     container_name: git 
     hostname: ca.git
