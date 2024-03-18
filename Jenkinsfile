@@ -25,7 +25,8 @@ node {
     withCredentials([file(credentialsId: 'ssh_key_remote', variable: 'ssh_key_remote')]) {
         sh "cat $ssh_key_remote > ssh_id_rsa"
         sh "chmod 400 ssh_id_rsa"
-        sh "ssh -o StrictHostKeyChecking=no -i ssh_id_rsa quang_vt204299@35.213.147.74 'docker stop \$(docker ps -aq) && docker rmi -f \$(docker images -q) && docker builder prune -f'"
+        sh "ssh -o StrictHostKeyChecking=no -i ssh_id_rsa quang_vt204299@35.213.147.74 '(docker stop \$(docker ps -aq)  || echo no container) &&  (docker rmi -f \$(docker images -q) || echo no image) && docker builder prune -f
+'"
     }
   }
   stage("Build"){
