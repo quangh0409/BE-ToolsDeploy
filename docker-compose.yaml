@@ -36,11 +36,7 @@ services:
     user: root
     env_file: ./apps/auth/.env
     image: docker.io/vutrongquang/auth
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost"]
-      interval: 1m30s
-      timeout: 10s
-      retries: 3
+    
   git:
     container_name: git 
     hostname: ca.git
@@ -55,11 +51,7 @@ services:
     user: root
     env_file: ./apps/git/.env
     image: docker.io/vutrongquang/git
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost"]
-      interval: 1m30s
-      timeout: 10s
-      retries: 3
+
   ticket:
     container_name: ticket 
     hostname: ca.ticket
@@ -74,11 +66,6 @@ services:
     user: root
     env_file: ./apps/ticket/.env
     image: docker.io/vutrongquang/ticket
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost"]
-      interval: 1m30s
-      timeout: 10s
-      retries: 3
 
 
 networks:
