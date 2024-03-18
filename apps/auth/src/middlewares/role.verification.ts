@@ -24,10 +24,6 @@ export function verifyRole(...roles: string[]): RequestHandler {
         roles.push("SA", "T", "S");
     }
 
-    // if (roles.includes("L*")) {
-    //     roles.push("L1", "L2");
-    // }
-
     return (req: Request, _: Response, next: NextFunction) => {
         const errorResult = error.actionNotAllowed();
         if (!req.payload) {

@@ -24,7 +24,6 @@ export interface IUser {
     avatar?: string;
     updated_time: Date;
     created_time: Date;
-    // git:
     activities: IUserActivity[];
 }
 

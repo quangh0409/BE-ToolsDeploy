@@ -7,52 +7,29 @@ import {
     ResultSuccess,
     success,
 } from "app";
-import {
-    IUser,
-    UserAction,
-} from "../interfaces/models";
+import { IUser, UserAction } from "../interfaces/models";
 import mongoose, { FilterQuery, PipelineStage } from "mongoose";
 import { createAccount } from "./account.controller";
 import { parseQuery, parseSort, ParseSyntaxError } from "mquery";
 import { Account, User } from "../models";
-import { ImportUserReqBody } from "../interfaces/request";
 
 export async function createUser(params: {
     email: string;
     password: string;
-    number: string;
     fullname: string;
-    phone?: string;
     roles: string[];
     avatar?: string;
-    is_active: boolean;
-    userRoles: string[];
-    userId: string;
-}): Promise<Result> {
-    console.log("🚀 ~ file: user.controller.ts:34 ~ params:", params);
-
-    if (!params.userRoles.includes("SA")) {
-        if (params.roles?.includes("SA")) {
-            return error.actionNotAllowed();
-        }
-    }
+}): Promise<ResultSuccess> {
     await checkEmailExists(params.email);
-
 
     const user = new User({
         id: v1(),
         fullname: params.fullname,
         email: params.email,
-        number: params.number,
-        phone: params.phone,
-        is_active: params.is_active,
-        activities: [
-            {
-                action: UserAction.CREATE,
-                actor: params.userId,
-                time: new Date(),
-            },
-        ],
+        is_active: true,
+        activities: [],
+        avatar: params.avatar,
+        created_time: new Date(),
     });
 
     await Promise.all([
@@ -61,7 +38,7 @@ export async function createUser(params: {
                 id: user.id,
                 email: params.email,
                 password: params.password,
-                is_active: params.is_active,
+                is_active: true,
                 roles: params.roles,
             },
         ]),
@@ -75,6 +52,13 @@ export async function createUser(params: {
     };
     return success.created(data);
 }
+
+export async function createUserByCodeGithub(params: {
+    github_code: string;
+}): Promise<ResultSuccess> {
+    return success.ok({});
+}
+
 export async function updateUser(params: {
     id: string;
     fullname?: string;
@@ -319,59 +303,6 @@ export async function updateUserActivity(params: {
     }
 }
 
-export async function getUserByIds(ids: string[]): Promise<Result> {
-    const users = await User.find(
-        { id: { $in: ids } },
-        { _id: 0, password: 0 }
-    ).lean();
-
-    return success.ok(users);
-}
-
-export async function importUser(params: {
-    data: ImportUserReqBody;
-    userRoles: string[];
-    userId: string;
-}): Promise<Result> {
-    await validateImportData(params);
-    const createUser = params.data.map(async (u) => {
-        const id = v1();
-        return {
-            id: id,
-            fullname: u.fullname,
-            email: u.email,
-            number: u.number,
-            phone: u.phone,
-            created_time: new Date(),
-            created_by: params.userId,
-            is_active: u.is_active,
-            activities: [
-                {
-                    action: UserAction.CREATE,
-                    actor: params.userId,
-                    time: new Date(),
-                },
-            ],
-        };
-    });
-
-    const users = await Promise.all([...createUser]);
-    const accounts = params.data.map((u) => {
-        const id = users.find((m) => m.email === u.email)?.id;
-        return {
-            id: id as string,
-            email: u.email,
-            password: u.password,
-            is_active: true,
-            roles: u.roles,
-        };
-    });
-    const mails = params.data.map((u) => {
-    });
-    await Promise.all([createAccount(accounts), User.insertMany(users), mails]);
-    return success.created({ inserted: params.data.length });
-}
-
 async function checkEmailExists(email: string): Promise<void> {
     const existedUser = await User.findOne({
         email: { $regex: `^${email}$`, $options: "i" },
@@ -389,114 +320,4 @@ async function checkEmailExists(email: string): Promise<void> {
             ],
         });
     }
-}
-
-// check duplicate email
-async function validateImportData(params: {
-    data: ImportUserReqBody;
-    userRoles: string[];
-}): Promise<void> {
-    const indexesEmailMissing: number[] = [];
-    const indexesPasswordMissing: number[] = [];
-    const emails = params.data.map((u) => u.email);
-    params.data.forEach((u) => {
-        if (!u.email || u.email === "") {
-            indexesEmailMissing.push(u.index);
-        }
-
-        if (u.password === "") {
-            indexesPasswordMissing.push(u.index);
-        }
-    });
-    const users = await User.find({ email: { $in: emails } });
-    const indexesEmailExisting = <number[]>params.data
-        .map((e) => {
-            const importUser = users.find((iu) => iu.email === e.email);
-            return importUser ? e.index : null;
-        })
-        .filter((u) => u !== null);
-
-    const errors: {
-        indexes: number[];
-        code: string;
-        description: {
-            vi: string;
-            en: string;
-        };
-    }[] = [];
-    if (indexesEmailMissing.length !== 0) {
-        errors.push({
-            indexes: indexesEmailMissing,
-            code: "EMAIL_IS_NOT_VALID",
-            description: {
-                vi: "Địa chỉ email không hợp lệ",
-                en: "Email address is not valid",
-            },
-        });
-    }
-
-    if (indexesEmailExisting.length !== 0) {
-        errors.push({
-            indexes: indexesEmailExisting,
-            code: "REGISTERED_EMAIL",
-            description: {
-                vi: "Địa chỉ email đã được sử dụng",
-                en: "The email is used for registration",
-            },
-        });
-    }
-
-    if (indexesPasswordMissing.length !== 0) {
-        errors.push({
-            indexes: indexesPasswordMissing,
-            code: "PASSWORD_IS_NOT_VALID",
-            description: {
-                vi: "Mật khẩu không hợp lệ",
-                en: "Password is not valid",
-            },
-        });
-    }
-
-    if (errors.length > 0) {
-        throw new HttpError({
-            status: HttpStatus.BAD_REQUEST,
-            code: "INVALID_DATA",
-            details: errors,
-            description: {
-                vi: "Tệp dữ liệu không hợp lệ",
-                en: "File data is not valid",
-            },
-        });
-    }
-}
-
-export async function getAllUserByPosition(params: {
-    position: string;
-    type?: boolean;
-    semester?: string;
-}): Promise<ResultSuccess> {
-    const filter ={};
-    const users = await User.find(filter, {
-        _id: 0,
-        id: 1,
-        number: 1,
-        fullname: 1,
-        email: 1,
-    }).then((res) => {
-        const result = res.map(async (u) => {
-            const research_area: {
-                [key: string]: string | number | undefined;
-            }[] = [];
-
-
-            const data = {
-                ...u.toObject(),
-                research_area: research_area,
-            };
-            return data;
-        });
-        return Promise.all(result);
-    });
-
-    return success.ok(users);
 }
