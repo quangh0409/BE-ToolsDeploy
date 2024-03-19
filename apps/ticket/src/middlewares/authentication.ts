@@ -12,7 +12,6 @@ export async function verifyToken(
 ): Promise<void> {
     const option = { algorithm: "RS256" } as VerifyOptions;
     const token: string | undefined = req.header("token");
-    console.log("🚀 ~ token:", token);
     const errors: ErrorDetail[] = [
         {
             param: "token",
@@ -31,13 +30,11 @@ export async function verifyToken(
     try {
         const publicKey = configs.keys.public;
         const payload = <Payload>jsonwebtoken.verify(token, publicKey, option);
-        console.log("🚀 ~ payload:", payload)
         req.payload = payload;
         const expireAt = await getExpireTime({
             token,
             userId: payload.id,
         });
-        console.log("🚀 ~ expireAt:", expireAt);
         if (payload.type !== "ACCESS_TOKEN" || expireAt === null) {
             return next({
                 status: HttpStatus.UNAUTHORIZED,

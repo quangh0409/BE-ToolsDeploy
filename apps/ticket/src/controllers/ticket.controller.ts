@@ -92,7 +92,6 @@ export async function findTicketDetailByUserId(params: {
             },
             user_id: undefined,
         });
-        console.log("🚀 ~ ticket:", result);
     }
 
     if (ticket.github_id) {

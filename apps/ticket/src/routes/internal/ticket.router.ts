@@ -43,7 +43,6 @@ router.get(
 
 router.post("/", async (req: Request, _: Response, next: NextFunction) => {
     const body = req.body;
-    console.log("🚀 ~ router.post ~ body:", body)
     const result = await createdTicket({ ...body });
     next(result);
 });

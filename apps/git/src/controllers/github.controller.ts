@@ -93,7 +93,7 @@ export async function getGitHubById(params: {
         });
     }
 
-    return success.ok({ check, _id: undefined });
+    return success.ok({ ...check, _id: undefined });
 }
 
 export async function getAGithubByCode(params: {
@@ -123,7 +123,6 @@ export async function getAGithubByCode(params: {
         }
         return success.ok(response.data);
     } catch (error) {
-        console.error(error);
         return {
             status: HttpStatus.INTERNAL_SERVER,
             code: "ACCOUNT_IS_INACTIVE",

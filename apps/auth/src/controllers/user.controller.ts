@@ -260,7 +260,7 @@ export async function _getUserById(userId: string): Promise<ResultSuccess> {
             message: `the user does not exist`,
         });
     }
-    return success.ok({ user, _id: undefined });
+    return success.ok({ ...user, _id: undefined });
 }
 
 export async function updateUserActivity(params: {
