@@ -31,6 +31,7 @@ export async function verifyToken(
     try {
         const publicKey = configs.keys.public;
         const payload = <Payload>jsonwebtoken.verify(token, publicKey, option);
+        console.log("🚀 ~ payload:", payload)
         req.payload = payload;
         const expireAt = await getExpireTime({
             token,

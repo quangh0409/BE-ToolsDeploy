@@ -142,7 +142,7 @@ export async function loginByGithub(params: { code: string }): Promise<Result> {
                     {
                         location: "body",
                         param: "code",
-                        value: params.code
+                        value: params.code,
                     },
                 ],
             };
@@ -197,6 +197,12 @@ export async function loginByGithub(params: { code: string }): Promise<Result> {
                         roles: account.roles,
                         activities: undefined,
                     };
+
+                    await saveTokenSignature({
+                        userId: user.data.id,
+                        token: accessToken.token,
+                        expireAt: accessToken.expireAt,
+                    });
                     return success.ok(data);
                 }
             }
@@ -217,6 +223,7 @@ export async function loginByGithub(params: { code: string }): Promise<Result> {
                 git_id: infoUserGit.body.id,
             }),
         ]);
+
         if (account && user) {
             const { id, roles, email } = account;
 
@@ -236,7 +243,11 @@ export async function loginByGithub(params: { code: string }): Promise<Result> {
                 roles: account.roles,
                 activities: undefined,
             };
-
+            await saveTokenSignature({
+                userId: id,
+                token: accessToken.token,
+                expireAt: accessToken.expireAt,
+            });
             return success.ok(data);
         }
         return accountNotFoundError();
