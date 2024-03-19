@@ -31,8 +31,8 @@ services:
     user: root
     env_file: ./apps/auth/.env
     environment:
-      - CA_AUTH_TICKET_SERVICE_HOST=ticket
-      - CA_AUTH_GIT_SERVICE_HOST=git
+      - CA_AUTH_TICKET_SERVICE_HOST=http://ticket
+      - CA_AUTH_GIT_SERVICE_HOST=http://git
     image: docker.io/vutrongquang/auth
 
   git:
@@ -64,7 +64,7 @@ services:
     user: root
     env_file: ./apps/ticket/.env
     environment: 
-      - CA_TICKET_GIT_SERVICE_HOST=git
+      - CA_TICKET_GIT_SERVICE_HOST=http://git
     image: docker.io/vutrongquang/ticket
 
 
