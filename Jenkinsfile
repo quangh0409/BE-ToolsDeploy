@@ -13,14 +13,14 @@ node {
         sh "ssh -o StrictHostKeyChecking=no -i ssh_id_rsa quang_vt204299@35.213.167.216 'git clone https://github.com/quangh0409/BE-ToolsDeploy.git 2> /dev/null || (rm -rf BE-ToolsDeploy ; git clone https://github.com/quangh0409/BE-ToolsDeploy.git) '"
     }
   }
-  stage("ScanSyntax"){
-   withCredentials([file(credentialsId: 'ssh_key_remote', variable: 'ssh_key_remote')]) {
-        sh "cat $ssh_key_remote > ssh_id_rsa"
-        sh "chmod 400 ssh_id_rsa"
-        sh "ssh -o StrictHostKeyChecking=no -i ssh_id_rsa quang_vt204299@35.213.167.216 './scan_image.sh 2> /dev/null '"
-        sh "ssh -o StrictHostKeyChecking=no -i ssh_id_rsa quang_vt204299@35.213.167.216 'cat ScanDockerCompose.json && cat ScanDockerImage.json '"
-    }
-  }
+  // stage("ScanSyntax"){
+  //  withCredentials([file(credentialsId: 'ssh_key_remote', variable: 'ssh_key_remote')]) {
+  //       sh "cat $ssh_key_remote > ssh_id_rsa"
+  //       sh "chmod 400 ssh_id_rsa"
+  //       sh "ssh -o StrictHostKeyChecking=no -i ssh_id_rsa quang_vt204299@35.213.167.216 './scan_image.sh 2> /dev/null '"
+  //       sh "ssh -o StrictHostKeyChecking=no -i ssh_id_rsa quang_vt204299@35.213.167.216 'cat ScanDockerCompose.json && cat ScanDockerImage.json '"
+  //   }
+  // }
   stage("Clear"){
     withCredentials([file(credentialsId: 'ssh_key_remote', variable: 'ssh_key_remote')]) {
         sh "cat $ssh_key_remote > ssh_id_rsa"
@@ -36,14 +36,14 @@ node {
         sh "ssh -o StrictHostKeyChecking=no -i ssh_id_rsa quang_vt204299@35.213.167.216 'cd BE-ToolsDeploy && chmod +x ./nginx/entrypoint.sh && chmod +x docker-compose.yaml  && docker compose -f ./docker-compose.yaml build'"
     }
   }
-  stage("ScanImages"){
-    withCredentials([file(credentialsId: 'ssh_key_remote', variable: 'ssh_key_remote')]) {
-        sh "cat $ssh_key_remote > ssh_id_rsa"
-        sh "chmod 400 ssh_id_rsa"
-        sh "ssh -o StrictHostKeyChecking=no -i ssh_id_rsa quang_vt204299@35.213.167.216 'trivy image vutrongquang/auth'"
-        sh "ssh -o StrictHostKeyChecking=no -i ssh_id_rsa quang_vt204299@35.213.167.216 'trivy image vutrongquang/gateway'"
-    }
-  }
+  // stage("ScanImages"){
+  //   withCredentials([file(credentialsId: 'ssh_key_remote', variable: 'ssh_key_remote')]) {
+  //       sh "cat $ssh_key_remote > ssh_id_rsa"
+  //       sh "chmod 400 ssh_id_rsa"
+  //       sh "ssh -o StrictHostKeyChecking=no -i ssh_id_rsa quang_vt204299@35.213.167.216 'trivy image vutrongquang/auth'"
+  //       sh "ssh -o StrictHostKeyChecking=no -i ssh_id_rsa quang_vt204299@35.213.167.216 'trivy image vutrongquang/gateway'"
+  //   }
+  // }
   stage("Clear"){
     withCredentials([file(credentialsId: 'ssh_key_remote', variable: 'ssh_key_remote')]) {
         sh "cat $ssh_key_remote > ssh_id_rsa"
