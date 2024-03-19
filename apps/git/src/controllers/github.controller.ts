@@ -93,7 +93,7 @@ export async function getGitHubById(params: {
         });
     }
 
-    return success.ok({ ...check, _id: undefined });
+    return success.ok({ ...check.toJSON(), _id: undefined });
 }
 
 export async function getAGithubByCode(params: {
