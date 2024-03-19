@@ -9,14 +9,6 @@ import {
 
 export const router: Router = Router();
 
-router.post("/", async (req: Request, _: Response, next: NextFunction) => {
-    const body = req.body;
-    const result = await createGitHub({
-        ...body,
-    });
-    next(result);
-});
-
 router.put("/", async (req: Request, _: Response, next: NextFunction) => {
     const body = req.body;
     const result = await updateGitHub({
@@ -44,6 +36,14 @@ router.post(
         next(result);
     }
 );
+
+router.post("/", async (req: Request, _: Response, next: NextFunction) => {
+    const body = req.body;
+    const result = await createGitHub({
+        ...body,
+    });
+    next(result);
+});
 
 router.get(
     "/:git_id",
