@@ -52,10 +52,27 @@ export const configs = {
     },
     saltRounds: process.env.CA_TICKET_SALT_ROUNDS || "10",
     services: {
-        ad: {
-            prefix: process.env.CA_TICKET_AD_SERVICE_PREFIX || "/",
-            host: process.env.CA_TICKET_AD_SERVICE_HOST || "http://127.0.0.1",
-            port: process.env.CA_TICKET_AD_SERVICE_PORT || "6801",
+        auth: {
+            prefix: process.env.CA_TICKET_AUTH_SERVICE_PREFIX || "/in/auth",
+            host: process.env.CA_TICKET_AUTH_SERVICE_HOST || "http://127.0.0.1",
+            port: process.env.CA_TICKET_AUTH_SERVICE_PORT || "6801",
+            getUrl: function (): string {
+                return `${this.host}:${this.port}${this.prefix}`;
+            },
+        },
+        users: {
+            prefix: process.env.CA_TICKET_USERS_SERVICE_PREFIX || "/api/v1/in/users",
+            host:
+                process.env.CA_TICKET_USERS_SERVICE_HOST || "http://127.0.0.1",
+            port: process.env.CA_TICKET_USERS_SERVICE_PORT || "6801",
+            getUrl: function (): string {
+                return `${this.host}:${this.port}${this.prefix}`;
+            },
+        },
+        git: {
+            prefix: process.env.CA_TICKET_GIT_SERVICE_PREFIX || "/api/v1/in/git",
+            host: process.env.CA_TICKET_GIT_SERVICE_HOST || "http://127.0.0.1",
+            port: process.env.CA_TICKET_GIT_SERVICE_PORT || "6802",
             getUrl: function (): string {
                 return `${this.host}:${this.port}${this.prefix}`;
             },
