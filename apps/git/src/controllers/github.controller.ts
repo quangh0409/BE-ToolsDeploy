@@ -43,8 +43,8 @@ export async function createGitHub(params: {
 export async function getAGithubByCode(params: {
     code: string;
 }): Promise<Result> {
-    const client_id = "d07893f17582c895aefd";
-    const client_secret = "3c8009ef28480dba2c7318672bea4db87b0a6fc0";
+    const client_id = "66602684d99f3683ebe0";
+    const client_secret = "2a5519307a6d3f29668a8a2924622af5970bcde2";
 
     try {
         const response = await axios.post(
