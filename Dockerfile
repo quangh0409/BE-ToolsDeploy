@@ -1,4 +1,4 @@
-FROM node:alpine AS builder
+FROM node:18-alpine AS builder
 ARG module
 RUN npm install -g pnpm
 WORKDIR /root/ca
@@ -16,7 +16,7 @@ RUN pnpm --filter $module --offline install
 COPY apps/$module apps/$module
 RUN pnpm --filter $module build
 
-FROM node:alpine AS runner
+FROM node:18-alpine AS runner
 ARG module
 WORKDIR /root/ca
 COPY --from=builder /root/ca/package.json .
