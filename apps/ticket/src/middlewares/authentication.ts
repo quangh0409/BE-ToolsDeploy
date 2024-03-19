@@ -12,10 +12,12 @@ export async function verifyToken(
 ): Promise<void> {
     const option = { algorithm: "RS256" } as VerifyOptions;
     const token: string | undefined = req.header("token");
+    console.log("🚀 ~ token:", token);
     const errors: ErrorDetail[] = [
         {
             param: "token",
             location: "header",
+            value: token,
         },
     ];
     if (!token) {
@@ -34,6 +36,7 @@ export async function verifyToken(
             token,
             userId: payload.id,
         });
+        console.log("🚀 ~ expireAt:", expireAt);
         if (payload.type !== "ACCESS_TOKEN" || expireAt === null) {
             return next({
                 status: HttpStatus.UNAUTHORIZED,
