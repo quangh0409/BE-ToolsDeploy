@@ -252,12 +252,7 @@ export async function getUserByEmail(params: {
 }
 
 export async function _getUserById(userId: string): Promise<ResultSuccess> {
-    const user = await User.findOne(
-        { id: userId },
-        {
-            _id: 0,
-        }
-    );
+    const user = await User.findOne({ id: userId });
     if (!user) {
         throw error.notFound({
             param: "userId",
@@ -265,7 +260,7 @@ export async function _getUserById(userId: string): Promise<ResultSuccess> {
             message: `the user does not exist`,
         });
     }
-    return success.ok(user);
+    return success.ok({ user, _id: undefined });
 }
 
 export async function updateUserActivity(params: {
