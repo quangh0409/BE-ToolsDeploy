@@ -22,6 +22,7 @@ import {
     createGitHub,
     getAGithubByCode,
     GetInfoUserGitByAccesToken,
+    updateGitHub,
 } from "../services/git.service";
 import {
     checkTicketExitsByGithubId,
@@ -201,7 +202,6 @@ export async function loginByGithub(params: { code: string }): Promise<Result> {
 
             // const
         }
-
         const ticket = await findTicketByGithubId({
             github_id: infoUserGit.body.id,
         });
@@ -209,6 +209,12 @@ export async function loginByGithub(params: { code: string }): Promise<Result> {
         const [account, user] = await Promise.all([
             Account.findOne({ id: ticket.body?.user_id }),
             User.findOne({ id: ticket.body?.user_id }),
+            updateGitHub({
+                access_token: github.body!.access_token,
+                token_type: github.body!.token_type,
+                scope: github.body!.scope,
+                git_id: infoUserGit.body.id,
+            }),
         ]);
         if (account && user) {
             const { id, roles, email } = account;

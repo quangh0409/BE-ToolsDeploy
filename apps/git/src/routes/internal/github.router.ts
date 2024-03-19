@@ -3,6 +3,7 @@ import {
     GetInfoUserGitByAccesToken,
     createGitHub,
     getAGithubByCode,
+    updateGitHub,
 } from "../../controllers/github.controller";
 
 export const router: Router = Router();
@@ -10,6 +11,14 @@ export const router: Router = Router();
 router.post("/", async (req: Request, _: Response, next: NextFunction) => {
     const body = req.body;
     const result = await createGitHub({
+        ...body,
+    });
+    next(result);
+});
+
+router.put("/", async (req: Request, _: Response, next: NextFunction) => {
+    const body = req.body;
+    const result = await updateGitHub({
         ...body,
     });
     next(result);
