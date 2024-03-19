@@ -26,15 +26,6 @@ router.put("/", async (req: Request, _: Response, next: NextFunction) => {
 });
 
 router.get(
-    "/:git_id",
-    async (req: Request, _: Response, next: NextFunction) => {
-        const git_id = req.params.git_id as string;
-        const result = await getGitHubById({ git_id: git_id });
-        next(result);
-    }
-);
-
-router.get(
     "/handle-code",
     async (req: Request, _: Response, next: NextFunction) => {
         const code = req.query.code as string;
@@ -50,6 +41,15 @@ router.post(
         const result = await GetInfoUserGitByAccesToken({
             access_token: token,
         });
+        next(result);
+    }
+);
+
+router.get(
+    "/:git_id",
+    async (req: Request, _: Response, next: NextFunction) => {
+        const git_id = req.params.git_id as string;
+        const result = await getGitHubById({ git_id: git_id });
         next(result);
     }
 );
