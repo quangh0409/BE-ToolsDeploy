@@ -77,7 +77,7 @@ export async function updateGitHub(params: {
 export async function getGitHubById(params: {
     git_id: string;
 }): Promise<ResultSuccess> {
-    const check = await Github.findOne({ git_id: params.git_id }, { _id: 0 });
+    const check = await Github.findOne({ git_id: params.git_id });
 
     if (!check) {
         throw new HttpError({
@@ -93,7 +93,7 @@ export async function getGitHubById(params: {
         });
     }
 
-    return success.ok(check);
+    return success.ok({ check, _id: undefined });
 }
 
 export async function getAGithubByCode(params: {

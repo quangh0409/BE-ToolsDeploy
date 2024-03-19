@@ -142,6 +142,7 @@ export async function loginByGithub(params: { code: string }): Promise<Result> {
                     {
                         location: "body",
                         param: "code",
+                        value: params.code
                     },
                 ],
             };
