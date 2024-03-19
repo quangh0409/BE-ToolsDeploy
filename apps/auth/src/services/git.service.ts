@@ -52,3 +52,19 @@ export async function createGitHub(
         }
     }
 }
+
+export async function updateGitHub(
+    params: ICreatedGithub
+): Promise<{ body?: any; status?: number }> {
+    const url = `${configs.services.git.getUrl()}/`;
+    try {
+        const res = await axios.put<ICreatedGithub>(`${url}`, params);
+        return { body: res.data, status: res.status };
+    } catch (e) {
+        if (axios.isAxiosError(e) && e.response?.status) {
+            return { status: e.response?.status };
+        } else {
+            throw new HttpError(error.service(url));
+        }
+    }
+}

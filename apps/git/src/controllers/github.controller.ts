@@ -40,6 +40,40 @@ export async function createGitHub(params: {
     return success.ok(github);
 }
 
+export async function updateGitHub(params: {
+    access_token: string;
+    token_type: string;
+    scope?: string;
+    git_id: string;
+}): Promise<ResultSuccess> {
+    const check = await Github.findOneAndUpdate(
+        { git_id: params.git_id },
+        {
+            $set: {
+                access_token: params.access_token,
+                token_type: params.token_type,
+                scope: params.scope,
+            },
+        }
+    );
+
+    if (!check) {
+        throw new HttpError({
+            status: HttpStatus.BAD_REQUEST,
+            code: "GITHUB_EXITSED",
+            errors: [
+                {
+                    param: "user_id",
+                    location: "body",
+                    value: params.git_id,
+                },
+            ],
+        });
+    }
+
+    return success.ok(check);
+}
+
 export async function getAGithubByCode(params: {
     code: string;
 }): Promise<Result> {
