@@ -2,6 +2,8 @@ import { HttpError, HttpStatus, ResultSuccess, success } from "app";
 import { ITicket } from "../interfaces/models/ticket";
 import { Result } from "ioredis";
 import Ticket from "../models/ticket";
+import { getUserById } from "../services/user.service";
+import { getGithubById } from "../services/git.service";
 
 export async function createdTicket(params: {
     github_id?: string;
@@ -58,6 +60,47 @@ export async function findTicketByUserId(params: {
         });
     }
     return success.ok(ticket);
+}
+
+export async function findTicketDetailByUserId(params: {
+    user_id: string;
+}): Promise<ResultSuccess> {
+    const ticket = await Ticket.findOne(
+        { user_id: params.user_id },
+        { _id: 0, __v: 0 }
+    );
+
+    if (!ticket) {
+        throw new HttpError({
+            status: HttpStatus.NOT_FOUND,
+            code: "TICKET_NOT_EXITS",
+            errors: [
+                {
+                    param: "user_id",
+                    location: "params",
+                    value: params.user_id,
+                },
+            ],
+        });
+    }
+    let result = { ...ticket.toJSON() };
+    const user = await getUserById({ user_id: ticket.user_id });
+    if (user.body) {
+        Object.assign(result, {
+            user: {
+                ...user.body,
+            },
+            user_id: undefined,
+        });
+        console.log("🚀 ~ ticket:", result);
+    }
+
+    if (ticket.github_id) {
+        const github = await getGithubById({ git_id: ticket.github_id });
+        Object.assign(result, { github: github.body, github_id: undefined });
+    }
+
+    return success.ok(result);
 }
 
 export async function findTicketByGithubId(params: {

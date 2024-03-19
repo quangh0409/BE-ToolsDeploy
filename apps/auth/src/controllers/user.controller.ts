@@ -211,7 +211,6 @@ export async function getUserById(params: {
     const [user, account] = await Promise.all([
         User.findOne(filter, {
             _id: 0,
-            created_by: 0,
             created_time: 0,
             updated_time: 0,
             is_active: 0,
@@ -257,12 +256,6 @@ export async function _getUserById(userId: string): Promise<ResultSuccess> {
         { id: userId },
         {
             _id: 0,
-            password: 0,
-            created_by: 0,
-            created_time: 0,
-            updated_time: 0,
-            is_active: 0,
-            activities: 0,
         }
     );
     if (!user) {

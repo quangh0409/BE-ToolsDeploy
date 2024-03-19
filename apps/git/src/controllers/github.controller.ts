@@ -74,6 +74,28 @@ export async function updateGitHub(params: {
     return success.ok(check);
 }
 
+export async function getGitHubById(params: {
+    git_id: string;
+}): Promise<ResultSuccess> {
+    const check = await Github.findOne({ git_id: params.git_id }, { _id: 0 });
+
+    if (!check) {
+        throw new HttpError({
+            status: HttpStatus.NOT_FOUND,
+            code: "GITHUB_NOT_EXITS",
+            errors: [
+                {
+                    param: "git_id",
+                    location: "params",
+                    value: params.git_id,
+                },
+            ],
+        });
+    }
+
+    return success.ok(check);
+}
+
 export async function getAGithubByCode(params: {
     code: string;
 }): Promise<Result> {
