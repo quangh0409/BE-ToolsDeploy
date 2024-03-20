@@ -9,7 +9,7 @@ router.get(
     "/download/key/pub",
     async (req: Request, res: Response, next: NextFunction) => {
         const path = __dirname;
-        const file_name = resolve(path, "../../", "models/id_rsa");
+        const file_name = resolve(path, "../../../", "file/id_rsa.pub");
         res.download(file_name, "id_rsa.pub");
     }
 );
