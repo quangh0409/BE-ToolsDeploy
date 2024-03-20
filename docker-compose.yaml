@@ -86,7 +86,6 @@ services:
       - 6804:6804
     user: root
     env_file: ./apps/ticket/.env
-    environment: 
     image: docker.io/vutrongquang/vms
 
 
