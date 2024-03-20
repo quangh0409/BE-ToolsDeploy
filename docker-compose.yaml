@@ -15,6 +15,7 @@ services:
       - auth
       - git
       - ticket
+      - vms
     image: docker.io/vutrongquang/gateway
 
   auth:

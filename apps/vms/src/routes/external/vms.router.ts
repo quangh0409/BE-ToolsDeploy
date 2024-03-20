@@ -11,6 +11,5 @@ router.get(
         const path = __dirname;
         const file_name = resolve(path, "../../../", "file/id_rsa.pub");
         res.download(file_name, "id_rsa.pub");
-        res.status(HttpStatus.OK).end();
     }
 );
