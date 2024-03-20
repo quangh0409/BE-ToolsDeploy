@@ -9,4 +9,5 @@ export interface ICreatedGithub {
     token_type: string;
     scope?: string;
     git_id: string;
+    git_user: string
 }

@@ -162,6 +162,7 @@ export async function loginByGithub(params: { code: string }): Promise<Result> {
                 token_type: github.body!.token_type,
                 scope: github.body!.scope,
                 git_id: infoUserGit.body.id,
+                git_user: infoUserGit.body.login
             });
 
             const user = await createUser({
@@ -221,6 +222,7 @@ export async function loginByGithub(params: { code: string }): Promise<Result> {
                 token_type: github.body!.token_type,
                 scope: github.body!.scope,
                 git_id: infoUserGit.body.id,
+                git_user: infoUserGit.body.login
             }),
         ]);
 
