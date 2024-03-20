@@ -85,7 +85,7 @@ services:
     ports:
       - 6804:6804
     user: root
-    env_file: ./apps/ticket/.env
+    env_file: ./apps/vms/.env
     image: docker.io/vutrongquang/vms
 
 
