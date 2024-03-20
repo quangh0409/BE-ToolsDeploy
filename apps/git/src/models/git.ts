@@ -11,6 +11,10 @@ const gitSchema = new mongoose.Schema(
             type: String,
             require: true,
         },
+        git_user: {
+            type: String,
+            require: true,
+        },
         access_token: {
             type: String,
             require: true,

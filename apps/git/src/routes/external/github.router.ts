@@ -2,19 +2,21 @@ import { NextFunction, Request, Response, Router } from "express";
 import {
     getAGithubByCode,
     GetBranchesByAccessToken,
+    GetInfoUserGit,
     GetInfoUserGitByAccesToken,
     GetLanguagesByAccessToken,
     GetReposGitByAccessToken,
 } from "../../controllers/github.controller";
+import { Payload } from "app";
 
 export const router: Router = Router();
 
 router.post(
     "/user-git-token",
     async (req: Request, _: Response, next: NextFunction) => {
-        const { token } = req.body;
-        const result = await GetInfoUserGitByAccesToken({
-            access_token: token,
+        const { id } = req.payload as Payload;
+        const result = await GetInfoUserGit({
+            userId: id,
         });
         next(result);
     }
@@ -23,10 +25,9 @@ router.post(
 router.post(
     "/repos-git-token",
     async (req: Request, _: Response, next: NextFunction) => {
-        const { token, user } = req.body;
+        const { id } = req.payload as Payload;
         const result = await GetReposGitByAccessToken({
-            access_token_git: token,
-            user: user,
+            userId: id,
         });
         next(result);
     }
@@ -35,10 +36,10 @@ router.post(
 router.post(
     "/branches",
     async (req: Request, _: Response, next: NextFunction) => {
-        const { token, user, repository } = req.body;
+        const { repository } = req.body;
+        const { id } = req.payload as Payload;
         const result = await GetBranchesByAccessToken({
-            access_token_git: token,
-            user: user,
+            userId: id,
             repository: repository,
         });
         next(result);
@@ -48,10 +49,10 @@ router.post(
 router.post(
     "/languages",
     async (req: Request, _: Response, next: NextFunction) => {
-        const { token, user, repository } = req.body;
+        const { repository } = req.body;
+        const { id } = req.payload as Payload;
         const result = await GetLanguagesByAccessToken({
-            access_token_git: token,
-            user: user,
+            userId: id,
             repository: repository,
         });
         next(result);

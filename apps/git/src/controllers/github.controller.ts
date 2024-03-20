@@ -4,12 +4,15 @@ import Github from "../models/git";
 import { v1 } from "uuid";
 import { createUser } from "../services/user.service";
 import { login } from "../services/auth.service";
+import { findTicketByUserId } from "../services/ticket.service";
+import { error } from "app";
 
 export async function createGitHub(params: {
     access_token: string;
     token_type: string;
     scope?: string;
     git_id: string;
+    git_user: string;
 }): Promise<ResultSuccess> {
     const check = await Github.findOne({ git_id: params.git_id });
 
@@ -33,6 +36,7 @@ export async function createGitHub(params: {
         access_token: params.access_token,
         token_type: params.token_type,
         scope: params.scope,
+        git_user: params.git_user,
     });
 
     await github.save();
@@ -45,6 +49,7 @@ export async function updateGitHub(params: {
     token_type: string;
     scope?: string;
     git_id: string;
+    git_user: string;
 }): Promise<ResultSuccess> {
     const check = await Github.findOneAndUpdate(
         { git_id: params.git_id },
@@ -53,8 +58,10 @@ export async function updateGitHub(params: {
                 access_token: params.access_token,
                 token_type: params.token_type,
                 scope: params.scope,
+                git_user: params.git_user,
             },
-        }
+        },
+        { new: true }
     );
 
     if (!check) {
@@ -71,7 +78,7 @@ export async function updateGitHub(params: {
         });
     }
 
-    return success.ok(check);
+    return success.ok({ ...check.toJSON(), _id: undefined });
 }
 
 export async function getGitHubById(params: {
@@ -137,6 +144,7 @@ export async function getAGithubByCode(params: {
     }
 }
 
+
 export async function GetInfoUserGitByAccesToken(params: {
     access_token: string;
 }): Promise<ResultSuccess> {
@@ -150,16 +158,54 @@ export async function GetInfoUserGitByAccesToken(params: {
     return success.ok(response.data);
 }
 
-export async function GetReposGitByAccessToken(params: {
-    access_token_git: string;
-    user: string;
-}) {
+export async function GetInfoUserGit(params: {
+    userId: string;
+}): Promise<ResultSuccess> {
+    const ticket = await findTicketByUserId({ user_id: params.userId });
+
+    const github = await Github.findOne({ git_id: ticket.body?.github_id });
+
+    if (!github) {
+        throw new HttpError(
+            error.notFound({
+                location: "token",
+                param: "token",
+                message: "git_id of user_id not exits",
+            })
+        );
+    }
+
+    const response = await axios.get(`https://api.github.com/user`, {
+        headers: {
+            Accept: "application/vnd.github+json",
+            Authorization: `Bearer ${github.access_token}`,
+        },
+    });
+
+    return success.ok(response.data);
+}
+
+export async function GetReposGitByAccessToken(params: { userId: string }) {
+    const ticket = await findTicketByUserId({ user_id: params.userId });
+
+    const github = await Github.findOne({ git_id: ticket.body?.github_id });
+
+    if (!github) {
+        throw new HttpError(
+            error.notFound({
+                location: "token",
+                param: "token",
+                message: "git_id of user_id not exits",
+            })
+        );
+    }
+
     const response = await axios.get(
-        `https://api.github.com/users/${params.user}/repos`,
+        `https://api.github.com/users/${github.git_user}/repos`,
         {
             headers: {
                 Accept: "application/vnd.github+json",
-                Authorization: `Bearer ${params.access_token_git}`,
+                Authorization: `Bearer ${github.access_token}`,
                 "X-GitHub-Api-Version": "2022-11-28",
             },
         }
@@ -169,16 +215,29 @@ export async function GetReposGitByAccessToken(params: {
 }
 
 export async function GetBranchesByAccessToken(params: {
-    access_token_git: string;
-    user: string;
+    userId: string;
     repository: string;
 }) {
+    const ticket = await findTicketByUserId({ user_id: params.userId });
+
+    const github = await Github.findOne({ git_id: ticket.body?.github_id });
+
+    if (!github) {
+        throw new HttpError(
+            error.notFound({
+                location: "token",
+                param: "token",
+                message: "git_id of user_id not exits",
+            })
+        );
+    }
+
     const response = await axios.get(
-        `https://api.github.com/repos/${params.user}/${params.repository}/branches`,
+        `https://api.github.com/repos/${github.git_user}/${params.repository}/branches`,
         {
             headers: {
                 Accept: "application/vnd.github+json",
-                Authorization: `Bearer ${params.access_token_git}`,
+                Authorization: `Bearer ${github.access_token}`,
                 "X-GitHub-Api-Version": "2022-11-28",
             },
         }
@@ -192,16 +251,29 @@ export async function GetBranchesByAccessToken(params: {
 }
 
 export async function GetLanguagesByAccessToken(params: {
-    access_token_git: string;
-    user: string;
+    userId: string;
     repository: string;
 }) {
+    const ticket = await findTicketByUserId({ user_id: params.userId });
+
+    const github = await Github.findOne({ git_id: ticket.body?.github_id });
+
+    if (!github) {
+        throw new HttpError(
+            error.notFound({
+                location: "token",
+                param: "token",
+                message: "git_id of user_id not exits",
+            })
+        );
+    }
+
     const response = await axios.get(
-        `https://api.github.com/repos/${params.user}/${params.repository}/languages`,
+        `https://api.github.com/repos/${github.git_user}/${params.repository}/languages`,
         {
             headers: {
                 Accept: "application/vnd.github+json",
-                Authorization: `Bearer ${params.access_token_git}`,
+                Authorization: `Bearer ${github.access_token}`,
                 "X-GitHub-Api-Version": "2022-11-28",
             },
         }

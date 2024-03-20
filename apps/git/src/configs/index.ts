@@ -54,17 +54,27 @@ export const configs = {
     saltRounds: process.env.CA_GIT_SALT_ROUNDS || "10",
     services: {
         auth: {
-            prefix: process.env.CA_GIT_AD_SERVICE_PREFIX || "/api/v1/in/auth",
-            host: process.env.CA_GIT_AD_SERVICE_HOST || "http://127.0.0.1",
-            port: process.env.CA_GIT_AD_SERVICE_PORT || "6801",
+            prefix: process.env.CA_GIT_AUTH_SERVICE_PREFIX || "/api/v1/in/auth",
+            host: process.env.CA_GIT_AUTH_SERVICE_HOST || "http://127.0.0.1",
+            port: process.env.CA_GIT_AUTH_SERVICE_PORT || "6801",
             getUrl: function (): string {
                 return `${this.host}:${this.port}${this.prefix}`;
             },
         },
         user: {
-            prefix: process.env.CA_GIT_AD_SERVICE_PREFIX || "/api/v1/in/users",
-            host: process.env.CA_GIT_AD_SERVICE_HOST || "http://127.0.0.1",
-            port: process.env.CA_GIT_AD_SERVICE_PORT || "6801",
+            prefix:
+                process.env.CA_GIT_USER_SERVICE_PREFIX || "/api/v1/in/users",
+            host: process.env.CA_GIT_USER_SERVICE_HOST || "http://127.0.0.1",
+            port: process.env.CA_GIT_USER_SERVICE_PORT || "6801",
+            getUrl: function (): string {
+                return `${this.host}:${this.port}${this.prefix}`;
+            },
+        },
+        ticket: {
+            prefix:
+                process.env.CA_GIT_TICKET_SERVICE_PREFIX || "/api/v1/in/ticket",
+            host: process.env.CA_GIT_TICKET_SERVICE_HOST || "http://127.0.0.1",
+            port: process.env.CA_GIT_TICKET_SERVICE_PORT || "6803",
             getUrl: function (): string {
                 return `${this.host}:${this.port}${this.prefix}`;
             },

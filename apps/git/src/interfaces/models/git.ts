@@ -4,4 +4,5 @@ export interface IGIT {
     access_token: string;
     token_type: string;
     scope?: string;
+    git_user: string;
 }
