@@ -48,6 +48,10 @@ services:
       - 6802:6802
     user: root
     env_file: ./apps/git/.env
+    environment:
+      - CA_GIT_USERS_SERVICE_HOST=http://auth
+      - CA_GIT_AUTH_SERVICE_HOST=http://auth
+      - CA_GIT_TICKET_SERVICE_HOST=http://ticket
     image: docker.io/vutrongquang/git
 
   ticket:
