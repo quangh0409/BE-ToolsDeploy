@@ -6,7 +6,7 @@ import { HttpError, error } from "app";
 export async function findTicketByUserId(params: {
     user_id: string;
 }): Promise<{ body?: ITicket; status?: number }> {
-    const url = `${configs.services.ticket.getUrl()}/by-github-id?user_id=${
+    const url = `${configs.services.ticket.getUrl()}/by-user-id?user_id=${
         params.user_id
     }`;
     try {
