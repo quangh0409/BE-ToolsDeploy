@@ -63,9 +63,9 @@ export const configs = {
         },
         user: {
             prefix:
-                process.env.CA_GIT_USER_SERVICE_PREFIX || "/api/v1/in/users",
-            host: process.env.CA_GIT_USER_SERVICE_HOST || "http://127.0.0.1",
-            port: process.env.CA_GIT_USER_SERVICE_PORT || "6801",
+                process.env.CA_GIT_USERS_SERVICE_PREFIX || "/api/v1/in/users",
+            host: process.env.CA_GIT_USERS_SERVICE_HOST || "http://127.0.0.1",
+            port: process.env.CA_GIT_USERS_SERVICE_PORT || "6801",
             getUrl: function (): string {
                 return `${this.host}:${this.port}${this.prefix}`;
             },
