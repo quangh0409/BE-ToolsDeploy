@@ -73,6 +73,22 @@ services:
       - CA_TICKET_AUTH_SERVICE_HOST=http://auth
     image: docker.io/vutrongquang/ticket
 
+  vms:
+    container_name: vms 
+    hostname: vms
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        module: vms
+    restart: always
+    ports:
+      - 6804:6804
+    user: root
+    env_file: ./apps/ticket/.env
+    environment: 
+    image: docker.io/vutrongquang/vms
+
 
 networks:
   default:
