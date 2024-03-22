@@ -110,7 +110,7 @@ export async function sshInstallDockerDev(): Promise<ResultSuccess> {
     const content = fs.readFileSync(file_path);
     await ssh.execCommand(`echo '${content}' > docker/docker-setup.sh`);
     const run = await ssh.execCommand(
-        "chmod +x docker/docker-setup.sh && ./docker/docker-setup.sh"
+        "chmod +x docker/docker-setup.sh && cd docker && ./docker-setup.sh"
     );
 
     await ssh.execCommand("sudo usermod -aG docker $USER");
