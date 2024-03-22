@@ -106,15 +106,33 @@ export async function sshInstallDockerDev(): Promise<ResultSuccess> {
         username: "gitlab",
         privateKey: privateKey,
     });
-    await ssh.execCommand("mkdir -p docker && touch docker/docker-setup.sh");
-    // const content = fs.readFileSync(file_path);
-    await ssh.execCommand(`echo '${content}' > docker/docker-setup.sh`);
-    const run = await ssh.execCommand(
-        "chmod +x docker/docker-setup.sh && cd docker && ./docker-setup.sh"
+    // await ssh.execCommand("mkdir -p docker && touch docker/docker-setup.sh");
+    // // const content = fs.readFileSync(file_path);
+    // await ssh.execCommand(`echo '${content}' > docker/docker-setup.sh`);
+    // const run = await ssh.execCommand(
+    //     "chmod +x docker/docker-setup.sh && cd docker && ./docker-setup.sh"
+    // );
+    await ssh.execCommand("sudo apt-get update");
+    await ssh.execCommand(
+        "sudo apt-get install -y apt-transport-https ca-certificates curl gnupg lsb-release"
     );
+    await ssh.execCommand(
+        "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg"
+    );
+    await ssh.execCommand(`echo \\
+    \"deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \\
+    $(lsb_release -cs) stable\\" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null`);
+    await ssh.execCommand("sudo apt-get update");
+    await ssh.execCommand(
+        "sudo apt-get install -y docker-ce docker-ce-cli containerd.io"
+    );
+    await ssh.execCommand(
+        `sudo curl -L \"https://github.com/docker/compose/releases/download/1.29.2/docker-compose-\$(uname -s)-\$(uname -m)\" -o /usr/local/bin/docker-compose`
+    );
+    await ssh.execCommand("sudo chmod +x /usr/local/bin/docker-compose");
 
     await ssh.execCommand("sudo usermod -aG docker $USER");
     await ssh.execCommand("sudo systemctl restart docker");
 
-    return success.ok({ result: run });
+    return success.ok({ result: "success full" });
 }
