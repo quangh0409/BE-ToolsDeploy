@@ -89,7 +89,7 @@ services:
     env_file: ./apps/vms/.env
     image: docker.io/vutrongquang/vms
     volumes:
-      - vms:~/ca
+      - /vms:~/ca
 
 networks:
   default:
