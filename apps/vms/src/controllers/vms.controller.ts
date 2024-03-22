@@ -99,7 +99,7 @@ export async function sshInstallDockerDev(): Promise<ResultSuccess> {
 
     // Đọc nội dung của file RSA vào biến privateKey
     const privateKey = fs.readFileSync(file_path).toString();
-    const conent: Buffer = fs.readFileSync(file_path_docker);
+    const content: Buffer = fs.readFileSync(file_path_docker);
 
     await ssh.connect({
         host: "23.102.228.99",
@@ -107,7 +107,7 @@ export async function sshInstallDockerDev(): Promise<ResultSuccess> {
         privateKey: privateKey,
     });
     await ssh.execCommand("mkdir -p docker && touch docker/docker-setup.sh");
-    const content = fs.readFileSync(file_path);
+    // const content = fs.readFileSync(file_path);
     await ssh.execCommand(`echo '${content}' > docker/docker-setup.sh`);
     const run = await ssh.execCommand(
         "chmod +x docker/docker-setup.sh && cd docker && ./docker-setup.sh"
