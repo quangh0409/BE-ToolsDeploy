@@ -99,7 +99,7 @@ export async function sshInstallDockerDev(): Promise<ResultSuccess> {
 
     // Đọc nội dung của file RSA vào biến privateKey
     const privateKey = fs.readFileSync(file_path).toString();
-    const conent: Buffer = fs.readFileSync(file_path);
+    const conent: Buffer = fs.readFileSync(file_path_docker);
 
     await ssh.connect({
         host: "23.102.228.99",
