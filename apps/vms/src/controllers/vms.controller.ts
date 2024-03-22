@@ -65,7 +65,7 @@ export async function sshCheckConnect(): Promise<ResultSuccess> {
         username: "quang_vt204299",
         privateKey: privateKey,
     });
-    await ssh.execCommand("mkdir -p docker && touch docker/docker-setup.sh");
+    await ssh.execCommand("mkdir -p test ");
     return success.ok({ result: "Connect successfull" });
 }
 
