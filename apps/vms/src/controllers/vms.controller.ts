@@ -68,3 +68,25 @@ export async function sshCheckConnect(): Promise<ResultSuccess> {
 
     return success.ok({ result: "Connect successfull" });
 }
+
+export async function sshCheckConnectDev(): Promise<ResultSuccess> {
+    const ssh = new NodeSSH();
+    const path = __dirname;
+    const file_path = resolve(path, "../../", "file/id_rsa");
+    const file_path_docker = resolve(
+        path,
+        "../../",
+        "file/win/docker-setup.sh"
+    );
+
+    // Đọc nội dung của file RSA vào biến privateKey
+    const privateKey = fs.readFileSync(file_path).toString();
+
+    await ssh.connect({
+        host: "23.102.228.99",
+        username: "gitlab",
+        privateKey: privateKey,
+    });
+
+    return success.ok({ result: "Connect successfull" });
+}
