@@ -4,12 +4,13 @@ import { Result } from "ioredis";
 import Ticket from "../models/ticket";
 import { getUserById } from "../services/user.service";
 import { getGithubById } from "../services/git.service";
+import { UpdateQuery } from "mongoose";
 
 export async function createdTicket(params: {
     github_id?: string;
     gitlab_id?: string;
     user_id: string;
-    image_ids?: string[];
+    vms_ids?: string[];
     record_ids?: string[];
 }): Promise<ResultSuccess> {
     const check = await Ticket.findOne({ user_id: params.user_id });
@@ -32,13 +33,57 @@ export async function createdTicket(params: {
         github_id: params.github_id,
         gitlab_id: params.gitlab_id,
         user_id: params.user_id,
-        image_ids: params.image_ids,
+        vms_ids: params.vms_ids,
         record_ids: params.record_ids,
     });
 
     await ticket.save();
 
     return success.ok(ticket);
+}
+
+export async function updateTicket(params: {
+    user_id: string;
+    vms_ids?: string;
+    record_ids?: string;
+}) {
+    const set: UpdateQuery<ITicket> = {};
+    if (params.vms_ids) {
+        set.$push = {
+            ...set.$push,
+            vms_ids: params.vms_ids,
+        };
+    }
+    if (params.record_ids) {
+        set.$push = {
+            ...set.$push,
+            record_ids: params.record_ids,
+        };
+    }
+
+    const check = await Ticket.findOneAndUpdate(
+        {
+            user_id: params.user_id,
+        },
+        set,
+        { new: true }
+    );
+
+    if (!check) {
+        throw new HttpError({
+            status: HttpStatus.BAD_REQUEST,
+            code: "TICKET_NOT_EXIT",
+            errors: [
+                {
+                    param: "user_id",
+                    location: "body",
+                    value: params.user_id,
+                },
+            ],
+        });
+    }
+
+    return success.ok(check);
 }
 
 export async function findTicketByUserId(params: {

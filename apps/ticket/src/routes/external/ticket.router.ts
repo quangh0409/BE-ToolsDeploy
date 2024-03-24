@@ -3,6 +3,7 @@ import {
     checkTicketExitsByUserId,
     findTicketByUserId,
     findTicketDetailByUserId,
+    updateTicket,
 } from "../../controllers/ticket.controller";
 import { verifyRole } from "../../middlewares";
 import { Payload } from "app";
@@ -28,4 +29,14 @@ router.get(
     }
 );
 
+router.put("/", async (req: Request, _: Response, next: NextFunction) => {
+    const { id } = req.payload as Payload;
+    const { vms_ids, record_ids } = req.body;
 
+    const result = await updateTicket({
+        user_id: id,
+        vms_ids: vms_ids,
+        record_ids: record_ids,
+    });
+    next(result);
+});

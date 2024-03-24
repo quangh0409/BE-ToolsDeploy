@@ -1,9 +1,49 @@
-import { HttpError, HttpStatus, ResultSuccess, success } from "app";
+import {
+    HttpError,
+    HttpStatus,
+    ResultError,
+    ResultSuccess,
+    error,
+    success,
+} from "app";
 import { resolve } from "path";
 import fs from "fs";
-import SftpClient from "ssh2-sftp-client";
 
 import { NodeSSH } from "node-ssh";
+import { SocketServer } from "../utils";
+import { Socket } from "socket.io";
+import Vms from "../models/vms";
+import { v1 } from "uuid";
+
+export async function createVms(params: {
+    host: String;
+    user: String;
+}): Promise<ResultSuccess> {
+    const check = await Vms.findOne({ host: params.host });
+    const err: ResultError = {
+        status: HttpStatus.BAD_REQUEST,
+        errors: [
+            {
+                location: "body",
+                value: params.host,
+                message: "Host exited",
+            },
+        ],
+    };
+    if (check) {
+        throw new HttpError(err);
+    }
+
+    const result = new Vms({
+        id: v1(),
+        host: params.host,
+        user: params.user,
+    });
+
+    await result.save();
+
+    return success.ok(result);
+}
 
 export async function sshInstallDocker(): Promise<ResultSuccess> {
     const ssh = new NodeSSH();
@@ -47,7 +87,7 @@ export async function sshInstallDocker(): Promise<ResultSuccess> {
     return success.ok({ result: "Install Docker Successfull" });
 }
 
-export async function sshCheckConnect(): Promise<ResultSuccess> {
+export async function sshCheckConnect(socket: Socket) {
     const ssh = new NodeSSH();
     const path = __dirname;
     const file_path = resolve(path, "../../", "file/win/id_rsa");
@@ -65,8 +105,6 @@ export async function sshCheckConnect(): Promise<ResultSuccess> {
         username: "quang_vt204299",
         privateKey: privateKey,
     });
-
-    return success.ok({ result: "Connect successfull" });
 }
 
 export async function sshCheckConnectDev(): Promise<ResultSuccess> {

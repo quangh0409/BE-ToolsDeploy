@@ -3,6 +3,7 @@ export interface ITicket {
     github_id?: string;
     gitlab_id?: string;
     user_id: string;
-    image_ids?: string[];
+    vms_ids?: string[];
     record_ids?: string[];
+
 }
