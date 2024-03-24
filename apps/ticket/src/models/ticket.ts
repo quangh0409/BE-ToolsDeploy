@@ -19,7 +19,7 @@ const ticketSchame = new mongoose.Schema(
             type: String,
             require: true,
         },
-        image_ids: [
+        vms_ids: [
             {
                 type: String,
                 require: false,

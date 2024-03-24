@@ -3,6 +3,7 @@ import { resolve } from "path";
 import fs from "fs";
 import { HttpStatus } from "app";
 import {
+    createVms,
     sshCheckConnectDev,
     sshInstallDocker,
     sshInstallDockerDev,
@@ -10,28 +11,28 @@ import {
 
 export const router: Router = Router();
 
-router.get(
-    "/ssh/win",
-    async (req: Request, res: Response, next: NextFunction) => {
-        const result = await sshInstallDocker();
-        next(result);
-    }
-);
-router.get(
-    "/ssh/dev",
-    async (req: Request, res: Response, next: NextFunction) => {
-        const result = await sshCheckConnectDev();
-        next(result);
-    }
-);
+// router.get(
+//     "/ssh/win",
+//     async (req: Request, res: Response, next: NextFunction) => {
+//         const result = await sshInstallDocker();
+//         next(result);
+//     }
+// );
+// router.get(
+//     "/ssh/dev",
+//     async (req: Request, res: Response, next: NextFunction) => {
+//         const result = await sshCheckConnectDev();
+//         next(result);
+//     }
+// );
 
-router.get(
-    "/ssh/dev/installDocker",
-    async (req: Request, res: Response, next: NextFunction) => {
-        const result = await sshInstallDockerDev();
-        next(result);
-    }
-);
+// router.get(
+//     "/ssh/dev/installDocker",
+//     async (req: Request, res: Response, next: NextFunction) => {
+//         const result = await sshInstallDockerDev();
+//         next(result);
+//     }
+// );
 
 router.get(
     "/download/key/pub",
@@ -41,3 +42,9 @@ router.get(
         res.download(file_name, "id_rsa.pub");
     }
 );
+
+router.post("/", async (req: Request, res: Response, next: NextFunction) => {
+    const { host, user } = req.body;
+    const result = await createVms({ host, user });
+    next(result);
+});
