@@ -60,6 +60,15 @@ export const configs = {
         //         return `${this.host}:${this.port}${this.prefix}`;
         //     },
         // },
+        ticket: {
+            prefix:
+                process.env.CA_GIT_TICKET_SERVICE_PREFIX || "/api/v1/in/ticket",
+            host: process.env.CA_GIT_TICKET_SERVICE_HOST || "http://127.0.0.1",
+            port: process.env.CA_GIT_TICKET_SERVICE_PORT || "6803",
+            getUrl: function (): string {
+                return `${this.host}:${this.port}${this.prefix}`;
+            },
+        },
     },
 };
 

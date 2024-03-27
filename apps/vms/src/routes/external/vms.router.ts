@@ -4,35 +4,13 @@ import fs from "fs";
 import { HttpStatus } from "app";
 import {
     createVms,
+    getVmsByIds,
     sshCheckConnectDev,
     sshInstallDocker,
     sshInstallDockerDev,
 } from "../../controllers/vms.controller";
 
 export const router: Router = Router();
-
-// router.get(
-//     "/ssh/win",
-//     async (req: Request, res: Response, next: NextFunction) => {
-//         const result = await sshInstallDocker();
-//         next(result);
-//     }
-// );
-// router.get(
-//     "/ssh/dev",
-//     async (req: Request, res: Response, next: NextFunction) => {
-//         const result = await sshCheckConnectDev();
-//         next(result);
-//     }
-// );
-
-// router.get(
-//     "/ssh/dev/installDocker",
-//     async (req: Request, res: Response, next: NextFunction) => {
-//         const result = await sshInstallDockerDev();
-//         next(result);
-//     }
-// );
 
 router.get(
     "/download/key/pub",
@@ -43,8 +21,18 @@ router.get(
     }
 );
 
-router.post("/", async (req: Request, res: Response, next: NextFunction) => {
-    const { host, user } = req.body;
-    const result = await createVms({ host, user });
+router.post("/ids", async (req: Request, _: Response, next: NextFunction) => {
+    const ids = req.body.ids;
+    const result = await getVmsByIds({
+        ids,
+    });
     next(result);
 });
+
+router.post("/", async (req: Request, res: Response, next: NextFunction) => {
+    const { host, user, pass } = req.body;
+    const result = await createVms({ host, user, pass });
+    next(result);
+});
+
+

@@ -15,6 +15,14 @@ const vmsSchema = new mongoose.Schema(
             type: String,
             require: true,
         },
+        pass: {
+            type: String,
+            require: true,
+        },
+        last_connect: {
+            type: Date,
+            require: false,
+        },
     },
     {
         versionKey: false,
