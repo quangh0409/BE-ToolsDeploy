@@ -2,7 +2,7 @@ import { Server, Socket } from "socket.io";
 import { Server as HttpServer } from "http"; // Sử dụng createServer từ http
 import logger from "logger";
 import { database } from "app/build/result/error";
-import { sshCheckConnect } from "../../controllers/vms.controller";
+import { sshCheckConnect, sshInstallDocker } from "../../controllers/vms.controller";
 
 export class SocketServer {
     static instance: SocketServer;
@@ -36,8 +36,12 @@ export class SocketServer {
     onConnection = (socket: Socket) => {
         logger.info(`User '${socket.id}' connected!`);
 
-        socket.on("CheckConnectVM", async (token,host) => {
-            const a = await sshCheckConnect(socket);
+        socket.on("CheckConnectVM", async (token, vm_id) => {
+            await sshCheckConnect(socket, token, vm_id);
+        });
+
+        socket.on("InstallDocker", async (token, vm_id) => {
+            await sshInstallDocker(socket, token, vm_id);
         });
 
         // Kết thúc (Done or out)

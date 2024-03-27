@@ -62,7 +62,7 @@ export async function verifyToken(
     }
 }
 
-async function getExpireTime(params: {
+export async function getExpireTime(params: {
     token: string;
     userId: string;
 }): Promise<string | null> {

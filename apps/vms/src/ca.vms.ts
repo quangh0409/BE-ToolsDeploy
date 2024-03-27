@@ -16,11 +16,11 @@ function main(): void {
     const port = configs.app.port;
 
     // // config socket
-    // const server = createServer(app);
-    // SocketServer.setInstance(server);
+    const server = createServer(app);
+    SocketServer.setInstance(server);
 
     const startApp = (): void => {
-        app.listen(Number(port), host, () => {
+        server.listen(Number(port), host, () => {
             logger.info("Listening on: %s:%d", host, port);
         });
     };
