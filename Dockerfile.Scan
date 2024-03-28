@@ -28,9 +28,11 @@ ENV module $module
 CMD node apps/$module/build/ca.$module.js
 
 # Install trivy and hadolint
-RUN apk add --no-cache wget && \
-    wget https://github.com/aquasecurity/trivy/releases/download/v0.50.1/trivy_0.50.1_Linux-64bit.deb && \
-    apk add --allow-untrusted trivy_0.50.1_Linux-64bit.deb
+# RUN apk add --no-cache wget && \
+#     wget https://github.com/aquasecurity/trivy/releases/download/v0.50.1/trivy_0.50.1_Linux-64bit.deb && \
+#     apk add --allow-untrusted trivy_0.50.1_Linux-64bit.deb
+
+RUN apk add --no-cache trivy
 
 RUN wget https://github.com/hadolint/hadolint/releases/download/v2.7.0/hadolint-Linux-x86_64
 RUN mv hadolint-Linux-x86_64 hadolint
