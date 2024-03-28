@@ -33,7 +33,7 @@ RUN mkdir -p /usr/share/keyrings/
 RUN wget -qO /usr/share/keyrings/trivy.gpg https://aquasecurity.github.io/trivy-repo/deb/public.key
 RUN echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" >> /etc/apk/repositories
 RUN apk update
-RUN apk add --no-cache trivy
+RUN apk add trivy
 
 RUN wget https://github.com/hadolint/hadolint/releases/download/v2.7.0/hadolint-Linux-x86_64
 RUN mv hadolint-Linux-x86_64 hadolint
