@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { IVms } from "../interfaces/models/vms";
+import { EStatus, IVms } from "../interfaces/models/vms";
 
 const vmsSchema = new mongoose.Schema(
     {
@@ -17,6 +17,11 @@ const vmsSchema = new mongoose.Schema(
         },
         pass: {
             type: String,
+            require: true,
+        },
+        status: {
+            type: String,
+            enum: EStatus,
             require: true,
         },
         last_connect: {
