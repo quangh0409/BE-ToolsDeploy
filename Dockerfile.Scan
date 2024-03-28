@@ -28,10 +28,12 @@ ENV module $module
 CMD node apps/$module/build/ca.$module.js
 
 # Install trivy and hadolint
-# Install trivy
-RUN apk add --no-cache wget gnupg
+RUN apk add --no-cache wget
+RUN apk add --no-cache gnupg
+RUN apk add --no-cache lsb-release
+RUN mkdir -p /usr/share/keyrings/
 RUN wget -qO /usr/share/keyrings/trivy.gpg https://aquasecurity.github.io/trivy-repo/deb/public.key
-RUN echo "https://aquasecurity.github.io/trivy-repo/deb/alpine/v3.14" > /etc/apk/repositories
+RUN echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
 RUN apk add --no-cache trivy
 
 RUN wget https://github.com/hadolint/hadolint/releases/download/v2.7.0/hadolint-Linux-x86_64
