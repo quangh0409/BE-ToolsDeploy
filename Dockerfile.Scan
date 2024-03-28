@@ -27,15 +27,15 @@ COPY --from=builder /root/ca/node_modules node_modules
 ENV module $module
 CMD node apps/$module/build/ca.$module.js
 
-# Install required packages
-RUN apk update && \
-    apk add --no-cache wget gnupg lsb-release
+# Install trivy and hadolint
+RUN apk add --no-cache wget gnupg lsb-release
+RUN mkdir -p /usr/share/keyrings/
+RUN wget -qO /usr/share/keyrings/trivy.gpg https://aquasecurity.github.io/trivy-repo/deb/public.key
+RUN echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" >> /etc/apk/repositories
+RUN apk update
+RUN apk add --no-cache trivy
 
-# Install trivy
-RUN wget -O /usr/bin/trivy https://github.com/aquasecurity/trivy/releases/download/v0.21.0/trivy_0.21.0_Linux-64bit && \
-    chmod +x /usr/bin/trivy
-
-# Install hadolint
-RUN wget https://github.com/hadolint/hadolint/releases/download/v2.7.0/hadolint-Linux-x86_64 && \
-    mv hadolint-Linux-x86_64 /usr/bin/hadolint && \
-    chmod +x /usr/bin/hadolint
+RUN wget https://github.com/hadolint/hadolint/releases/download/v2.7.0/hadolint-Linux-x86_64
+RUN mv hadolint-Linux-x86_64 hadolint
+RUN chmod +x hadolint
+RUN mv hadolint /usr/local/bin/
