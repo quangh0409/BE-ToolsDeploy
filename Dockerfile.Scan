@@ -28,11 +28,9 @@ ENV module $module
 CMD node apps/$module/build/ca.$module.js
 
 # Install trivy and hadolint
-RUN apk add --no-cache wget
-RUN apk add --no-cache gnupg
-RUN apk add --no-cache lsb-release
-RUN mkdir -p /usr/share/keyrings/
-RUN wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | tee /usr/share/keyrings/trivy.gpg > /dev/null
+# Install trivy
+RUN apk add --no-cache wget gnupg
+RUN wget -qO /usr/share/keyrings/trivy.gpg https://aquasecurity.github.io/trivy-repo/deb/public.key
 RUN echo "https://aquasecurity.github.io/trivy-repo/deb/alpine/v3.14" > /etc/apk/repositories
 RUN apk add --no-cache trivy
 
