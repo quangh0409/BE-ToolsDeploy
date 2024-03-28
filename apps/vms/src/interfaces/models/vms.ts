@@ -3,5 +3,10 @@ export interface IVms {
     host: string;
     user: string;
     pass: string;
+    status: EStatus;
     last_connect: Date;
+}
+export enum EStatus {
+    CONNECT = "CONNECTED",
+    DISCONNECT = "DISCONNECTED",
 }

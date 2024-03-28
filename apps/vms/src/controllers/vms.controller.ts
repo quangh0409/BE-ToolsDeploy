@@ -21,11 +21,12 @@ import { configs } from "../configs";
 import { getExpireTime } from "../middlewares";
 import { findTicketByUserId } from "../services/ticket.service";
 import logger from "logger";
+import { EStatus } from "../interfaces/models/vms";
 
 export async function createVms(params: {
-    host: String;
-    user: String;
-    pass: String;
+    host: string;
+    user: string;
+    pass: string;
 }): Promise<ResultSuccess> {
     const check = await Vms.findOne({ host: params.host });
     const err: ResultError = {
@@ -41,21 +42,50 @@ export async function createVms(params: {
     if (check) {
         throw new HttpError(err);
     }
+    const ssh = new NodeSSH();
+    try {
+        await ssh.connect({
+            host: params.host,
+            username: params.user,
+            password: params.pass,
+        });
+        ssh.dispose();
+        const result = new Vms({
+            id: v1(),
+            host: params.host,
+            user: params.user,
+            pass: params.pass,
+            status: EStatus.CONNECT,
+            last_connect: new Date(),
+        });
+        await result.save();
 
-    const result = new Vms({
-        id: v1(),
-        host: params.host,
-        user: params.user,
-    });
+        return success.ok({ ...result, pass: undefined, _id: undefined });
+    } catch (err) {
+        const result = new Vms({
+            id: v1(),
+            host: params.host,
+            user: params.user,
+            pass: params.pass,
+            status: EStatus.DISCONNECT,
+            last_connect: new Date(),
+        });
+        await result.save();
 
-    await result.save();
-
-    return success.ok(result);
+        throw new HttpError(
+            error.notFound({
+                message: "wrong user or pass",
+            })
+        );
+    }
 }
 
 export async function getVmsByIds(params: {
     ids: string[];
 }): Promise<ResultSuccess> {
+    let connect: string[] = [];
+    let disconnect: string[] = [];
+
     const vms = await Vms.aggregate([
         {
             $match: {
@@ -71,7 +101,64 @@ export async function getVmsByIds(params: {
         },
     ]);
 
-    return success.ok(vms);
+    vms.map((vm) => {
+        try {
+            const ssh = new NodeSSH();
+            ssh.connect({
+                host: vm.host,
+                username: vm.user,
+                password: vm.pass,
+            });
+            connect.push(vm.id);
+        } catch (error) {
+            disconnect.push(vm.id);
+        }
+    });
+
+    const [con, dis] = await Promise.all([
+        Vms.updateMany(
+            {
+                id: {
+                    $in: [...connect],
+                },
+            },
+            {
+                $set: {
+                    status: EStatus.CONNECT,
+                },
+            }
+        ),
+        Vms.updateMany(
+            {
+                id: {
+                    $in: [...disconnect],
+                },
+            },
+            {
+                $set: {
+                    status: EStatus.DISCONNECT,
+                },
+            }
+        ),
+    ]);
+
+    const result = await Vms.aggregate([
+        {
+            $match: {
+                id: {
+                    $in: [...params.ids],
+                },
+            },
+        },
+        {
+            $project: {
+                _id: 0,
+                pass: 0,
+            },
+        },
+    ]);
+
+    return success.ok(result);
 }
 
 export async function updateVms(params: {
