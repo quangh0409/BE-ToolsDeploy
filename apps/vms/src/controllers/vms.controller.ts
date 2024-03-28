@@ -60,7 +60,11 @@ export async function createVms(params: {
         });
         await result.save();
 
-        return success.ok({ ...result, pass: undefined, _id: undefined });
+        return success.ok({
+            ...result.toJSON(),
+            pass: undefined,
+            _id: undefined,
+        });
     } catch (err) {
         const result = new Vms({
             id: v1(),
