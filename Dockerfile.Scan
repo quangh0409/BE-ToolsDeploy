@@ -31,6 +31,7 @@ CMD node apps/$module/build/ca.$module.js
 RUN apk add --no-cache wget
 RUN apk add --no-cache gnupg
 RUN apk add --no-cache lsb-release
+RUN mkdir -p /usr/share/keyrings/
 RUN wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | tee /usr/share/keyrings/trivy.gpg > /dev/null
 RUN echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | tee -a /etc/apk/repositories
 RUN apk update
