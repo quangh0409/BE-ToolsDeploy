@@ -79,7 +79,7 @@ services:
     hostname: vms
     build:
       context: .
-      dockerfile: ./Dockerfile
+      dockerfile: ./Dockerfile.Scan
       args:
         module: vms
     restart: always

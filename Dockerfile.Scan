@@ -1,0 +1,42 @@
+FROM node:18-alpine AS builder
+ARG module
+RUN npm install -g pnpm
+WORKDIR /root/ca
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm fetch
+
+COPY pnpm-workspace.yaml .
+COPY packages packages
+COPY apps/$module/package.json apps/$module/
+
+RUN pnpm --filter $module^... --offline install
+RUN pnpm --filter $module^... build
+
+RUN pnpm --filter $module --offline install
+COPY apps/$module apps/$module
+RUN pnpm --filter $module build
+
+FROM node:18-alpine AS runner
+ARG module
+WORKDIR /root/ca
+COPY --from=builder /root/ca/package.json .
+COPY --from=builder /root/ca/apps/$module apps/$module
+COPY --from=builder /root/ca/packages packages
+COPY --from=builder /root/ca/node_modules node_modules
+
+ENV module $module
+CMD node apps/$module/build/ca.$module.js
+
+# Install trivy and hadolint
+RUN apk add --no-cache wget
+RUN apk add --no-cache gnupg
+RUN apk add --no-cache lsb-release
+RUN wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | tee /usr/share/keyrings/trivy.gpg > /dev/null
+RUN echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | tee -a /etc/apk/repositories
+RUN apk update
+RUN apk add --no-cache trivy
+
+RUN wget https://github.com/hadolint/hadolint/releases/download/v2.7.0/hadolint-Linux-x86_64
+RUN mv hadolint-Linux-x86_64 hadolint
+RUN chmod +x hadolint
+RUN mv hadolint /usr/local/bin/
