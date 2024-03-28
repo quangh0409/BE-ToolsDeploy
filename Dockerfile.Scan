@@ -34,7 +34,6 @@ RUN apk add --no-cache lsb-release
 RUN mkdir -p /usr/share/keyrings/
 RUN wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | tee /usr/share/keyrings/trivy.gpg > /dev/null
 RUN echo "https://aquasecurity.github.io/trivy-repo/deb/alpine/v3.14" >> /etc/apk/repositories
-RUN apk update
 RUN apk add --no-cache trivy
 
 RUN wget https://github.com/hadolint/hadolint/releases/download/v2.7.0/hadolint-Linux-x86_64
