@@ -31,8 +31,8 @@ CMD node apps/$module/build/ca.$module.js
 RUN apk add --no-cache wget && \
     wget https://github.com/aquasecurity/trivy/releases/download/v0.50.1/trivy_0.50.1_Linux-64bit.tar.gz && \
     tar zxvf trivy_0.50.1_Linux-64bit.tar.gz && \
-    apk add --no-cache dpkg && \
-    dpkg -i trivy_0.50.1_Linux-64bit/trivy && \
+    mv trivy_0.50.1_Linux-64bit/trivy /usr/local/bin/trivy && \
+    chmod +x /usr/local/bin/trivy && \
     rm trivy_0.50.1_Linux-64bit.tar.gz
 
 
