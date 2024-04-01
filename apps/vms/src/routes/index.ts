@@ -10,5 +10,5 @@ import { verifyToken } from "../middlewares";
 export const router: Router = Router();
 router.use(`${configs.app.prefix}/vms`, verifyToken, vmsRouter);
 router.use(`${configs.app.prefix}/services`, verifyToken, serviceRouter);
-router.use(`${configs.app.prefix}/webhooks`, webhooksRouter);
+router.use(`${configs.app.prefix}/webhook`, webhooksRouter);
 // router.use(`${configs.app.prefix}/in/vms`, vmsInRouter);
