@@ -210,7 +210,6 @@ export async function sshInstallDocker(
 ) {
     const payload = await verifyToken(token);
     const ticket = await findTicketByUserId({ user_id: payload.id });
-    const ssh = new NodeSSH();
     const path = __dirname;
     const file_path = resolve(path, "../../", "file/win/id_rsa");
     const file_path_docker = resolve(
@@ -222,22 +221,21 @@ export async function sshInstallDocker(
     if (ticket.body && ticket.status === 200) {
         if (ticket.body.vms_ids) {
             const check = ticket.body.vms_ids.find((id) => {
-                return "7ce28bf0-eac6-11ee-bd50-398fd5d039d1" === id;
+                return vm_id === id;
             });
             if (check) {
                 const ssh = new NodeSSH();
 
                 const vm = await Vms.findOne({
-                    id: "7ce28bf0-eac6-11ee-bd50-398fd5d039d1",
+                    id: vm_id,
                 });
 
                 if (!vm) {
-                    logger.error(
-                        `socket emmit logCheckConnectVM mess: host not exited`
-                    );
                     socket.emit("logCheckConnectVM", {
-                        mess: "host not exited ",
-                        status: "error",
+                        log: undefined,
+                        title: undefined,
+                        mess: "HOST NOT EXITED",
+                        status: "ERROR",
                     });
                 }
 
@@ -246,20 +244,22 @@ export async function sshInstallDocker(
 
                 try {
                     await ssh.connect({
-                        host: "23.102.237.66",
-                        username: "quang_vt204299",
+                        host: vm!.host,
+                        username: vm!.user,
                         privateKey: privateKey,
                     });
                     socket.emit("logInstallDocker", {
-                        mess: "connect successfull",
-                        status: "ok",
+                        log: undefined,
+                        title: "ssh connect successfully",
+                        mess: "CONNECT SUCCESSFULLY",
+                        status: "DONE",
                     });
                 } catch (err: any) {
-                    console.log("🚀 ~ err84:", err);
                     socket.emit("logInstallDocker", {
-                        content: err,
-                        mess: "connect fialed",
-                        status: "error",
+                        log: undefined,
+                        title: "ssh connect failed",
+                        mess: err?.level,
+                        status: "ERROR",
                     });
                 }
                 let log;
@@ -268,15 +268,17 @@ export async function sshInstallDocker(
                 );
                 const content = fs.readFileSync(file_path_docker);
                 await ssh.execCommand(
-                    `echo '${content}' > docker/docker-setup.sh`
+                    `echo '${content}' | tr -d '\r' > docker/docker-setup.sh`
                 );
                 await ssh.execCommand("chmod +x docker/docker-setup.sh");
                 log = await ssh.execCommand(
-                    `echo "Quangh204299" | sudo -S ./docker/docker-setup.sh`
+                    `echo "${vm!.pass}" | sudo -S ./docker/docker-setup.sh`
                 );
                 socket.emit("logInstallDocker", {
                     log: log,
-                    mess: `echo "Quangh204299" | sudo -S ./docker/docker-setup.sh`,
+                    title: "sudo ./docker/docker-setup.sh",
+                    mess: undefined,
+                    status: "IN_PROGRESS",
                 });
                 if (log.code === 0) {
                     log = await ssh.execCommand(
@@ -285,7 +287,9 @@ export async function sshInstallDocker(
                     );
                     socket.emit("logInstallDocker", {
                         log: log,
-                        mess: "sudo usermod -aG docker $USER",
+                        title: "sudo usermod -aG docker $USER",
+                        mess: undefined,
+                        status: "IN_PROGRESS",
                     });
                 }
                 if (log.code === 0) {
@@ -295,30 +299,30 @@ export async function sshInstallDocker(
                     );
                     socket.emit("logInstallDocker", {
                         log: log,
-                        mess: "sudo systemctl restart docker",
+                        title: "sudo systemctl restart docker",
+                        mess: undefined,
+                        status: "IN_PROGRESS",
                     });
                 }
-                socket.emit("logInstallDocker", {
-                    log: log,
-                    mess: "successfully",
-                });
+                if (log.code === 0) {
+                    socket.emit("logInstallDocker", {
+                        log: log,
+                        title: undefined,
+                        mess: "SUCCESSFULLY",
+                        status: "SUCCESSFULLY",
+                    });
+                } else {
+                    socket.emit("logInstallDocker", {
+                        log: log,
+                        title: undefined,
+                        mess: "ERROR",
+                        status: "ERROR",
+                    });
+                }
                 ssh.dispose();
             }
         }
     }
-
-    // const sftp = new SftpClient();
-    // await sftp.connect({
-    //     host: "23.102.237.66",
-    //     username: "quang_vt204299",
-    //     privateKey: privateKey,
-    // });
-
-    // // await sftp.chmod("docker/docker-setup.sh", 0o777);
-
-    // await sftp.put(conent, "docker/docker-setup.sh");
-
-    // return success.ok({ result: "Install Docker Successfull" });
 }
 
 export async function sshCheckConnect(
@@ -344,12 +348,11 @@ export async function sshCheckConnect(
                 });
 
                 if (!vm) {
-                    logger.error(
-                        `socket emmit logCheckConnectVM mess: host not exited`
-                    );
                     socket.emit("logCheckConnectVM", {
-                        mess: "host not exited ",
-                        status: "error",
+                        log: undefined,
+                        title: undefined,
+                        mess: "HOST NOT EXITED",
+                        status: "ERROR",
                     });
                 }
 
@@ -364,93 +367,306 @@ export async function sshCheckConnect(
                     });
 
                     socket.emit("logCheckConnectVM", {
-                        mess: "conecct sccessfull ",
-                        status: "ok",
+                        log: undefined,
+                        title: "ssh connect successfully",
+                        mess: "CONNECT_SUCCESSFULLY",
+                        status: "DONE",
                     });
                     ssh.dispose();
                 } catch (error: any) {
                     socket.emit("logCheckConnectVM", {
+                        log: undefined,
+                        title: "ssh connect failed",
                         mess: error?.level,
-                        status: "error",
+                        status: "ERROR",
                     });
-                    logger.error(
-                        `socket emmit logCheckConnectVM mess: ${error?.level}`
-                    );
                 }
             }
         }
     }
 }
 
-export async function sshCheckConnectDev(): Promise<ResultSuccess> {
-    const ssh = new NodeSSH();
+export async function sshInstallTrivy(
+    socket: Socket,
+    token: string,
+    vm_id: string
+) {
+    const payload = await verifyToken(token);
+    const ticket = await findTicketByUserId({ user_id: payload.id });
     const path = __dirname;
-    const file_path = resolve(path, "../../", "file/id_rsa");
+    const file_path = resolve(path, "../../", "file/win/id_rsa");
+    if (ticket.body && ticket.status === 200) {
+        if (ticket.body.vms_ids) {
+            const check = ticket.body.vms_ids.find((id) => {
+                return vm_id === id;
+            });
+            console.log("🚀 ~ check ~ check:", check);
+            if (check) {
+                const ssh = new NodeSSH();
 
-    // Đọc nội dung của file RSA vào biến privateKey
-    const privateKey = fs.readFileSync(file_path).toString();
+                const vm = await Vms.findOne({
+                    id: vm_id,
+                });
 
-    await ssh.connect({
-        host: "23.102.228.99",
-        username: "gitlab",
-        privateKey: privateKey,
-    });
-    await ssh.execCommand("mkdir -p test ");
+                if (!vm) {
+                    socket.emit("logInstallTrivy", {
+                        log: undefined,
+                        title: undefined,
+                        mess: "HOST NOT EXITED",
+                        status: "ERROR",
+                    });
+                }
 
-    return success.ok({ result: "Connect successfull" });
+                // Đọc nội dung của file RSA vào biến privateKey
+                const privateKey = fs.readFileSync(file_path).toString();
+
+                try {
+                    await ssh.connect({
+                        host: vm!.host,
+                        username: vm!.user,
+                        privateKey: privateKey,
+                    });
+
+                    socket.emit("logInstallTrivy", {
+                        log: undefined,
+                        title: "ssh connect successfully",
+                        mess: "CONNECT SUCCESSFULLY",
+                        status: "DONE",
+                    });
+                } catch (err: any) {
+                    socket.emit("logInstallTrivy", {
+                        log: undefined,
+                        title: "ssh connect failed",
+                        mess: err?.level,
+                        status: "ERROR",
+                    });
+                }
+                await ssh.execCommand("mkdir -p trivy");
+                let log;
+                log = await ssh.execCommand(
+                    `echo "${vm!.pass}" | sudo -S apt-get install -y wget`
+                );
+                socket.emit("logInstallTrivy", {
+                    log: log,
+                    title: `sudo apt-get install -y wget`,
+                    mess: undefined,
+                    status: "IN_PROGRESS",
+                });
+
+                if (log.code === 0) {
+                    log = await ssh.execCommand(
+                        `cd trivy && wget https://github.com/aquasecurity/trivy/releases/download/v0.50.1/trivy_0.50.1_Linux-64bit.tar.gz`
+                    );
+                    socket.emit("logInstallTrivy", {
+                        log: log,
+                        title: `wget https://github.com/aquasecurity/trivy/releases/download/v0.50.1/trivy_0.50.1_Linux-64bit.tar.gz`,
+                        mess: undefined,
+                        status: "IN_PROGRESS",
+                    });
+                }
+                if (log.code === 0) {
+                    log = await ssh.execCommand(
+                        `cd trivy && tar zxvf trivy_0.50.1_Linux-64bit.tar.gz`
+                    );
+                    socket.emit("logInstallTrivy", {
+                        log: log,
+                        title: `cd trivy && tar zxvf trivy_0.50.1_Linux-64bit.tar.gz`,
+                        mess: undefined,
+                        status: "IN_PROGRESS",
+                    });
+                }
+                if (log.code === 0) {
+                    log = await ssh.execCommand(
+                        `cd trivy && echo "${
+                            vm!.pass
+                        }" | sudo -S mv trivy /usr/local/bin/`
+                    );
+                    socket.emit("logInstallTrivy", {
+                        log: log,
+                        title: `cd trivy && mv trivy /usr/local/bin/`,
+                        mess: undefined,
+                        status: "IN_PROGRESS",
+                    });
+                }
+                if (log.code === 0) {
+                    socket.emit("logInstallTrivy", {
+                        log: log,
+                        title: undefined,
+                        mess: "SUCCESSFULLY",
+                        status: "SUCCESSFULLY",
+                    });
+                }
+                if (log.code !== 0) {
+                    socket.emit("logInstallTrivy", {
+                        log: log,
+                        title: undefined,
+                        mess: "ERROR",
+                        status: "ERROR",
+                    });
+                }
+                ssh.dispose();
+            } else {
+                throw new HttpError(
+                    error.invalidData({
+                        message: "id vm not found",
+                    })
+                );
+            }
+        }
+    } else {
+        throw new HttpError(
+            error.invalidData({
+                message: "token have problem",
+            })
+        );
+    }
 }
 
-export async function sshInstallDockerDev(): Promise<ResultSuccess> {
-    const ssh = new NodeSSH();
+export async function sshInstallHadolint(
+    socket: Socket,
+    token: string,
+    vm_id: string
+) {
+    const payload = await verifyToken(token);
+    const ticket = await findTicketByUserId({ user_id: payload.id });
     const path = __dirname;
-    const file_path = resolve(path, "../../", "file/id_rsa");
-    const file_path_docker = resolve(
-        path,
-        "../../",
-        "file/win/docker-setup.sh"
-    );
+    const file_path = resolve(path, "../../", "file/win/id_rsa");
+    if (ticket.body && ticket.status === 200) {
+        if (ticket.body.vms_ids) {
+            const check = ticket.body.vms_ids.find((id) => {
+                return vm_id === id;
+            });
+            if (check) {
+                const ssh = new NodeSSH();
 
-    // Đọc nội dung của file RSA vào biến privateKey
-    const privateKey = fs.readFileSync(file_path).toString();
-    const content: Buffer = fs.readFileSync(file_path_docker);
+                const vm = await Vms.findOne({
+                    id: vm_id,
+                });
 
-    await ssh.connect({
-        host: "23.102.228.99",
-        username: "gitlab",
-        privateKey: privateKey,
-        timeout: 300000,
-    });
-    // await ssh.execCommand("mkdir -p docker && touch docker/docker-setup.sh");
-    // // const content = fs.readFileSync(file_path);
-    // await ssh.execCommand(`echo '${content}' > docker/docker-setup.sh`);
-    // const run = await ssh.execCommand(
-    //     "chmod +x docker/docker-setup.sh && cd docker && ./docker-setup.sh"
-    // );
-    /// SSH
-    await ssh.execCommand("sudo apt-get update");
+                if (!vm) {
+                    socket.emit("logInstallHadolint", {
+                        log: undefined,
+                        title: undefined,
+                        mess: "HOST NOT EXITED",
+                        status: "ERROR",
+                    });
+                }
 
-    await ssh.execCommand(
-        "sudo apt-get install -y apt-transport-https ca-certificates curl gnupg lsb-release"
-    );
-    await ssh.execCommand(
-        "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg"
-    );
-    await ssh.execCommand(`echo \\
-    \"deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \\
-    $(lsb_release -cs) stable\\" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null`);
-    await ssh.execCommand("sudo apt-get update");
-    await ssh.execCommand(
-        "sudo apt-get install -y docker-ce docker-ce-cli containerd.io"
-    );
-    await ssh.execCommand(
-        `sudo curl -L \"https://github.com/docker/compose/releases/download/1.29.2/docker-compose-\$(uname -s)-\$(uname -m)\" -o /usr/local/bin/docker-compose`
-    );
-    await ssh.execCommand("sudo chmod +x /usr/local/bin/docker-compose");
+                // Đọc nội dung của file RSA vào biến privateKey
+                const privateKey = fs.readFileSync(file_path).toString();
 
-    await ssh.execCommand("sudo usermod -aG docker $USER");
-    await ssh.execCommand("sudo systemctl restart docker");
+                try {
+                    await ssh.connect({
+                        host: vm!.host,
+                        username: vm!.user,
+                        privateKey: privateKey,
+                    });
 
-    return success.ok({ result: "successful" });
+                    socket.emit("logInstallHadolint", {
+                        log: undefined,
+                        title: "ssh connect successfully",
+                        mess: "CONNECT SUCCESSFULLY",
+                        status: "DONE",
+                    });
+                } catch (err: any) {
+                    socket.emit("logInstallHadolint", {
+                        log: undefined,
+                        title: "ssh connect failed",
+                        mess: err?.level,
+                        status: "ERROR",
+                    });
+                }
+                await ssh.execCommand("mkdir -p hadolint");
+                let log;
+                log = await ssh.execCommand(
+                    `echo "${vm!.pass}" | sudo -S apt-get update`
+                );
+                socket.emit("logInstallHadolint", {
+                    log: log,
+                    title: `sudo apt-get update`,
+                    mess: undefined,
+                    status: "IN_PROGRESS",
+                });
+                if (log.code === 0) {
+                    log = await ssh.execCommand(
+                        `cd hadolint && wget https://github.com/hadolint/hadolint/releases/download/v2.7.0/hadolint-Linux-x86_64`
+                    );
+                    socket.emit("logInstallHadolint", {
+                        log: log,
+                        title: `wget https://github.com/hadolint/hadolint/releases/download/v2.7.0/hadolint-Linux-x86_64`,
+                        mess: undefined,
+                        status: "IN_PROGRESS",
+                    });
+                }
+                if (log.code === 0) {
+                    log = await ssh.execCommand(
+                        `cd hadolint && echo "${
+                            vm!.pass
+                        }" | sudo -S mv hadolint-Linux-x86_64 hadolint`
+                    );
+                    socket.emit("logInstallHadolint", {
+                        log: log,
+                        title: `sudo mv hadolint-Linux-x86_64 hadolint`,
+                        mess: undefined,
+                        status: "IN_PROGRESS",
+                    });
+                }
+                if (log.code === 0) {
+                    log = await ssh.execCommand(
+                        `cd hadolint && chmod +x hadolint`
+                    );
+                    socket.emit("logInstallHadolint", {
+                        log: log,
+                        title: `cd hadolint && chmod +x hadolint`,
+                        mess: undefined,
+                        status: "IN_PROGRESS",
+                    });
+                }
+                if (log.code === 0) {
+                    log = await ssh.execCommand(
+                        `cd hadolint && echo "${
+                            vm!.pass
+                        }" | sudo -S mv hadolint /usr/local/bin/`
+                    );
+                    socket.emit("logInstallHadolint", {
+                        log: log,
+                        title: `sudo mv hadolint /usr/local/bin/`,
+                        mess: undefined,
+                        status: "IN_PROGRESS",
+                    });
+                }
+                if (log.code === 0) {
+                    socket.emit("logInstallHadolint", {
+                        log: log,
+                        title: undefined,
+                        mess: "SUCCESSFULLY",
+                        status: "SUCCESSFULLY",
+                    });
+                }
+                if (log.code !== 0) {
+                    socket.emit("logInstallHadolint", {
+                        log: log,
+                        title: undefined,
+                        mess: "ERROR",
+                        status: "ERROR",
+                    });
+                }
+                ssh.dispose();
+            } else {
+                throw new HttpError(
+                    error.invalidData({
+                        message: "id vm not found",
+                    })
+                );
+            }
+        }
+    } else {
+        throw new HttpError(
+            error.invalidData({
+                message: "token have problem",
+            })
+        );
+    }
 }
 
 export async function verifyToken(token: string): Promise<Payload> {

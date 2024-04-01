@@ -5,9 +5,6 @@ import { HttpStatus } from "app";
 import {
     createVms,
     getVmsByIds,
-    sshCheckConnectDev,
-    sshInstallDocker,
-    sshInstallDockerDev,
 } from "../../controllers/vms.controller";
 
 export const router: Router = Router();

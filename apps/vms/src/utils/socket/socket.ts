@@ -2,7 +2,12 @@ import { Server, Socket } from "socket.io";
 import { Server as HttpServer } from "http"; // Sử dụng createServer từ http
 import logger from "logger";
 import { database } from "app/build/result/error";
-import { sshCheckConnect, sshInstallDocker } from "../../controllers/vms.controller";
+import {
+    sshCheckConnect,
+    sshInstallDocker,
+    sshInstallHadolint,
+    sshInstallTrivy,
+} from "../../controllers/vms.controller";
 
 export class SocketServer {
     static instance: SocketServer;
@@ -44,10 +49,19 @@ export class SocketServer {
             await sshInstallDocker(socket, token, vm_id);
         });
 
+        socket.on("InstallTrivy", async (token, vm_id) => {
+            await sshInstallTrivy(socket, token, vm_id);
+        });
+
+        socket.on("InstallHadolint", async (token, vm_id) => {
+            await sshInstallHadolint(socket, token, vm_id);
+        });
+
+        
+
         // Kết thúc (Done or out)
         socket.on("disconnect", () => {
             logger.info(`User '${socket.id}' disconnected!`);
         });
     };
-
 }

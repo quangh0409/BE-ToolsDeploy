@@ -1,5 +1,4 @@
-export interface IService {
-    id: string;
+export interface IServiceBody {
     name: string;
     architectura: string;
     language: string;

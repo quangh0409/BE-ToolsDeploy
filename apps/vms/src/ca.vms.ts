@@ -19,6 +19,16 @@ function main(): void {
     const server = createServer(app);
     SocketServer.setInstance(server);
 
+    const SmeeClient = require("smee-client");
+
+    const smee = new SmeeClient({
+        source: "https://smee.io/NEsyf7sKQOTJ8tO",
+        target: "http://localhost:6804/webhooks",
+        logger: console,
+    });
+
+    smee.start();
+
     const startApp = (): void => {
         server.listen(Number(port), host, () => {
             logger.info("Listening on: %s:%d", host, port);
@@ -34,8 +44,6 @@ function main(): void {
             startApp();
         }
     });
-
-
 }
 
 main();
