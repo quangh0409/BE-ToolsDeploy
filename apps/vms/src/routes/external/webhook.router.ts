@@ -1,4 +1,6 @@
 import { Request, Router, Response, NextFunction } from "express";
+import { SocketServer } from "../../utils";
+import { Socket } from "socket.io";
 
 export const router: Router = Router();
 
@@ -27,4 +29,8 @@ router.post("/", async (req: Request, res: Response, next: NextFunction) => {
     } else {
         console.log(`Unhandled event: ${githubEvent}`);
     }
+
+    SocketServer.getInstance()
+        .getSocket()
+        ?.emit("webhooks", "connect webhooks successfully");
 });

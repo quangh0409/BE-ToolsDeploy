@@ -12,6 +12,7 @@ import {
 export class SocketServer {
     static instance: SocketServer;
     io: Server;
+    socket: Socket | undefined;
 
     constructor(server: HttpServer) {
         // Gắn kết socket.io với server HTTP
@@ -37,7 +38,6 @@ export class SocketServer {
             SocketServer.instance = new SocketServer(server);
         }
     }
-
     onConnection = (socket: Socket) => {
         logger.info(`User '${socket.id}' connected!`);
 
@@ -57,11 +57,15 @@ export class SocketServer {
             await sshInstallHadolint(socket, token, vm_id);
         });
 
-        
-
         // Kết thúc (Done or out)
         socket.on("disconnect", () => {
             logger.info(`User '${socket.id}' disconnected!`);
         });
+
+        this.socket = socket;
     };
+
+    getSocket() {
+        return this.socket;
+    }
 }
