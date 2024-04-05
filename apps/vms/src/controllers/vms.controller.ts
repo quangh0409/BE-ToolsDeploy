@@ -244,7 +244,7 @@ export async function sshInstallDocker(
                     await ssh.connect({
                         host: vm!.host,
                         username: vm!.user,
-                        privateKey: privateKey,
+                        password: vm!.pass,
                     });
                     socket.emit("logInstallDocker", {
                         log: undefined,
@@ -361,7 +361,7 @@ export async function sshCheckConnect(
                     await ssh.connect({
                         host: vm!.host,
                         username: vm!.user,
-                        privateKey: privateKey,
+                        password: vm!.pass,
                     });
 
                     socket.emit("logCheckConnectVM", {
@@ -422,7 +422,7 @@ export async function sshInstallTrivy(
                     await ssh.connect({
                         host: vm!.host,
                         username: vm!.user,
-                        privateKey: privateKey,
+                        password: vm!.pass,
                     });
 
                     socket.emit("logInstallTrivy", {
@@ -557,7 +557,7 @@ export async function sshInstallHadolint(
                     await ssh.connect({
                         host: vm!.host,
                         username: vm!.user,
-                        privateKey: privateKey,
+                        password: vm!.pass,
                     });
 
                     socket.emit("logInstallHadolint", {

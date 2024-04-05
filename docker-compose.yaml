@@ -87,6 +87,8 @@ services:
       - 6804:6804
     user: root
     env_file: ./apps/vms/.env
+     environment:
+      - CA_VMS_TICKET_SERVICE_HOST=http://ticket
     image: docker.io/vutrongquang/vms
 
 networks:
