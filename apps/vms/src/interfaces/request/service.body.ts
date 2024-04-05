@@ -4,7 +4,7 @@ export interface IServiceBody {
     language: string;
     repo: string;
     source: string;
-    environment: [
+    environments: [
         {
             name: string;
             vm: string;

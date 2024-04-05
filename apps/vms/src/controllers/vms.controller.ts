@@ -12,7 +12,6 @@ import { resolve } from "path";
 import fs from "fs";
 
 import { NodeSSH } from "node-ssh";
-import { SocketServer } from "../utils";
 import { Socket } from "socket.io";
 import Vms from "../models/vms";
 import { v1 } from "uuid";
@@ -20,7 +19,6 @@ import jsonwebtoken, { VerifyOptions } from "jsonwebtoken";
 import { configs } from "../configs";
 import { getExpireTime } from "../middlewares";
 import { findTicketByUserId } from "../services/ticket.service";
-import logger from "logger";
 import { EStatus } from "../interfaces/models/vms";
 
 export async function createVms(params: {
