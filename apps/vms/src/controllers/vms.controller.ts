@@ -575,25 +575,15 @@ export async function sshInstallHadolint(
                 await ssh.execCommand("mkdir -p hadolint");
                 let log;
                 log = await ssh.execCommand(
-                    `echo "${vm!.pass}" | sudo -S apt-get update`
+                    `cd hadolint && wget https://github.com/hadolint/hadolint/releases/download/v2.7.0/hadolint-Linux-x86_64`
                 );
                 socket.emit("logInstallHadolint", {
                     log: log,
-                    title: `sudo apt-get update`,
+                    title: `wget https://github.com/hadolint/hadolint/releases/download/v2.7.0/hadolint-Linux-x86_64`,
                     mess: undefined,
                     status: "IN_PROGRESS",
                 });
-                if (log.code === 0) {
-                    log = await ssh.execCommand(
-                        `cd hadolint && wget https://github.com/hadolint/hadolint/releases/download/v2.7.0/hadolint-Linux-x86_64`
-                    );
-                    socket.emit("logInstallHadolint", {
-                        log: log,
-                        title: `wget https://github.com/hadolint/hadolint/releases/download/v2.7.0/hadolint-Linux-x86_64`,
-                        mess: undefined,
-                        status: "IN_PROGRESS",
-                    });
-                }
+
                 if (log.code === 0) {
                     log = await ssh.execCommand(
                         `cd hadolint && echo "${
