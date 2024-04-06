@@ -5,6 +5,7 @@ import {
     GetInfoUserGit,
     GetInfoUserGitByAccesToken,
     GetLanguagesByAccessToken,
+    GetPathFileDockerByAccessToken,
     GetReposGitByAccessToken,
 } from "../../controllers/github.controller";
 import { Payload } from "app";
@@ -52,6 +53,19 @@ router.post(
         const { repository } = req.body;
         const { id } = req.payload as Payload;
         const result = await GetLanguagesByAccessToken({
+            userId: id,
+            repository: repository,
+        });
+        next(result);
+    }
+);
+
+router.post(
+    "/paths-file-docker",
+    async (req: Request, _: Response, next: NextFunction) => {
+        const { repository } = req.body;
+        const { id } = req.payload as Payload;
+        const result = await GetPathFileDockerByAccessToken({
             userId: id,
             repository: repository,
         });
