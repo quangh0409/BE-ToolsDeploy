@@ -280,8 +280,7 @@ export async function sshInstallDocker(
                 });
                 if (log.code === 0) {
                     log = await ssh.execCommand(
-                        "sudo -S usermod -aG docker $USER",
-                        { stdin: vm!.pass }
+                        `echo "${vm!.pass}" | sudo -S usermod -aG docker $USER`
                     );
                     socket.emit("logInstallDocker", {
                         log: log,
@@ -292,8 +291,7 @@ export async function sshInstallDocker(
                 }
                 if (log.code === 0) {
                     log = await ssh.execCommand(
-                        "sudo -S systemctl restart docker",
-                        { stdin: vm!.pass }
+                        `echo "${vm!.pass}" | sudo -S systemctl restart docker`
                     );
                     socket.emit("logInstallDocker", {
                         log: log,
