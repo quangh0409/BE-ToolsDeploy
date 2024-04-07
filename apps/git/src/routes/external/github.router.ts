@@ -2,6 +2,7 @@ import { NextFunction, Request, Response, Router } from "express";
 import {
     getAGithubByCode,
     GetBranchesByAccessToken,
+    GetContentsByAccessToken,
     GetInfoUserGit,
     GetInfoUserGitByAccesToken,
     GetLanguagesByAccessToken,
@@ -68,6 +69,20 @@ router.post(
         const result = await GetPathFileDockerByAccessToken({
             userId: id,
             repository: repository,
+        });
+        next(result);
+    }
+);
+
+router.post(
+    "/content-file",
+    async (req: Request, _: Response, next: NextFunction) => {
+        const { repository, path } = req.body;
+        const { id } = req.payload as Payload;
+        const result = await GetContentsByAccessToken({
+            userId: id,
+            repository: repository,
+            path: path,
         });
         next(result);
     }

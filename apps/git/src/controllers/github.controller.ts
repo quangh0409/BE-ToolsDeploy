@@ -316,12 +316,12 @@ export async function GetPathFileDockerByAccessToken(params: {
         }
     );
 
-    let path_Dockerfile = "";
+    let path_Dockerfile: string[] = [];
     let path_docker_compose = "";
 
     response.data.tree.map((t: any) => {
         if (t.path.toLowerCase().includes("dockerfile")) {
-            path_Dockerfile = t.path;
+            path_Dockerfile.push(t.path);
         }
         if (t.path.toLowerCase().includes("docker-compose")) {
             path_docker_compose = t.path;
@@ -332,6 +332,43 @@ export async function GetPathFileDockerByAccessToken(params: {
         dockerfile: path_Dockerfile,
         docker_compose: path_docker_compose,
     });
+}
+
+export async function GetContentsByAccessToken(params: {
+    userId: string;
+    repository: string;
+    path: string;
+}) {
+    const ticket = await findTicketByUserId({ user_id: params.userId });
+
+    const github = await Github.findOne({ git_id: ticket.body?.github_id });
+
+    if (!github) {
+        throw new HttpError(
+            error.notFound({
+                location: "token",
+                param: "token",
+                message: "git_id of user_id not exits",
+            })
+        );
+    }
+    const response = await axios.get(
+        `https://api.github.com/repos/${github.git_user}/${params.repository}/contents/${params.path}`,
+        {
+            headers: {
+                Accept: "application/vnd.github+json",
+                Authorization: `Bearer ${github.access_token}`,
+                "X-GitHub-Api-Version": "2022-11-28",
+            },
+        }
+    );
+
+    const content = Buffer.from(
+        response.data.content,
+        response.data.encoding
+    ).toString("utf-8");
+
+    return success.ok({ content });
 }
 
 function parseAccessToken(input: string): {
