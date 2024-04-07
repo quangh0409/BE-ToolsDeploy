@@ -50,7 +50,7 @@ export async function createService(
     return success.ok(service);
 }
 
-export async function GetAllService(params: {
+export async function getAllService(params: {
     vm: string;
 }): Promise<ResultSuccess> {
     const vm = await Vms.findOne({ id: params.vm });
@@ -80,6 +80,26 @@ export async function GetAllService(params: {
     );
 
     return success.ok(services);
+}
+
+export async function getServiceById(params: {
+    id: string;
+}): Promise<ResultSuccess> {
+    const service = await Service.findOne({ id: params.id }, { _id: 0 });
+    const err: ResultError = {
+        status: HttpStatus.BAD_REQUEST,
+        errors: [
+            {
+                location: "body",
+                value: params.id,
+                message: "Service not exit",
+            },
+        ],
+    };
+    if (!service) {
+        throw new HttpError(err);
+    }
+    return success.ok(service);
 }
 
 export async function clone(
