@@ -27,9 +27,9 @@ const serviceSchema = new mongoose.Schema(
             type: String,
             require: true,
         },
-        environment: [
+        environment: 
             {
-                type: {
+                type: [{
                     name: {
                         type: String,
                         required: true,
@@ -78,11 +78,11 @@ const serviceSchema = new mongoose.Schema(
                         require: true,
                         _id: false,
                     },
-                },
+                }],
                 required: true,
                 _id: false,
             },
-        ],
+        
     },
     {
         versionKey: false,
