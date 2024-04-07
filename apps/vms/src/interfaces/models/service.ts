@@ -10,16 +10,16 @@ export interface IService {
             name: string;
             vm: string;
             branch: string;
-            docker_file: {
+            docker_file: [{
                 location: string;
                 content: string;
                 name: string;
-            };
-            docker_compose: {
+            }];
+            docker_compose: [{
                 location: string;
                 content: string;
                 name: string;
-            };
+            }];
         }
     ];
 }

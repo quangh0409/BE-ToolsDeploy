@@ -43,7 +43,7 @@ const serviceSchema = new mongoose.Schema(
                         require: true,
                     },
                     docker_file: {
-                        type: {
+                        type: [{
                             location: {
                                 type: String,
                                 require: true,
@@ -56,12 +56,12 @@ const serviceSchema = new mongoose.Schema(
                                 type: String,
                                 require: true,
                             },
-                        },
+                        }],
                         require: true,
                         _id: false,
                     },
                     docker_compose: {
-                        type: {
+                        type: [{
                             location: {
                                 type: String,
                                 require: true,
@@ -74,7 +74,7 @@ const serviceSchema = new mongoose.Schema(
                                 type: String,
                                 require: true,
                             },
-                        },
+                        }],
                         require: true,
                         _id: false,
                     },
