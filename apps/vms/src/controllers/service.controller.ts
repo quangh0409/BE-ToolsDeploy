@@ -25,6 +25,7 @@ export async function createService(
         language: params.language,
         repo: params.repo,
         source: params.source,
+        user: params.user,
         environment: [...params.environments],
     });
 

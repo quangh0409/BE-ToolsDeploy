@@ -27,6 +27,10 @@ const serviceSchema = new mongoose.Schema(
             type: String,
             require: true,
         },
+        user: {
+            type: String,
+            require: true,
+        },
         environment: 
             {
                 type: [{

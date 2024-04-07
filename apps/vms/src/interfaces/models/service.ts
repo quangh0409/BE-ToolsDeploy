@@ -5,6 +5,7 @@ export interface IService {
     language: string;
     repo: string;
     source: string;
+    user: string;
     environment: {
         name: string;
         vm: string;
