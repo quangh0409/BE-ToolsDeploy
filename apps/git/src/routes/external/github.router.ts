@@ -64,11 +64,12 @@ router.post(
 router.post(
     "/paths-file-docker",
     async (req: Request, _: Response, next: NextFunction) => {
-        const { repository } = req.body;
+        const { repository, branch } = req.body;
         const { id } = req.payload as Payload;
         const result = await GetPathFileDockerByAccessToken({
             userId: id,
             repository: repository,
+            branch: branch,
         });
         next(result);
     }
@@ -77,12 +78,12 @@ router.post(
 router.post(
     "/content-file",
     async (req: Request, _: Response, next: NextFunction) => {
-        const { repository, path } = req.body;
+        const { repository, sha } = req.body;
         const { id } = req.payload as Payload;
         const result = await GetContentsByAccessToken({
             userId: id,
             repository: repository,
-            path: path,
+            sha: sha,
         });
         next(result);
     }

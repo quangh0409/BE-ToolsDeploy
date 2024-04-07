@@ -291,6 +291,7 @@ export async function GetLanguagesByAccessToken(params: {
 export async function GetPathFileDockerByAccessToken(params: {
     userId: string;
     repository: string;
+    branch: string;
 }) {
     const ticket = await findTicketByUserId({ user_id: params.userId });
 
@@ -306,7 +307,7 @@ export async function GetPathFileDockerByAccessToken(params: {
         );
     }
     const response = await axios.get(
-        `https://api.github.com/repos/${github.git_user}/${params.repository}/git/trees/main?recursive=1`,
+        `https://api.github.com/repos/${github.git_user}/${params.repository}/git/trees/${params.branch}?recursive=1`,
         {
             headers: {
                 Accept: "application/vnd.github+json",
@@ -316,15 +317,25 @@ export async function GetPathFileDockerByAccessToken(params: {
         }
     );
 
-    let path_Dockerfile: string[] = [];
-    let path_docker_compose = "";
+    let path_Dockerfile: { path: string; name: string; sha: string }[] = [];
+    let path_docker_compose: { path: string; name: string; sha: string }[] = [];
 
     response.data.tree.map((t: any) => {
         if (t.path.toLowerCase().includes("dockerfile")) {
-            path_Dockerfile.push(t.path);
+            const file_name = t.path.split("/");
+            path_Dockerfile.push({
+                path: t.path,
+                name: file_name[file_name.length - 1],
+                sha: t.sha,
+            });
         }
         if (t.path.toLowerCase().includes("docker-compose")) {
-            path_docker_compose = t.path;
+            const file_name = t.path.split("/");
+            path_docker_compose.push({
+                path: t.path,
+                name: file_name[file_name.length - 1],
+                sha: t.sha,
+            });
         }
     });
 
@@ -337,7 +348,7 @@ export async function GetPathFileDockerByAccessToken(params: {
 export async function GetContentsByAccessToken(params: {
     userId: string;
     repository: string;
-    path: string;
+    sha: string;
 }) {
     const ticket = await findTicketByUserId({ user_id: params.userId });
 
@@ -353,7 +364,7 @@ export async function GetContentsByAccessToken(params: {
         );
     }
     const response = await axios.get(
-        `https://api.github.com/repos/${github.git_user}/${params.repository}/contents/${params.path}`,
+        `https://api.github.com/repos/${github.git_user}/${params.repository}/git/blobs/${params.sha}`,
         {
             headers: {
                 Accept: "application/vnd.github+json",
