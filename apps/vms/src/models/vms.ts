@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { EStatus, IVms } from "../interfaces/models/vms";
+import { service } from "app/build/result/error";
 
 const vmsSchema = new mongoose.Schema(
     {
@@ -28,6 +29,12 @@ const vmsSchema = new mongoose.Schema(
             type: Date,
             require: false,
         },
+        services: [
+            {
+                type: String,
+                require: false,
+            },
+        ],
     },
     {
         versionKey: false,

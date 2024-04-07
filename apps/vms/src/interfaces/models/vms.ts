@@ -5,6 +5,7 @@ export interface IVms {
     pass: string;
     status: EStatus;
     last_connect: Date;
+    services?: string[];
 }
 export enum EStatus {
     CONNECT = "CONNECTED",

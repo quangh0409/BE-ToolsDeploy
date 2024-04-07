@@ -22,9 +22,28 @@ export async function createService(
         environment: [...params.environments],
     });
 
+    const vms_ids = params.environments.map((env) => {
+        return env.vm;
+    });
+
+    await Vms.updateMany(
+        {
+            id: {
+                $in: vms_ids,
+            },
+        },
+        {
+            $push: {
+                services: service.id,
+            },
+        }
+    );
+
     await service.save();
     return success.ok(service);
 }
+
+export async function GetAllService(params: { userId: string; vm: string }) {}
 
 export async function clone(
     socket: Socket,

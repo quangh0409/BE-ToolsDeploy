@@ -5,7 +5,7 @@ import { createService } from "../../controllers/service.controller";
 export const router: Router = Router();
 
 router.post("/", async (req: Request, _: Response, next: NextFunction) => {
-    const body = req.body as IServiceBody;
+    const body = req.body.service as IServiceBody;
     const result = await createService(body);
     next(result);
 });
