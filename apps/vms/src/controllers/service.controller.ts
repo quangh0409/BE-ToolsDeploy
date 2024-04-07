@@ -5,7 +5,13 @@ import { NodeSSH } from "node-ssh";
 import logger from "logger";
 import Vms from "../models/vms";
 import { IServiceBody } from "../interfaces/request/service.body";
-import { ResultSuccess, success } from "app";
+import {
+    HttpError,
+    HttpStatus,
+    ResultError,
+    ResultSuccess,
+    success,
+} from "app";
 import Service from "../models/service";
 import { v1 } from "uuid";
 
@@ -43,7 +49,37 @@ export async function createService(
     return success.ok(service);
 }
 
-export async function GetAllService(params: { userId: string; vm: string }) {}
+export async function GetAllService(params: {
+    vm: string;
+}): Promise<ResultSuccess> {
+    const vm = await Vms.findOne({ id: params.vm });
+    const err: ResultError = {
+        status: HttpStatus.BAD_REQUEST,
+        errors: [
+            {
+                location: "body",
+                value: params.vm,
+                message: "Host not exit",
+            },
+        ],
+    };
+    if (!vm) {
+        throw new HttpError(err);
+    }
+
+    const services = await Service.find(
+        {
+            id: {
+                $in: vm.services,
+            },
+        },
+        {
+            _id: 0,
+        }
+    );
+
+    return success.ok(services);
+}
 
 export async function clone(
     socket: Socket,
