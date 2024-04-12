@@ -4,6 +4,7 @@ import {
     getAllService,
     createService,
     getServiceById,
+    deleteService,
 } from "../../controllers/service.controller";
 
 export const router: Router = Router();
@@ -27,6 +28,17 @@ router.get(
     async (req: Request, _: Response, next: NextFunction) => {
         const service = req.params.service as string;
         const result = await getServiceById({
+            id: service,
+        });
+        next(result);
+    }
+);
+
+router.delete(
+    "/:service",
+    async (req: Request, _: Response, next: NextFunction) => {
+        const service = req.params.service as string;
+        const result = await deleteService({
             id: service,
         });
         next(result);

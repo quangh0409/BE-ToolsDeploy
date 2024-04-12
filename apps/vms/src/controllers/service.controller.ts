@@ -11,6 +11,7 @@ import {
     ResultError,
     ResultSuccess,
     success,
+    error,
 } from "app";
 import Service from "../models/service";
 import { v1 } from "uuid";
@@ -48,6 +49,22 @@ export async function createService(
 
     await service.save();
     return success.ok(service);
+}
+
+export async function deleteService(params: {
+    id: string;
+}): Promise<ResultSuccess> {
+    const check = await Service.deleteOne({ id: params.id });
+    if (check.deletedCount !== 1) {
+        throw new HttpError(
+            error.notFound({
+                message: `service not exited, failed delete`,
+                value: params.id,
+            })
+        );
+    }
+
+    return success.ok({ message: "successfully deleted" });
 }
 
 export async function getAllService(params: {
@@ -567,7 +584,7 @@ export async function build(
                         },
                     }
                 );
-              
+
                 if (log.code === 0) {
                     socket.emit("logStepBuild", {
                         log: log,
@@ -777,7 +794,7 @@ export async function deploy(
                         },
                     }
                 );
-               
+
                 if (log.code === 0) {
                     socket.emit("logStepDeploy", {
                         log: log,
