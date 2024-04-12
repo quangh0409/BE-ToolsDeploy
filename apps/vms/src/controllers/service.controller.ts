@@ -127,7 +127,8 @@ export async function clone(
                 if (!vm) {
                     socket.emit("logStepClone", {
                         log: undefined,
-                        title: undefined,
+                        title: "clone",
+                        sub_title: undefined,
                         mess: "HOST NOT EXITED",
                         status: "ERROR",
                     });
@@ -140,7 +141,8 @@ export async function clone(
                 if (!service) {
                     socket.emit("logStepClone", {
                         log: undefined,
-                        title: undefined,
+                        title: "clone",
+                        sub_title: undefined,
                         mess: "SERVICE NOT EXITED",
                         status: "ERROR",
                     });
@@ -162,14 +164,16 @@ export async function clone(
 
                     socket.emit("logStepClone", {
                         log: undefined,
-                        title: "ssh connect successfully",
+                        title: "clone",
+                        sub_title: "ssh connect successfully",
                         mess: "CONNECT SUCCESSFULLY",
-                        status: "DONE",
+                        status: "START",
                     });
                 } catch (err: any) {
                     socket.emit("logStepClone", {
                         log: undefined,
-                        title: "ssh connect failed",
+                        title: "clone",
+                        sub_title: "ssh connect failed",
                         mess: err?.level,
                         status: "ERROR",
                     });
@@ -184,7 +188,8 @@ export async function clone(
                 );
                 socket.emit("logStepClone", {
                     log: log,
-                    title: `git clone ${
+                    title: "clone",
+                    sub_title: `git clone ${
                         service!.source
                     } 2> /dev/null || (rm -rf ${service!.repo} ; git clone ${
                         service!.source
@@ -198,7 +203,8 @@ export async function clone(
                     );
                     socket.emit("logStepClone", {
                         log: log,
-                        title: `cd ${service!.repo} && git checkout ${
+                        title: "clone",
+                        sub_title: `cd ${service!.repo} && git checkout ${
                             env!.branch
                         }`,
                         mess: undefined,
@@ -208,19 +214,23 @@ export async function clone(
                 if (log.code === 0) {
                     socket.emit("logStepClone", {
                         log: log,
-                        title: undefined,
+                        title: "clone",
+                        sub_title: undefined,
                         mess: "SUCCESSFULLY",
                         status: "SUCCESSFULLY",
                     });
+                    // ssh.dispose()
                     return true;
                 }
                 if (log.code !== 0) {
                     socket.emit("logStepClone", {
                         log: log,
-                        title: undefined,
+                        title: "clone",
+                        sub_title: undefined,
                         mess: "ERROR",
                         status: "ERROR",
                     });
+                    // ssh.dispose()
                     return false;
                 }
             }
@@ -236,7 +246,7 @@ export async function scanDockerfile(
     vm_id: string,
     service_id: string,
     env_name: string
-) {
+): Promise<Boolean> {
     const payload = await verifyToken(token);
     const ticket = await findTicketByUserId({ user_id: payload.id });
 
@@ -255,20 +265,24 @@ export async function scanDockerfile(
                 if (!vm) {
                     socket.emit("logStepScanDockerfile", {
                         log: undefined,
-                        title: undefined,
+                        title: "scanDockerfile",
+                        sub_title: undefined,
                         mess: "HOST NOT EXITED",
                         status: "ERROR",
                     });
+                    return false;
                 }
                 const service = await Service.findOne({ id: service_id });
 
                 if (!service) {
                     socket.emit("logStepScanDockerfile", {
                         log: undefined,
-                        title: undefined,
+                        title: "scanDockerfile",
+                        sub_title: undefined,
                         mess: "SERVICE NOT EXITED",
                         status: "ERROR",
                     });
+                    return false;
                 }
 
                 const repo = service!.repo;
@@ -286,62 +300,59 @@ export async function scanDockerfile(
 
                     socket.emit("logStepScanDockerfile", {
                         log: undefined,
-                        title: "ssh connect successfully",
+                        title: "scanDockerfile",
+                        sub_title: "ssh connect successfully",
                         mess: "CONNECT SUCCESSFULLY",
-                        status: "DONE",
+                        status: "START",
                     });
                 } catch (err: any) {
                     socket.emit("logStepScanDockerfile", {
                         log: undefined,
-                        title: "ssh connect failed",
+                        title: "scanDockerfile",
+                        sub_title: "ssh connect failed",
                         mess: err?.level,
                         status: "ERROR",
                     });
+                    return false;
                 }
 
                 let log;
-
                 log = await ssh.execCommand(
-                    `hadolint ./${service!.repo}/Dockerfile`
+                    "cd " + service!.repo + " && hadolint Dockerfile"
                 );
                 socket.emit("logStepScanDockerfile", {
                     log: log,
-                    title: `hadolint ./${service!.repo}/Dockerfile`,
+                    title: "scanDockerfile",
+                    sub_title: `hadolint ./${service!.repo}/Dockerfile`,
                     mess: undefined,
                     status: "IN_PROGRESS",
                 });
-                if (log.code === 0) {
-                    log = await ssh.execCommand(
-                        `hadolint ./${service!.repo}/Dockerfile`
-                    );
-                    socket.emit("logStepScanDockerfile", {
-                        log: log,
-                        title: `hadolint ./${
-                            service!.repo
-                        }/docker-compose.yaml`,
-                        mess: undefined,
-                        status: "IN_PROGRESS",
-                    });
-                }
-                if (log.code === 0) {
-                    socket.emit("logStepScanDockerfile", {
-                        log: log,
-                        title: undefined,
-                        mess: "SUCCESSFULLY",
-                        status: "SUCCESSFULLY",
-                    });
-                }
-                if (log.code !== 0) {
-                    socket.emit("logStepScanDockerfile", {
-                        log: log,
-                        title: undefined,
-                        mess: "ERROR",
-                        status: "ERROR",
-                    });
-                }
+                log = await ssh.execCommand(
+                    "cd " + service!.repo + " && hadolint docker-compose.yaml"
+                );
+                socket.emit("logStepScanDockerfile", {
+                    log: log,
+                    title: "scanDockerfile",
+                    sub_title: `hadolint ./${
+                        service!.repo
+                    }/docker-compose.yaml`,
+                    mess: undefined,
+                    status: "IN_PROGRESS",
+                });
+                socket.emit("logStepScanDockerfile", {
+                    // log: log,
+                    title: "scanDockerfile",
+                    sub_title: undefined,
+                    mess: "SUCCESSFULLY",
+                    status: "SUCCESSFULLY",
+                });
+                return true;
             }
+            return false;
         }
+        return false;
     }
+    return false;
 }
 
 export async function clear(
@@ -350,7 +361,7 @@ export async function clear(
     vm_id: string,
     service_id: string,
     env_name: string
-) {
+): Promise<Boolean> {
     const payload = await verifyToken(token);
     const ticket = await findTicketByUserId({ user_id: payload.id });
 
@@ -369,20 +380,24 @@ export async function clear(
                 if (!vm) {
                     socket.emit("logsStepClear", {
                         log: undefined,
-                        title: undefined,
+                        title: "clear",
+                        sub_title: undefined,
                         mess: "HOST NOT EXITED",
                         status: "ERROR",
                     });
+                    return false;
                 }
                 const service = await Service.findOne({ id: service_id });
 
                 if (!service) {
                     socket.emit("logsStepClear", {
                         log: undefined,
-                        title: undefined,
+                        title: "clear",
+                        sub_title: undefined,
                         mess: "SERVICE NOT EXITED",
                         status: "ERROR",
                     });
+                    return false;
                 }
 
                 const repo = service!.repo;
@@ -399,46 +414,59 @@ export async function clear(
 
                     socket.emit("logsStepClear", {
                         log: undefined,
-                        title: "ssh connect successfully",
+                        title: "clear",
+                        sub_title: "ssh connect successfully",
                         mess: "CONNECT SUCCESSFULLY",
-                        status: "DONE",
+                        status: "START",
                     });
                 } catch (err: any) {
                     socket.emit("logsStepClear", {
                         log: undefined,
-                        title: "ssh connect failed",
+                        title: "clear",
+                        sub_title: "ssh connect failed",
                         mess: err?.level,
                         status: "ERROR",
                     });
+                    return false;
                 }
 
                 let log;
-                log = await ssh.execCommand(`docker builder prune -f`);
+                log = await ssh.execCommand(
+                    `docker stop $(docker ps -aq) || echo no container && docker rmi -f $(docker images -q) || echo no image && docker builder prune -f`
+                );
                 socket.emit("logsStepClear", {
                     log: log,
-                    title: `docker builder prune -f`,
+                    title: "clear",
+                    sub_title: `docker stop $(docker ps -aq) || echo no container && docker rmi -f $(docker images -q) || echo no image && docker builder prune -f`,
                     mess: undefined,
                     status: "IN_PROGRESS",
                 });
                 if (log.code === 0) {
                     socket.emit("logsStepClear", {
                         log: log,
-                        title: undefined,
+                        title: "clear",
+                        sub_title: undefined,
                         mess: "SUCCESSFULLY",
                         status: "SUCCESSFULLY",
                     });
+                    return true;
                 }
                 if (log.code !== 0) {
                     socket.emit("logsStepClear", {
                         log: log,
-                        title: undefined,
+                        title: "clear",
+                        sub_title: undefined,
                         mess: "ERROR",
                         status: "ERROR",
                     });
+                    return false;
                 }
             }
+            return false;
         }
+        return false;
     }
+    return false;
 }
 
 export async function build(
@@ -447,7 +475,7 @@ export async function build(
     vm_id: string,
     service_id: string,
     env_name: string
-) {
+): Promise<Boolean> {
     const payload = await verifyToken(token);
     const ticket = await findTicketByUserId({ user_id: payload.id });
 
@@ -466,20 +494,24 @@ export async function build(
                 if (!vm) {
                     socket.emit("logStepBuild", {
                         log: undefined,
-                        title: undefined,
+                        title: "build",
+                        sub_title: undefined,
                         mess: "HOST NOT EXITED",
                         status: "ERROR",
                     });
+                    return false;
                 }
                 const service = await Service.findOne({ id: service_id });
 
                 if (!service) {
                     socket.emit("logStepBuild", {
                         log: undefined,
-                        title: undefined,
+                        title: "build",
+                        sub_title: undefined,
                         mess: "SERVICE NOT EXITED",
                         status: "ERROR",
                     });
+                    return false;
                 }
                 const env = service!.environment.find((e) => {
                     return e.name === env_name;
@@ -494,52 +526,74 @@ export async function build(
 
                     socket.emit("logStepBuild", {
                         log: undefined,
-                        title: "ssh connect successfully",
+                        title: "build",
+                        sub_title: "ssh connect successfully",
                         mess: "CONNECT SUCCESSFULLY",
-                        status: "DONE",
+                        status: "START",
                     });
                 } catch (err: any) {
                     socket.emit("logStepBuild", {
                         log: undefined,
-                        title: "ssh connect failed",
+                        title: "build",
+                        sub_title: "ssh connect failed",
                         mess: err?.level,
                         status: "ERROR",
                     });
+                    return false;
                 }
 
                 let log;
-                log = await ssh.execCommand(
-                    `cd ${
-                        service!.repo
-                    } && chmod +x ./nginx/entrypoint.sh && chmod +x docker-compose.yaml  && docker compose -f ./docker-compose.yaml build`
-                );
                 socket.emit("logStepBuild", {
-                    log: log,
-                    title: `cd ${
+                    log: undefined,
+                    title: "build",
+                    sub_title: `cd ${
                         service!.repo
                     } && chmod +x ./nginx/entrypoint.sh && chmod +x docker-compose.yaml  && docker compose -f ./docker-compose.yaml build`,
                     mess: undefined,
                     status: "IN_PROGRESS",
                 });
+                log = await ssh.execCommand(
+                    `cd ${
+                        service!.repo
+                    } && chmod +x ./nginx/entrypoint.sh && chmod +x docker-compose.yaml  && docker compose -f ./docker-compose.yaml build`,
+                    {
+                        onStdout(chunk) {
+                            // Gửi log mới đến client
+                            // console.log(chunk.toString("utf8"));
+                            socket.emit(
+                                "logRealTimeBuild",
+                                chunk.toString("utf8")
+                            );
+                        },
+                    }
+                );
+              
                 if (log.code === 0) {
                     socket.emit("logStepBuild", {
                         log: log,
-                        title: undefined,
+                        title: "build",
+                        sub_title: undefined,
                         mess: "SUCCESSFULLY",
                         status: "SUCCESSFULLY",
                     });
+                    return true;
                 }
                 if (log.code !== 0) {
                     socket.emit("logStepBuild", {
                         log: log,
-                        title: undefined,
+                        title: "build",
+                        sub_title: undefined,
                         mess: "ERROR",
                         status: "ERROR",
                     });
+                    return false;
                 }
             }
+            return false;
         }
+        return false;
     }
+    return false;
 }
 
 // export async function scanImages(
@@ -647,20 +701,24 @@ export async function deploy(
                 if (!vm) {
                     socket.emit("logStepDeploy", {
                         log: undefined,
-                        title: undefined,
+                        title: "deploy",
+                        sub_title: undefined,
                         mess: "HOST NOT EXITED",
                         status: "ERROR",
                     });
+                    return false;
                 }
                 const service = await Service.findOne({ id: service_id });
 
                 if (!service) {
                     socket.emit("logStepDeploy", {
                         log: undefined,
-                        title: undefined,
+                        title: "deploy",
+                        sub_title: undefined,
                         mess: "SERVICE NOT EXITED",
                         status: "ERROR",
                     });
+                    return false;
                 }
 
                 const repo = service!.repo;
@@ -678,51 +736,72 @@ export async function deploy(
 
                     socket.emit("logStepDeploy", {
                         log: undefined,
-                        title: "ssh connect successfully",
+                        title: "deploy",
+                        sub_title: "ssh connect successfully",
                         mess: "CONNECT SUCCESSFULLY",
-                        status: "DONE",
+                        status: "START",
                     });
                 } catch (err: any) {
                     socket.emit("logStepDeploy", {
                         log: undefined,
-                        title: "ssh connect failed",
+                        title: "deploy",
+                        sub_title: "ssh connect failed",
                         mess: err?.level,
                         status: "ERROR",
                     });
+                    return false;
                 }
 
                 let log;
-
-                log = await ssh.execCommand(
-                    `cd ${
-                        service!.repo
-                    } && docker compose -f ./docker-compose.yaml up --build -d`
-                );
-                socket.emit("logStepScanImage", {
-                    log: log,
-                    title: `cd ${
+                socket.emit("logStepDeploy", {
+                    log: undefined,
+                    title: "deploy",
+                    sub_title: `cd ${
                         service!.repo
                     } && docker compose -f ./docker-compose.yaml up --build -d`,
                     mess: undefined,
                     status: "IN_PROGRESS",
                 });
+                log = await ssh.execCommand(
+                    `cd ${
+                        service!.repo
+                    } && docker compose -f ./docker-compose.yaml up --build -d`,
+                    {
+                        onStdout(chunk) {
+                            // Gửi log mới đến client
+                            // console.log(chunk.toString("utf8"));
+                            socket.emit(
+                                "logRealTimeDeploy",
+                                chunk.toString("utf8")
+                            );
+                        },
+                    }
+                );
+               
                 if (log.code === 0) {
-                    socket.emit("logStepScanImage", {
+                    socket.emit("logStepDeploy", {
                         log: log,
-                        title: undefined,
+                        title: "deploy",
+                        sub_title: undefined,
                         mess: "SUCCESSFULLY",
                         status: "SUCCESSFULLY",
                     });
+                    return true;
                 }
                 if (log.code !== 0) {
-                    socket.emit("logStepScanImage", {
+                    socket.emit("logStepDeploy", {
                         log: log,
-                        title: undefined,
+                        title: "deploy",
+                        sub_title: undefined,
                         mess: "ERROR",
                         status: "ERROR",
                     });
+                    return false;
                 }
             }
+            return false;
         }
+        return false;
     }
+    return false;
 }

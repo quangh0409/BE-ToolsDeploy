@@ -317,27 +317,37 @@ export async function GetPathFileDockerByAccessToken(params: {
         }
     );
 
-    let path_Dockerfile: { path: string; name: string; sha: string }[] = [];
-    let path_docker_compose: { path: string; name: string; sha: string }[] = [];
+    let path_Dockerfile: { path: string; name: string; content: string }[] = [];
+    let path_docker_compose: { path: string; name: string; content: string }[] = [];
 
-    response.data.tree.map((t: any) => {
+    for (const t of response.data.tree) {
         if (t.path.toLowerCase().includes("dockerfile")) {
             const file_name = t.path.split("/");
+            const res = await GetContentsByAccessToken({
+                userId: params.userId,
+                sha: t.sha,
+                repository: params.repository,
+            });
             path_Dockerfile.push({
                 path: t.path,
                 name: file_name[file_name.length - 1],
-                sha: t.sha,
+                content: res.data.content,
             });
         }
         if (t.path.toLowerCase().includes("docker-compose")) {
             const file_name = t.path.split("/");
+            const res = await GetContentsByAccessToken({
+                userId: params.userId,
+                sha: t.sha,
+                repository: params.repository,
+            });
             path_docker_compose.push({
                 path: t.path,
                 name: file_name[file_name.length - 1],
-                sha: t.sha,
+                content: res.data.content,
             });
         }
-    });
+    }
 
     return success.ok({
         dockerfile: path_Dockerfile,

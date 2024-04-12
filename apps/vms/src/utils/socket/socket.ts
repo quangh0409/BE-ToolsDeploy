@@ -8,6 +8,7 @@ import {
     sshInstallHadolint,
     sshInstallTrivy,
 } from "../../controllers/vms.controller";
+import { build, clear, clone, deploy, scanDockerfile } from "../../controllers/service.controller";
 
 export class SocketServer {
     static instance: SocketServer;
@@ -55,6 +56,26 @@ export class SocketServer {
 
         socket.on("InstallHadolint", async (token, vm_id) => {
             await sshInstallHadolint(socket, token, vm_id);
+        });
+
+        socket.on("clone", async (token, vm_id, service_id, env_name) => {
+            await clone(socket, token, vm_id, service_id, env_name);
+        });
+
+        socket.on("scanSyntax", async (token, vm_id, service_id, env_name) => {
+            await scanDockerfile(socket, token, vm_id, service_id, env_name);
+        });
+
+        socket.on("clear", async (token, vm_id, service_id, env_name) => {
+            await clear(socket, token, vm_id, service_id, env_name);
+        });
+
+        socket.on("build", async (token, vm_id, service_id, env_name) => {
+            await build(socket, token, vm_id, service_id, env_name);
+        });
+
+        socket.on("deploy", async (token, vm_id, service_id, env_name) => {
+            await deploy(socket, token, vm_id, service_id, env_name);
         });
 
         // Kết thúc (Done or out)

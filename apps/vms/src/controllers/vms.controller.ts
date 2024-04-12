@@ -364,7 +364,8 @@ export async function sshCheckConnect(
 
                     socket.emit("logCheckConnectVM", {
                         log: undefined,
-                        title: "ssh connect successfully",
+                        title: "ssh",
+                        sub_title: "ssh connect successfully",
                         mess: "CONNECT_SUCCESSFULLY",
                         status: "DONE",
                     });
@@ -372,10 +373,12 @@ export async function sshCheckConnect(
                 } catch (error: any) {
                     socket.emit("logCheckConnectVM", {
                         log: undefined,
-                        title: "ssh connect failed",
+                        title: "ssh",
+                        sub_title: "ssh connect failed",
                         mess: error?.level,
                         status: "ERROR",
                     });
+                    ssh.dispose();
                 }
             }
         }
