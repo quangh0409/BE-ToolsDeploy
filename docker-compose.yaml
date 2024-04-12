@@ -79,7 +79,7 @@ services:
     hostname: vms
     build:
       context: .
-      dockerfile: ./Dockerfile.Scan
+      dockerfile: ./Dockerfile
       args:
         module: vms
     restart: always
@@ -90,6 +90,21 @@ services:
     environment:
       - CA_VMS_TICKET_SERVICE_HOST=http://ticket
     image: docker.io/vutrongquang/vms
+
+  scan:
+    container_name: scan 
+    hostname: scan
+    build:
+      context: .
+      dockerfile: ./Dockerfile.Scan
+      args:
+        module: scan
+    restart: always
+    ports:
+      - 6805:6805
+    user: root
+    env_file: ./apps/scan/.env
+    image: docker.io/vutrongquang/scan
 
 networks:
   default:
