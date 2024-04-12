@@ -16,7 +16,7 @@ export async function scanSyntax(params: {
 
     execSync(`hadolint ${file_path} --format json | tee ${file_path_result}`, {
         stdio: "inherit",
-        shell: "/bin/bash",
+        shell: "/bin/sh",
     });
 
     try {
