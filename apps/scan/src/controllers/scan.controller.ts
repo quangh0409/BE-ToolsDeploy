@@ -38,7 +38,7 @@ export async function scanImages(params: {
     const file_path_result = resolve(path, "../../", "file/trivy.json");
 
     execSync(
-        `trivy image ${params.image} --format json --no-fail true | tee ${file_path_result}`,
+        `trivy image ${params.image} --format json --scanners vuln | tee ${file_path_result}`,
         {
             stdio: "inherit",
             shell: "/bin/sh",
