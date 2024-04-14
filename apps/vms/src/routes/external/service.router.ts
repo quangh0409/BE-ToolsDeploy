@@ -5,6 +5,7 @@ import {
     createService,
     getServiceById,
     deleteService,
+    getImagesOfServiceById,
 } from "../../controllers/service.controller";
 
 export const router: Router = Router();
@@ -22,6 +23,18 @@ router.get("/vm/:vm", async (req: Request, _: Response, next: NextFunction) => {
     });
     next(result);
 });
+
+router.post(
+    "/images",
+    async (req: Request, _: Response, next: NextFunction) => {
+        const { service, env } = req.body;
+        const result = await getImagesOfServiceById({
+            service,
+            env,
+        });
+        next(result);
+    }
+);
 
 router.get(
     "/:service",

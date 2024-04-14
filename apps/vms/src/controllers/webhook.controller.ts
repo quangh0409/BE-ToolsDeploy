@@ -11,11 +11,8 @@ export async function webhookHandle(params: {
         const { id: github_id, login: github_user } =
             params.data.repository.owner;
 
-        const { name: repo } = params.data.repository;
+        const { name: repo, clone_url: source } = params.data.repository;
         const branch = params.data.ref.split("/")[2];
-        console.log("🚀 ~ branch:", branch);
-        // const { clone_url: source } = params.data.clone_url;
-        console.log("🚀 ~ source:", params.data.clone_url);
         const ticket = await findTicketByGithubId({ github_id: github_id });
 
         if (ticket && ticket.body) {
@@ -31,14 +28,21 @@ export async function webhookHandle(params: {
                 },
 
                 repo: repo,
-                // source: source,
+                source: source,
             });
             console.log("🚀 ~ service:", service);
-            const socket = await redis.get(user_id);
-            if (socket) {
-                SocketServer.getInstance()
-                    .io.to(socket)
-                    .emit("webhooks", user_id);
+            if (service) {
+                const socket = await redis.get(user_id);
+                console.log("🚀 ~ socket:", socket);
+                const env = service.environment.find(
+                    (e) => e.branch === branch
+                );
+
+                if (socket) {
+                    SocketServer.getInstance()
+                        .io
+                        .emit("webhooks", user_id, service.id, env!.name);
+                }
             }
             // SocketServer.getInstance()
             //     .getSocket()

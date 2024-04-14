@@ -145,6 +145,55 @@ export async function UpdateStatusServiceById(params: {
     return success.ok({ ...service, _id: undefined });
 }
 
+export async function getImagesOfServiceById(params: {
+    service: string;
+    env: string;
+}): Promise<ResultSuccess> {
+    const service = await Service.findOne({ id: params.service });
+    const ssh = new NodeSSH();
+
+    if (service) {
+        const env = service.environment.find((e) => e.name === params.env);
+
+        const vm = await Vms.findOne({
+            id: env!.vm,
+        });
+
+        await ssh.connect({
+            host: vm!.host,
+            username: vm!.user,
+            password: vm!.pass,
+        });
+
+        const log = await ssh.execCommand(`docker images --format json`);
+        const images_ = log.stdout.split("\n").map((item) => JSON.parse(item));
+
+        const imageRegex = /image:\s*docker.io\/(.*)/g;
+        let match: RegExpExecArray | null;
+        const images: string[] = [];
+
+        while (
+            (match = imageRegex.exec(env!.docker_compose[0].content)) !== null
+        ) {
+            images.push(match[1]);
+        }
+
+        let result = images_.filter((element) =>
+            images.includes(element.Repository)
+        );
+
+        return success.ok({ result });
+    }
+
+    throw new HttpError(
+        error.notFound({
+            param: "service",
+            value: params.service,
+            message: "service not exit",
+        })
+    );
+}
+
 export async function clone(
     socket: Socket,
     token: string,
