@@ -17,7 +17,7 @@ export async function scanSyntax(params: {
         fs.writeFileSync(file_path, params.content);
 
         execSync(
-            `hadolint  ${file_path} --format json --no-fail true | tee ${file_path_result}`,
+            `hadolint  ${file_path} --format json | tee ${file_path_result}`,
             {
                 stdio: "inherit",
                 shell: "/bin/sh",
