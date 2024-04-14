@@ -12,17 +12,17 @@ export async function scanSyntax(params: {
     const path = __dirname;
     const file_path = resolve(path, "../../", "file/config_file");
     const file_path_result = resolve(path, "../../", "file/hadolint.json");
-    fs.writeFileSync(file_path, params.content);
-
-    execSync(
-        `hadolint  ${file_path} --format json --no-fail true | tee ${file_path_result}`,
-        {
-            stdio: "inherit",
-            shell: "/bin/sh",
-        }
-    );
 
     try {
+        fs.writeFileSync(file_path, params.content);
+
+        execSync(
+            `hadolint  ${file_path} --format json --no-fail true | tee ${file_path_result}`,
+            {
+                stdio: "inherit",
+                shell: "/bin/sh",
+            }
+        );
         const content: Buffer = await readFileAsync(file_path_result);
         const jsonData = JSON.parse(content.toString());
         return success.ok(jsonData);
@@ -37,15 +37,14 @@ export async function scanImages(params: {
     const path = __dirname;
     const file_path_result = resolve(path, "../../", "file/trivy.json");
 
-    execSync(
-        `trivy image ${params.image} --format json --scanners vuln | tee ${file_path_result}`,
-        {
-            stdio: "inherit",
-            shell: "/bin/sh",
-        }
-    );
-
     try {
+        execSync(
+            `trivy image ${params.image} --format json --scanners vuln | tee ${file_path_result}`,
+            {
+                stdio: "inherit",
+                shell: "/bin/sh",
+            }
+        );
         const content: Buffer = await readFileAsync(file_path_result);
         const jsonData = JSON.parse(content.toString());
         return success.ok(jsonData);

@@ -214,6 +214,14 @@ export async function clone(
                     mess: undefined,
                     status: "IN_PROGRESS",
                 });
+
+                for (const docker_file of env!.docker_file) {
+                    const command = `cat > ${service.repo}/${docker_file.location}`;
+                    await ssh.execCommand(command, {
+                        stdin: docker_file.content,
+                    });
+                }
+
                 if (log.code === 0) {
                     log = await ssh.execCommand(
                         `cd ${service!.repo} && git checkout ${env!.branch}`
@@ -451,12 +459,14 @@ export async function clear(
                 socket.emit("logsStepClear", {
                     log: undefined,
                     title: "clear",
-                    sub_title: `docker stop $(docker ps -aq) || echo no container && docker rmi -f $(docker images -q) || echo no image && docker builder prune -f`,
+                    // sub_title: `docker stop $(docker ps -aq) || echo no container && docker rmi -f $(docker images -q) || echo no image && docker builder prune -f`,
+                    sub_title: `docker builder prune -f`,
+
                     mess: undefined,
                     status: "IN_PROGRESS",
                 });
                 log = await ssh.execCommand(
-                    `docker stop $(docker ps -aq) || echo no container && docker rmi -f $(docker images -q) || echo no image && docker builder prune -f`,
+                    `docker builder prune -f`,
 
                     {
                         onStdout(chunk) {
