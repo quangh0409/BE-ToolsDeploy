@@ -119,6 +119,32 @@ export async function getServiceById(params: {
     return success.ok(service);
 }
 
+export async function UpdateStatusServiceById(params: {
+    id: string;
+    status: string;
+    env: string;
+}) {
+    const service = await Service.findOne({ id: params.id });
+
+    if (!service) {
+        throw new HttpError(
+            error.notFound({
+                param: "id",
+                value: params.id,
+                message: "service not exit",
+            })
+        );
+    }
+
+    const idx = service.environment.findIndex((e) => e.name === params.env);
+
+    service.environment[idx].status = params.status;
+
+    await service.save();
+
+    return success.ok({ ...service, _id: undefined });
+}
+
 export async function clone(
     socket: Socket,
     token: string,
@@ -782,7 +808,7 @@ export async function scanImages(
                             log: JSON.parse(log.stdout),
                         });
                     } catch (error) {
-                        console.log("🚀 ~ error:", error)
+                        console.log("🚀 ~ error:", error);
                         socket.emit("logStepScanImage", {
                             log: log,
                             title: "scanImages",

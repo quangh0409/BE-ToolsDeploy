@@ -103,19 +103,37 @@ export async function getVmsByIds(params: {
         },
     ]);
 
-    vms.map((vm) => {
+    async function connectSSH(vm: {
+        host: any;
+        user: any;
+        pass: any;
+        id: any;
+    }) {
+        const ssh = new NodeSSH();
         try {
-            const ssh = new NodeSSH();
-            ssh.connect({
+            await ssh.connect({
                 host: vm.host,
                 username: vm.user,
                 password: vm.pass,
             });
-            connect.push(vm.id);
+            return vm.id; // Return vm.id if connection is successful
         } catch (error) {
-            disconnect.push(vm.id);
+            return null; // Return null if connection fails
+        } finally {
+            ssh.dispose(); // Close the SSH connection
         }
-    });
+    }
+
+    await Promise.all(
+        vms.map(async (vm) => {
+            const id = await connectSSH(vm);
+            if (id) {
+                connect.push(id);
+            } else {
+                disconnect.push(vm.id);
+            }
+        })
+    );
 
     const [con, dis] = await Promise.all([
         Vms.updateMany(
@@ -143,6 +161,7 @@ export async function getVmsByIds(params: {
             }
         ),
     ]);
+    console.log("🚀 ~ con, dis:", con, dis);
 
     const result = await Vms.aggregate([
         {

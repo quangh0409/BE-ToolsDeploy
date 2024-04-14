@@ -20,3 +20,21 @@ export async function findTicketByUserId(params: {
         }
     }
 }
+
+export async function findTicketByGithubId(params: {
+    github_id: string;
+}): Promise<{ body?: ITicket; status: number }> {
+    const url = `${configs.services.ticket.getUrl()}/by-github-id?github_id=${
+        params.github_id
+    }`;
+    try {
+        const res = await axios.get<ITicket>(`${url}`);
+        return { body: res.data, status: res.status };
+    } catch (e) {
+        if (axios.isAxiosError(e) && e.response?.status) {
+            return { status: e.response?.status };
+        } else {
+            throw new HttpError(error.service(url));
+        }
+    }
+}

@@ -7,8 +7,17 @@ import {
     sshInstallDocker,
     sshInstallHadolint,
     sshInstallTrivy,
+    verifyToken,
 } from "../../controllers/vms.controller";
-import { build, clear, clone, deploy, scanDockerfile, scanImages } from "../../controllers/service.controller";
+import {
+    build,
+    clear,
+    clone,
+    deploy,
+    scanDockerfile,
+    scanImages,
+} from "../../controllers/service.controller";
+import { redis } from "../../database";
 
 export class SocketServer {
     static instance: SocketServer;
@@ -40,7 +49,15 @@ export class SocketServer {
         }
     }
     onConnection = (socket: Socket) => {
-        logger.info(`User '${socket.id}' connected!`);
+        logger.info(`socket '${socket.id}' connected!`);
+
+        socket.on("register", async (token) => {
+            if (redis.status !== "ready") {
+                await redis.connect();
+            }
+            const payload = await verifyToken(token);
+            await redis.set(payload.id, socket.id);
+        });
 
         socket.on("CheckConnectVM", async (token, vm_id) => {
             await sshCheckConnect(socket, token, vm_id);

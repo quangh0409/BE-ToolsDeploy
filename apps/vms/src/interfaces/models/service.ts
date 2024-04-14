@@ -10,6 +10,7 @@ export interface IService {
         name: string;
         vm: string;
         branch: string;
+        status?: string;
         docker_file: [
             {
                 location: string;
