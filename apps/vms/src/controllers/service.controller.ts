@@ -215,13 +215,6 @@ export async function clone(
                     status: "IN_PROGRESS",
                 });
 
-                for (const docker_file of env!.docker_file) {
-                    const command = `cat > ${service.repo}/${docker_file.location}`;
-                    await ssh.execCommand(command, {
-                        stdin: docker_file.content,
-                    });
-                }
-
                 if (log.code === 0) {
                     log = await ssh.execCommand(
                         `cd ${service!.repo} && git checkout ${env!.branch}`
@@ -236,6 +229,14 @@ export async function clone(
                         status: "IN_PROGRESS",
                     });
                 }
+
+                for (const docker_file of env!.docker_file) {
+                    const command = `cat > ${service.repo}/${docker_file.location}`;
+                    await ssh.execCommand(command, {
+                        stdin: docker_file.content,
+                    });
+                }
+
                 if (log.code === 0) {
                     socket.emit("logStepClone", {
                         log: log,
