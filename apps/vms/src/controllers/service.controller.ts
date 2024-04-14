@@ -448,16 +448,30 @@ export async function clear(
                 }
 
                 let log;
-                log = await ssh.execCommand(
-                    `docker stop $(docker ps -aq) || echo no container && docker rmi -f $(docker images -q) || echo no image && docker builder prune -f`
-                );
                 socket.emit("logsStepClear", {
-                    log: log,
+                    log: undefined,
                     title: "clear",
                     sub_title: `docker stop $(docker ps -aq) || echo no container && docker rmi -f $(docker images -q) || echo no image && docker builder prune -f`,
                     mess: undefined,
                     status: "IN_PROGRESS",
                 });
+                log = await ssh.execCommand(
+                    `docker stop $(docker ps -aq) || echo no container && docker rmi -f $(docker images -q) || echo no image && docker builder prune -f`,
+
+                    {
+                        onStdout(chunk) {
+                            // Gửi log mới đến client
+                            // console.log(chunk.toString("utf8"));
+                            chunk
+                                .toString("utf8")
+                                .split("\n")
+                                .map((l) => {
+                                    socket.emit("logRealTimeClear", l);
+                                });
+                        },
+                    }
+                );
+
                 if (log.code === 0) {
                     socket.emit("logsStepClear", {
                         log: log,
@@ -577,10 +591,12 @@ export async function build(
                         onStdout(chunk) {
                             // Gửi log mới đến client
                             // console.log(chunk.toString("utf8"));
-                            socket.emit(
-                                "logRealTimeBuild",
-                                chunk.toString("utf8")
-                            );
+                            chunk
+                                .toString("utf8")
+                                .split("\n")
+                                .map((l) => {
+                                    socket.emit("logRealTimeBuild", l);
+                                });
                         },
                     }
                 );
@@ -613,85 +629,174 @@ export async function build(
     return false;
 }
 
-// export async function scanImages(
-//     socket: Socket,
-//     token: string,
-//     vm_id: string,
-//     service_id: string,
-//     env_name: string
-// ) {
-//     const payload = await verifyToken(token);
-//     const ticket = await findTicketByUserId({ user_id: payload.id });
+export async function scanImages(
+    socket: Socket,
+    token: string,
+    vm_id: string,
+    service_id: string,
+    env_name: string
+): Promise<Boolean> {
+    const payload = await verifyToken(token);
+    const ticket = await findTicketByUserId({ user_id: payload.id });
 
-//     if (ticket.body && ticket.status === 200) {
-//         if (ticket.body.vms_ids) {
-//             const check = ticket.body.vms_ids.find((id) => {
-//                 return vm_id === id;
-//             });
-//             if (check) {
-//                 const ssh = new NodeSSH();
+    if (ticket.body && ticket.status === 200) {
+        if (ticket.body.vms_ids) {
+            const check = ticket.body.vms_ids.find((id) => {
+                return vm_id === id;
+            });
+            if (check) {
+                const ssh = new NodeSSH();
 
-//                 const vm = await Vms.findOne({
-//                     id: vm_id,
-//                 });
+                const vm = await Vms.findOne({
+                    id: vm_id,
+                });
 
-//                 if (!vm) {
-//                     socket.emit("logStepScanImage", {
-//                         mess: "host not exited ",
-//                         status: "ERROR",
-//                     });
-//                 }
+                if (!vm) {
+                    socket.emit("logStepScanImage", {
+                        log: undefined,
+                        title: "scanImages",
+                        sub_title: undefined,
+                        mess: "HOST NOT EXITED",
+                        status: "ERROR",
+                    });
+                    return false;
+                }
 
-//                 const service = await Service.findOne({ id: service_id });
+                const service = await Service.findOne({ id: service_id });
 
-//                 if (!service) {
-//                     socket.emit("logStepScanImage", {
-//                         mess: "host not exited ",
-//                         status: "ERROR",
-//                     });
-//                 }
+                if (!service) {
+                    socket.emit("logStepScanImage", {
+                        log: undefined,
+                        title: "scanImages",
+                        sub_title: undefined,
+                        mess: "SERVICE NOT EXITED",
+                        status: "ERROR",
+                    });
+                    return false;
+                }
 
-//                 const repo = service!.repo;
+                const repo = service!.repo;
 
-//                 const env = service!.environment.find((e) => {
-//                     return e.name === env_name;
-//                 });
-//                 try {
-//                     await ssh.connect({
-//                         host: vm!.host,
-//                         username: vm!.user,
-//                         password: vm!.pass,
-//                     });
+                const env = service!.environment.find((e) => {
+                    return e.name === env_name;
+                });
+                try {
+                    await ssh.connect({
+                        host: vm!.host,
+                        username: vm!.user,
+                        password: vm!.pass,
+                    });
 
-//                     socket.emit("logStepScanImage", {
-//                         mess: "conecct sccessfull ",
-//                         status: "ok",
-//                     });
-//                 } catch (error: any) {
-//                     socket.emit("logStepScanImage", {
-//                         mess: error?.level,
-//                         status: "ERROR",
-//                     });
-//                 }
+                    socket.emit("logStepScanImage", {
+                        log: undefined,
+                        title: "scanImages",
+                        sub_title: "ssh connect successfully",
+                        mess: "CONNECT SUCCESSFULLY",
+                        status: "START",
+                    });
+                } catch (err: any) {
+                    socket.emit("logStepScanImage", {
+                        log: undefined,
+                        title: "scanImages",
+                        sub_title: "ssh connect failed",
+                        mess: err?.level,
+                        status: "ERROR",
+                    });
+                    return false;
+                }
 
-//                 let log;
+                let log;
 
-//                 log = await ssh.execCommand(
-//                     `cd ${
-//                         service!.repo
-//                     } && docker compose -f ./docker-compose.yaml up --build -d`
-//                 );
-//                 socket.emit("logStepScanImage", {
-//                     log: log,
-//                     mess: `cd ${
-//                         service!.repo
-//                     } && docker compose -f ./docker-compose.yaml up --build -d`,
-//                     status: "ok",
-//                 });
-//             }
-//         }
-//     }
-// }
+                // log = await ssh.execCommand(
+                //     `docker images --format json`
+                //     //  {
+                //     //     onStdout(chunk) {
+                //     //         // Gửi log mới đến client
+                //     //         // console.log(chunk.toString("utf8"));
+                //     //         socket.emit(
+                //     //             "logRealTimeScanImages",
+                //     //             chunk.toString("utf8")
+                //     //         );
+                //     //     },
+                //     // }
+                // );
+                // const images = log.stdout
+                //     .split("\n")
+                //     .map((item) => JSON.parse(item));
+
+                // Sử dụng biểu thức chính quy để tìm tất cả các tên image và loại bỏ "docker.io/"
+                const imageRegex = /image:\s*docker.io\/(.*)/g;
+                let match: RegExpExecArray | null;
+                const images: string[] = [];
+
+                while (
+                    (match = imageRegex.exec(
+                        env!.docker_compose[0].content
+                    )) !== null
+                ) {
+                    images.push(match[1]);
+                }
+
+                // In ra danh sách các images đã loại bỏ "docker.io/"
+                for (const image of images) {
+                    try {
+                        socket.emit("logStepScanImage", {
+                            log: log,
+                            title: "scanImages",
+                            sub_title: `trivy image ${image}`,
+                            mess: undefined,
+                            status: "IN_PROGRESS",
+                        });
+
+                        log = await ssh.execCommand(
+                            `trivy image ${image}`
+                            // {
+                            //     onStdout(chunk) {
+                            //         // Gửi log mới đến client
+                            //         // console.log(chunk.toString("utf8"));
+                            //         chunk
+                            //             .toString("utf8")
+                            //             .split("\n")
+                            //             .map((l) => {
+                            //                 socket.emit("logRealTimeScanImages", {
+                            //                     sub_title: `trivy image ${image}`,
+                            //                     log: l,
+                            //                 });
+                            //             });
+                            //     },
+                            // }
+                        );
+                        socket.emit("logRealTimeScanImages", {
+                            sub_title: `trivy image ${image}`,
+                            log: log.stdout,
+                        });
+                    } catch (error) {
+                        socket.emit("logStepScanImage", {
+                            log: log,
+                            title: "scanImages",
+                            sub_title: undefined,
+                            mess: "ERROR",
+                            status: "ERROR",
+                        });
+                        return false;
+                    }
+                }
+
+                socket.emit("logStepScanImage", {
+                    log: log,
+                    title: "scanImages",
+                    sub_title: undefined,
+                    mess: "SUCCESSFULLY",
+                    status: "SUCCESSFULLY",
+                });
+                return true;
+            }
+            return false;
+        }
+        return false;
+    }
+    return false;
+}
 
 export async function deploy(
     socket: Socket,
@@ -787,10 +892,12 @@ export async function deploy(
                         onStdout(chunk) {
                             // Gửi log mới đến client
                             // console.log(chunk.toString("utf8"));
-                            socket.emit(
-                                "logRealTimeDeploy",
-                                chunk.toString("utf8")
-                            );
+                            chunk
+                                .toString("utf8")
+                                .split("\n")
+                                .map((l) => {
+                                    socket.emit("logRealTimeDeploy", l);
+                                });
                         },
                     }
                 );

@@ -8,7 +8,7 @@ import {
     sshInstallHadolint,
     sshInstallTrivy,
 } from "../../controllers/vms.controller";
-import { build, clear, clone, deploy, scanDockerfile } from "../../controllers/service.controller";
+import { build, clear, clone, deploy, scanDockerfile, scanImages } from "../../controllers/service.controller";
 
 export class SocketServer {
     static instance: SocketServer;
@@ -72,6 +72,10 @@ export class SocketServer {
 
         socket.on("build", async (token, vm_id, service_id, env_name) => {
             await build(socket, token, vm_id, service_id, env_name);
+        });
+
+        socket.on("scanImages", async (token, vm_id, service_id, env_name) => {
+            await scanImages(socket, token, vm_id, service_id, env_name);
         });
 
         socket.on("deploy", async (token, vm_id, service_id, env_name) => {
