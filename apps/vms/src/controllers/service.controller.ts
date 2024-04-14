@@ -749,7 +749,7 @@ export async function scanImages(
                         });
 
                         log = await ssh.execCommand(
-                            `trivy image ${image}`
+                            `trivy image ${image} --format json --scanners vuln`
                             // {
                             //     onStdout(chunk) {
                             //         // Gửi log mới đến client
