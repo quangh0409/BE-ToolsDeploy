@@ -194,6 +194,43 @@ export async function getImagesOfServiceById(params: {
     );
 }
 
+export async function scanImageOfService(params: {
+    service: string;
+    env: string;
+    image: string;
+}): Promise<ResultSuccess> {
+    const service = await Service.findOne({ id: params.service });
+    const ssh = new NodeSSH();
+
+    if (service) {
+        const env = service.environment.find((e) => e.name === params.env);
+
+        const vm = await Vms.findOne({
+            id: env!.vm,
+        });
+
+        await ssh.connect({
+            host: vm!.host,
+            username: vm!.user,
+            password: vm!.pass,
+        });
+
+        const log = await ssh.execCommand(
+            `trivy image ${params.image} --format json --scanners vuln`
+        );
+
+        return success.ok(JSON.parse(log.stdout));
+    }
+
+    throw new HttpError(
+        error.notFound({
+            param: "service",
+            value: params.service,
+            message: "service not exit",
+        })
+    );
+}
+
 export async function clone(
     socket: Socket,
     token: string,

@@ -6,6 +6,7 @@ import {
     getServiceById,
     deleteService,
     getImagesOfServiceById,
+    scanImageOfService,
 } from "../../controllers/service.controller";
 
 export const router: Router = Router();
@@ -35,6 +36,18 @@ router.post(
         next(result);
     }
 );
+
+router.get("/images", async (req: Request, _: Response, next: NextFunction) => {
+    const service = req.query.service as string;
+    const env = req.query.env as string;
+    const image  = req.query.image as string;
+    const result = await scanImageOfService({
+        service ,
+        env,
+        image,
+    });
+    next(result);
+});
 
 router.get(
     "/:service",
