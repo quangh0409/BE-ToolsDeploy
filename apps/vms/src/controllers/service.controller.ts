@@ -777,14 +777,12 @@ export async function scanImages(
                             //     },
                             // }
                         );
-                        log.stdout.split("\n").map((item) => JSON.parse(item));
                         socket.emit("logRealTimeScanImages", {
                             sub_title: `trivy image ${image}`,
-                            log: log.stdout
-                                .split("\n")
-                                .map((item) => JSON.parse(item)),
+                            log: JSON.parse(log.stdout),
                         });
                     } catch (error) {
+                        console.log("🚀 ~ error:", error)
                         socket.emit("logStepScanImage", {
                             log: log,
                             title: "scanImages",
