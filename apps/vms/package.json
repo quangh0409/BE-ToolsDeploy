@@ -30,6 +30,7 @@
         "logger": "workspace:*",
         "mongoose": "^7.0.1",
         "mquery": "workspace:*",
+        "newman": "^6.1.2",
         "node-ssh": "^13.1.0",
         "passport": "^0.7.0",
         "passport-github": "^1.1.0",
