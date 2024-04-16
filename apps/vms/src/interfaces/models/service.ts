@@ -25,5 +25,9 @@ export interface IService {
                 name: string;
             }
         ];
+        postman: {
+            name: string;
+            content: string;
+        };
     }[];
 }

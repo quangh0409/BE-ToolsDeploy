@@ -31,9 +31,9 @@ const serviceSchema = new mongoose.Schema(
             type: String,
             require: true,
         },
-        environment: 
-            {
-                type: [{
+        environment: {
+            type: [
+                {
                     name: {
                         type: String,
                         required: true,
@@ -47,46 +47,64 @@ const serviceSchema = new mongoose.Schema(
                         require: true,
                     },
                     docker_file: {
-                        type: [{
-                            location: {
-                                type: String,
-                                require: true,
+                        type: [
+                            {
+                                location: {
+                                    type: String,
+                                    require: true,
+                                },
+                                content: {
+                                    type: String,
+                                    require: true,
+                                },
+                                name: {
+                                    type: String,
+                                    require: true,
+                                },
                             },
-                            content: {
-                                type: String,
-                                require: true,
-                            },
-                            name: {
-                                type: String,
-                                require: true,
-                            },
-                        }],
+                        ],
                         require: true,
                         _id: false,
                     },
                     docker_compose: {
-                        type: [{
-                            location: {
-                                type: String,
-                                require: true,
+                        type: [
+                            {
+                                location: {
+                                    type: String,
+                                    require: true,
+                                },
+                                content: {
+                                    type: String,
+                                    require: true,
+                                },
+                                name: {
+                                    type: String,
+                                    require: true,
+                                },
                             },
-                            content: {
-                                type: String,
-                                require: true,
-                            },
-                            name: {
-                                type: String,
-                                require: true,
-                            },
-                        }],
+                        ],
                         require: true,
                         _id: false,
                     },
-                }],
-                required: true,
-                _id: false,
-            },
-        
+                    postman: {
+                        type: {
+                            name: {
+                                type: String,
+                                required: true,
+                            },
+                            content: {
+                                type: String,
+                                required: true,
+                            },
+                        },
+                        required: false,
+                        _id: false,
+                    },
+                },
+            ],
+            required: true,
+            _id: false,
+        },
     },
     {
         versionKey: false,
