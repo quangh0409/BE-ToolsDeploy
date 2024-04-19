@@ -8,6 +8,8 @@ import {
     getImagesOfServiceById,
     scanImageOfService,
 } from "../../controllers/service.controller";
+import { IRecordReqBodyCreate } from "../../interfaces/request/record.body";
+import { createRecord } from "../../controllers/record.controller";
 
 export const router: Router = Router();
 
@@ -37,12 +39,27 @@ router.post(
     }
 );
 
+router.post(
+    "/:service/env/:env/record",
+    async (req: Request, _: Response, next: NextFunction) => {
+        const service = req.params.service as string;
+        const env = req.params.env as string;
+        const body = req.body as IRecordReqBodyCreate;
+        const result = await createRecord({
+            service,
+            env,
+            ...body,
+        });
+        next(result);
+    }
+);
+
 router.get("/images", async (req: Request, _: Response, next: NextFunction) => {
     const service = req.query.service as string;
     const env = req.query.env as string;
-    const image  = req.query.image as string;
+    const image = req.query.image as string;
     const result = await scanImageOfService({
-        service ,
+        service,
         env,
         image,
     });

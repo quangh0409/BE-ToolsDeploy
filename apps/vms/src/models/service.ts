@@ -100,6 +100,10 @@ const serviceSchema = new mongoose.Schema(
                         required: false,
                         _id: false,
                     },
+                    record: {
+                        type: [String],
+                        required: false,
+                    },
                 },
             ],
             required: true,

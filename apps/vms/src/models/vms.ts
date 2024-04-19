@@ -35,6 +35,34 @@ const vmsSchema = new mongoose.Schema(
                 require: false,
             },
         ],
+        operating_system: {
+            type: String,
+            require: false,
+        },
+        kernel: {
+            type: String,
+            require: false,
+        },
+        architecture: {
+            type: String,
+            require: false,
+        },
+        home_url: {
+            type: String,
+            require: false,
+        },
+        support_url: {
+            type: String,
+            require: false,
+        },
+        bug_report_url: {
+            type: String,
+            require: false,
+        },
+        privacy_policy_url: {
+            type: String,
+            require: false,
+        },
     },
     {
         versionKey: false,

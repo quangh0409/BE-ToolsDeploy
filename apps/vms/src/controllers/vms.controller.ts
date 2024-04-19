@@ -47,6 +47,80 @@ export async function createVms(params: {
             username: params.user,
             password: params.pass,
         });
+
+        let log;
+        log = await ssh.execCommand("hostnamectl");
+        let operating_system: string = "";
+        let kernel: string = "";
+        let architecture: string = "";
+        log.stdout.split("\n").map((t) => {
+            const ob = t.split(": ");
+            if ("Operating System" === ob[0].trim()) {
+                operating_system = ob[1];
+            }
+            if ("Kernel" === ob[0].trim()) {
+                kernel = ob[1];
+            }
+            if ("Architecture" === ob[0].trim()) {
+                architecture = ob[1];
+            }
+        });
+        log = await ssh.execCommand("uname -o");
+        operating_system += ` ${log.stdout}`;
+        log = await ssh.execCommand("cat /etc/os-release");
+        let home_url: string = "";
+        let support_url: string = "";
+        let bug_report_url: string = "";
+        let privacy_policy_url: string = "";
+        log.stdout.split("\n").map((t) => {
+            const ob = t.split("=");
+            if ("HOME_URL" === ob[0]) {
+                home_url = `${ob[1].replace(/"/g, "")}`;
+            } else if ("SUPPORT_URL" === ob[0]) {
+                support_url = `${ob[1].replace(/"/g, "")}`;
+            } else if ("BUG_REPORT_URL" === ob[0]) {
+                bug_report_url = `${ob[1].replace(/"/g, "")}`;
+            } else if ("PRIVACY_POLICY_URL" === ob[0]) {
+                privacy_policy_url = `${ob[1].replace(/"/g, "")}`;
+            }
+        });
+        log = await ssh.execCommand("landscape-sysinfo");
+        let lines = log.stdout.split("\n");
+        let obj: { [key: string]: string } = {};
+        lines.forEach((line) => {
+            let parts = line.split(/\s{2,}/);
+            console.log("🚀 ~ lines.forEach ~ parts:", parts)
+            parts.forEach((part) => {
+                let [key, value] = part.split(": ");
+                if (key && value) {
+                    obj[key] = value;
+                }
+            });
+        });
+
+        console.log(obj);
+        /**
+         *  hostnamectl
+                Operating System: Ubuntu 22.04.4 LTS
+                Kernel: Linux 6.5.0-1018-azure
+                Architecture: x86-64
+            uname -o operating-system 
+                GNU/Linux
+             cat /etc/os-release
+                HOME_URL="https://www.ubuntu.com/"
+                SUPPORT_URL="https://help.ubuntu.com/"
+                BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/"
+                PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"
+
+            landscape-sysinfo
+                  System load:  0.0               Processes:                106
+                    Usage of /:   5.4% of 61.84GB   Users logged in:          1
+                    Memory usage: 39%               IPv4 address for docker0: 172.17.0.1
+                    Swap usage:   0%                IPv4 address for eth0:    10.1.1.4
+
+
+         */
+
         ssh.dispose();
         const result = new Vms({
             id: v1(),
@@ -55,8 +129,15 @@ export async function createVms(params: {
             pass: params.pass,
             status: EStatus.CONNECT,
             last_connect: new Date(),
+            operating_system: operating_system,
+            kernel: kernel,
+            architecture: architecture,
+            home_url: home_url,
+            support_url: support_url,
+            bug_report_url: bug_report_url,
+            privacy_policy_url: privacy_policy_url,
         });
-        await result.save();
+        // await result.save();
 
         return success.ok({
             ...result.toJSON(),
@@ -72,7 +153,7 @@ export async function createVms(params: {
             status: EStatus.DISCONNECT,
             last_connect: new Date(),
         });
-        await result.save();
+        // await result.save();
 
         throw new HttpError(
             error.notFound({

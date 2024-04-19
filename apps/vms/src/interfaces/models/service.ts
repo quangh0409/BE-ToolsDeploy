@@ -29,5 +29,6 @@ export interface IService {
             name: string;
             content: string;
         };
+        record: string[]
     }[];
 }
