@@ -4,6 +4,8 @@ import fs from "fs";
 import { HttpStatus } from "app";
 import {
     createVms,
+    deleteVmsById,
+    getVmsById,
     getVmsByIds,
 } from "../../controllers/vms.controller";
 
@@ -17,6 +19,14 @@ router.get(
         res.download(file_name, "id_rsa.pub");
     }
 );
+
+router.post("/:vms", async (req: Request, _: Response, next: NextFunction) => {
+    const vms = req.params.vms;
+    const result = await getVmsById({
+        vms,
+    });
+    next(result);
+});
 
 router.post("/ids", async (req: Request, _: Response, next: NextFunction) => {
     const ids = req.body.ids;
@@ -32,4 +42,11 @@ router.post("/", async (req: Request, res: Response, next: NextFunction) => {
     next(result);
 });
 
-
+router.delete(
+    "/:vms",
+    async (req: Request, res: Response, next: NextFunction) => {
+        const vms = req.params.vms;
+        const result = await deleteVmsById({ vms });
+        next(result);
+    }
+);

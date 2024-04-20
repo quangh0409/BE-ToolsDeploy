@@ -13,6 +13,16 @@ export interface IVms {
     support_url: string;
     bug_report_url: string;
     privacy_policy_url: string;
+    cpus: string;
+    cores: string;
+    sockets: string;
+    ram: string;
+    thread: string;
+    set_up: {
+        docker: string;
+        hadolint: string;
+        trivy: string;
+    };
 }
 export enum EStatus {
     CONNECT = "CONNECTED",

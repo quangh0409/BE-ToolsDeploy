@@ -13,7 +13,7 @@ export interface IRecord {
 export interface IOceanContent {
     title: string;
     status: EStatus;
-    time: string;
+    time?: string;
 }
 
 export interface IOcean {
@@ -28,15 +28,15 @@ export interface ILogContent {
     log?: ILogCommand;
     title: string;
     sub_title: string;
-    mess: string;
+    mess?: string;
     status: EStatus;
 }
 
 export interface ILogCommand {
-    stdout: string;
-    stderr: string;
-    code: number | null;
-    signal: string | null;
+    stdout?: string;
+    stderr?: string;
+    code?: number | null;
+    signal?: string | null;
 }
 
 export enum EStatus {

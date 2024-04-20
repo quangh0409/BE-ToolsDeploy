@@ -85,21 +85,82 @@ export async function createVms(params: {
             }
         });
         log = await ssh.execCommand("landscape-sysinfo");
-        let lines = log.stdout.split("\n");
         let obj: { [key: string]: string } = {};
-        lines.forEach((line) => {
-            let parts = line.split(/\s{2,}/);
-            console.log("🚀 ~ lines.forEach ~ parts:", parts)
-            parts.forEach((part) => {
-                let [key, value] = part.split(": ");
-                if (key && value) {
-                    obj[key] = value;
-                }
-            });
-        });
+        const regex = /([\w\s\/]+):\s*([^\n]+?)(?=\s{2,}[\w\s\/]+:|$)/g;
+        let match;
 
-        console.log(obj);
+        while ((match = regex.exec(log.stdout)) !== null) {
+            let key = match[1].trim().replace(/\s+/g, " "); // Normalize whitespace in keys
+            let value = match[2].trim();
+            // Handle cases where multiple entries might be on the same line
+            if (value.includes("   ")) {
+                let parts = value.split("   ").map((part) => part.trim());
+                let lastKey = key;
+                parts.forEach((part, index) => {
+                    if (index === 0) {
+                        obj[lastKey] = part;
+                    } else {
+                        let newSplit = part.split(": ");
+                        lastKey = newSplit[0].trim().replace(/\s+/g, " ");
+                        obj[lastKey] = newSplit[1]?.trim();
+                    }
+                });
+            } else {
+                obj[key] = value;
+            }
+        }
+        log = await ssh.execCommand(`lscpu | grep '^CPU(s):'`);
+        const cpus = log.stdout.split(/\s{2,}/g)[1];
+        log = await ssh.execCommand(`lscpu | grep 'Socket(s)'`);
+        const sockets = log.stdout.split(/\s{2,}/g)[1];
+        log = await ssh.execCommand(`lscpu | grep 'Core(s) per socket'`);
+        const cores = `${
+            Number.parseInt(log.stdout.split(/\s{2,}/g)[1]) *
+            Number.parseInt(sockets)
+        }`;
+        log = await ssh.execCommand(`lscpu | grep 'Thread(s) per core'`);
+        const thread = `${
+            Number.parseInt(log.stdout.split(/\s{2,}/g)[1]) *
+            Number.parseInt(cores)
+        }`;
+        log = await ssh.execCommand(`free --giga | awk '/Mem/{print $2}'`);
+        let ram;
+        if (log.stdout === "0") {
+            log = await ssh.execCommand(`free -m | awk '/Mem/{print $2}'`);
+            ram = `${log.stdout}MB`;
+        } else {
+            ram = `${log.stdout}GB`;
+        }
+        const set_up: {
+            docker: string;
+            hadolint: string;
+            trivy: string;
+        } = {
+            docker: "",
+            hadolint: "",
+            trivy: "",
+        };
+        log = await ssh.execCommand(`hadolint --version`);
+        if (log.code === 0) {
+            set_up.hadolint = log.stdout;
+        }
+        log = await ssh.execCommand(`trivy -v`);
+        if (log.code === 0) {
+            set_up.trivy = log.stdout.split("\n")[0];
+        }
+        log = await ssh.execCommand(`docker --version`);
+        if (log.code === 0) {
+            set_up.docker = log.stdout;
+        }
+
         /**
+         * lscpu 
+         *  CPU(s):                             2
+            On-line CPU(s) list:                0,1
+            Thread(s) per core:                 2
+            Core(s) per socket:                 1
+            Socket(s):                          1
+
          *  hostnamectl
                 Operating System: Ubuntu 22.04.4 LTS
                 Kernel: Linux 6.5.0-1018-azure
@@ -117,8 +178,6 @@ export async function createVms(params: {
                     Usage of /:   5.4% of 61.84GB   Users logged in:          1
                     Memory usage: 39%               IPv4 address for docker0: 172.17.0.1
                     Swap usage:   0%                IPv4 address for eth0:    10.1.1.4
-
-
          */
 
         ssh.dispose();
@@ -136,13 +195,20 @@ export async function createVms(params: {
             support_url: support_url,
             bug_report_url: bug_report_url,
             privacy_policy_url: privacy_policy_url,
+            cpus: cpus,
+            cores: cores,
+            sockets: sockets,
+            ram: ram,
+            thread: thread,
+            set_up: set_up,
         });
-        // await result.save();
+        await result.save();
 
         return success.ok({
             ...result.toJSON(),
             pass: undefined,
             _id: undefined,
+            landscape_sysinfo: obj,
         });
     } catch (err) {
         const result = new Vms({
@@ -153,7 +219,7 @@ export async function createVms(params: {
             status: EStatus.DISCONNECT,
             last_connect: new Date(),
         });
-        // await result.save();
+        await result.save();
 
         throw new HttpError(
             error.notFound({
@@ -161,6 +227,85 @@ export async function createVms(params: {
             })
         );
     }
+}
+
+export async function getSysinfoOfVms(params: {
+    vms: string;
+}): Promise<ResultSuccess> {
+    const check = await Vms.findOne({ id: params.vms });
+    const err: ResultError = {
+        status: HttpStatus.BAD_REQUEST,
+        errors: [
+            {
+                location: "params",
+                value: params.vms,
+                message: "Vms not exit",
+            },
+        ],
+    };
+    if (!check) {
+        throw new HttpError(err);
+    }
+    const ssh = new NodeSSH();
+
+    await ssh.connect({
+        host: check.host,
+        username: check.user,
+        password: check.pass,
+    });
+
+    let log;
+    log = await ssh.execCommand("landscape-sysinfo");
+    let obj: { [key: string]: string } = {};
+    const regex = /([\w\s\/]+):\s*([^\n]+?)(?=\s{2,}[\w\s\/]+:|$)/g;
+    let match;
+
+    while ((match = regex.exec(log.stdout)) !== null) {
+        let key = match[1].trim().replace(/\s+/g, " "); // Normalize whitespace in keys
+        let value = match[2].trim();
+        // Handle cases where multiple entries might be on the same line
+        if (value.includes("   ")) {
+            let parts = value.split("   ").map((part) => part.trim());
+            let lastKey = key;
+            parts.forEach((part, index) => {
+                if (index === 0) {
+                    obj[lastKey] = part;
+                } else {
+                    let newSplit = part.split(": ");
+                    lastKey = newSplit[0].trim().replace(/\s+/g, " ");
+                    obj[lastKey] = newSplit[1]?.trim();
+                }
+            });
+        } else {
+            obj[key] = value;
+        }
+    }
+
+    return success.ok(obj);
+}
+
+export async function getVmsById(params: {
+    vms: string;
+}): Promise<ResultSuccess> {
+    const check = await Vms.findOne({ id: params.vms });
+    const err: ResultError = {
+        status: HttpStatus.BAD_REQUEST,
+        errors: [
+            {
+                location: "params",
+                value: params.vms,
+                message: "Vms not exit",
+            },
+        ],
+    };
+    if (!check) {
+        throw new HttpError(err);
+    }
+
+    return success.ok({
+        ...check.toJSON(),
+        _id: undefined,
+    });
 }
 
 export async function getVmsByIds(params: {
@@ -242,7 +387,6 @@ export async function getVmsByIds(params: {
             }
         ),
     ]);
-    console.log("🚀 ~ con, dis:", con, dis);
 
     const result = await Vms.aggregate([
         {
@@ -299,6 +443,29 @@ export async function updateVms(params: {
     }
 
     return success.ok(vm);
+}
+
+export async function deleteVmsById(params: {
+    vms: string;
+}): Promise<ResultSuccess> {
+    const check = await Vms.findOne({ id: params.vms });
+    const err: ResultError = {
+        status: HttpStatus.BAD_REQUEST,
+        errors: [
+            {
+                location: "params",
+                value: params.vms,
+                message: "Vms not exit",
+            },
+        ],
+    };
+    if (!check) {
+        throw new HttpError(err);
+    }
+
+    const result = await Vms.deleteOne({ id: params.vms });
+
+    return success.ok({ message: "deleted successfully" });
 }
 
 export async function sshInstallDocker(

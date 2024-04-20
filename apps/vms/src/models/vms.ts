@@ -63,6 +63,44 @@ const vmsSchema = new mongoose.Schema(
             type: String,
             require: false,
         },
+        cpus: {
+            type: String,
+            require: false,
+        },
+        cores: {
+            type: String,
+            require: false,
+        },
+        sockets: {
+            type: String,
+            require: false,
+        },
+        ram: {
+            type: String,
+            require: false,
+        },
+        thread: {
+            type: String,
+            require: false,
+        },
+        set_up: {
+            type: {
+                docker: {
+                    type: String,
+                    require: false,
+                },
+                hadolint: {
+                    type: String,
+                    require: false,
+                },
+                trivy: {
+                    type: String,
+                    require: false,
+                },
+            },
+            _id: false,
+            require: false,
+        },
     },
     {
         versionKey: false,

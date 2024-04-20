@@ -15,6 +15,9 @@ import {
 } from "app";
 import Service from "../models/service";
 import { v1 } from "uuid";
+import Record from "../models/record";
+import { EStatus, ILogCommand } from "../interfaces/models";
+import { time } from "console";
 
 export async function createService(
     params: IServiceBody
@@ -1050,6 +1053,200 @@ export async function deploy(
             return false;
         }
         return false;
+    }
+    return false;
+}
+
+export async function planCiCd(
+    socket: Socket,
+    token: string,
+    vm_id: string,
+    service_id: string,
+    env_name: string
+): Promise<Boolean> {
+    const payload = await verifyToken(token);
+    const ticket = await findTicketByUserId({ user_id: payload.id });
+
+    const record = new Record({});
+    if (ticket.body && ticket.status === 200) {
+        if (ticket.body.vms_ids) {
+            const check = ticket.body.vms_ids.find((id) => {
+                return vm_id === id;
+            });
+            if (check) {
+                const ssh = new NodeSSH();
+
+                const vm = await Vms.findOne({
+                    id: vm_id,
+                });
+
+                if (!vm) {
+                    socket.emit("planCiCd", {
+                        log: undefined,
+                        title: "clone",
+                        sub_title: undefined,
+                        mess: "HOST NOT EXITED",
+                        status: "ERROR",
+                    });
+                    return false;
+                }
+
+                // TODO xu ly service de laays tham soos
+                const service = await Service.findOne({ id: service_id });
+
+                if (!service) {
+                    socket.emit("planCiCd", {
+                        log: undefined,
+                        title: "clone",
+                        sub_title: undefined,
+                        mess: "SERVICE NOT EXITED",
+                        status: "ERROR",
+                    });
+                    return false;
+                }
+
+                const repo = service!.repo;
+
+                const env = service!.environment.find((e) => {
+                    return e.name === env_name;
+                });
+
+                const record = new Record({
+                    id: v1(),
+                    status: EStatus.START,
+                });
+
+                try {
+                    record.logs["ssh"] = [
+                        {
+                            log: undefined,
+                            title: "ssh",
+                            sub_title: "ssh connect",
+                            mess: "CONNECT",
+                            status: EStatus.START,
+                        },
+                    ];
+                    record.ocean["ssh"] = {
+                        title: "ssh",
+                        status: EStatus.START,
+                    };
+                    socket.emit("planCiCd", record);
+                    await ssh.connect({
+                        host: vm!.host,
+                        username: vm!.user,
+                        password: vm!.pass,
+                    });
+                    record.ocean["ssh"] = {
+                        title: "ssh",
+                        status: EStatus.DONE,
+                    };
+                    record.logs["ssh"] = [
+                        {
+                            log: undefined,
+                            title: "ssh",
+                            sub_title: "ssh connect successfully",
+                            mess: "CONNECT SUCCESSFULLY",
+                            status: EStatus.DONE,
+                        },
+                    ];
+
+                    socket.emit("planCiCd", record);
+                } catch (err: any) {
+                    record.ocean["ssh"] = {
+                        title: "ssh",
+                        status: EStatus.ERROR,
+                    };
+                    record.logs["ssh"] = [
+                        {
+                            log: undefined,
+                            title: "ssh",
+                            sub_title: "ssh connect failed",
+                            mess: JSON.stringify(err),
+                            status: EStatus.ERROR,
+                        },
+                    ];
+                    socket.emit("planCiCd", record);
+                    return false;
+                }
+
+                let log;
+                record.ocean["clone"] = {
+                    title: "clone",
+                    status: EStatus.START,
+                };
+                socket.emit("planCiCd", record);
+                log = await ssh.execCommand(
+                    `git clone ${service!.source} 2> /dev/null || (rm -rf ${
+                        service!.repo
+                    } ; git clone ${service!.source})`
+                );
+                record.ocean["clone"] = {
+                    title: "clone",
+                    status: EStatus.IN_PROGRESS,
+                };
+                record.logs["clone"] = [
+                    {
+                        log: log,
+                        title: "clone",
+                        sub_title: `git clone ${
+                            service!.source
+                        } 2> /dev/null || (rm -rf ${
+                            service!.repo
+                        } ; git clone ${service!.source})`,
+                        mess: undefined,
+                        status: EStatus.IN_PROGRESS,
+                    },
+                ];
+                socket.emit("planCiCd", record);
+
+                if (log.code === 0) {
+                    log = await ssh.execCommand(
+                        `cd ${service!.repo} && git checkout ${env!.branch}`
+                    );
+                    record.logs["clone"].push({
+                        log: log,
+                        title: "clone",
+                        sub_title: `cd ${service!.repo} && git checkout ${
+                            env!.branch
+                        }`,
+                        mess: undefined,
+                        status: EStatus.IN_PROGRESS,
+                    });
+                    socket.emit("planCiCd", record);
+                }
+
+                for (const docker_file of env!.docker_file) {
+                    const command = `cat > ${service.repo}/${docker_file.location}`;
+                    await ssh.execCommand(command, {
+                        stdin: docker_file.content,
+                    });
+                }
+
+                if (log.code === 0) {
+                    socket.emit("planCiCd", {
+                        log: log,
+                        title: "clone",
+                        sub_title: undefined,
+                        mess: "SUCCESSFULLY",
+                        status: "SUCCESSFULLY",
+                    });
+                    // ssh.dispose()
+                    return true;
+                }
+                if (log.code !== 0) {
+                    socket.emit("planCiCd", {
+                        log: log,
+                        title: "clone",
+                        sub_title: undefined,
+                        mess: "ERROR",
+                        status: "ERROR",
+                    });
+                    // ssh.dispose()
+                    return false;
+                }
+            }
+            return false;
+        }
     }
     return false;
 }
