@@ -1115,7 +1115,7 @@ export async function planCiCd(
                     id: v1(),
                     status: EStatus.START,
                 });
-
+                /** handle stage ssh  */
                 try {
                     record.logs["ssh"] = [
                         {
@@ -1170,79 +1170,209 @@ export async function planCiCd(
                 }
 
                 let log;
-                record.ocean["clone"] = {
-                    title: "clone",
-                    status: EStatus.START,
-                };
-                socket.emit("planCiCd", record);
-                log = await ssh.execCommand(
-                    `git clone ${service!.source} 2> /dev/null || (rm -rf ${
-                        service!.repo
-                    } ; git clone ${service!.source})`
-                );
-                record.ocean["clone"] = {
-                    title: "clone",
-                    status: EStatus.IN_PROGRESS,
-                };
-                record.logs["clone"] = [
-                    {
-                        log: log,
+                let command;
+                /** handle stage clone  */
+                if (record.ocean["ssh"].status === EStatus.DONE) {
+                    record.ocean["clone"] = {
                         title: "clone",
-                        sub_title: `git clone ${
-                            service!.source
-                        } 2> /dev/null || (rm -rf ${
-                            service!.repo
-                        } ; git clone ${service!.source})`,
-                        mess: undefined,
-                        status: EStatus.IN_PROGRESS,
-                    },
-                ];
-                socket.emit("planCiCd", record);
-
-                if (log.code === 0) {
-                    log = await ssh.execCommand(
-                        `cd ${service!.repo} && git checkout ${env!.branch}`
-                    );
-                    record.logs["clone"].push({
-                        log: log,
-                        title: "clone",
-                        sub_title: `cd ${service!.repo} && git checkout ${
-                            env!.branch
-                        }`,
-                        mess: undefined,
-                        status: EStatus.IN_PROGRESS,
-                    });
+                        status: EStatus.START,
+                    };
+                    record.logs["clone"] = [];
                     socket.emit("planCiCd", record);
+                    command = `git clone ${
+                        service!.source
+                    } 2> /dev/null || (rm -rf ${service!.repo} ; git clone ${
+                        service!.source
+                    })`;
+                    log = await ssh.execCommand(command);
+                    if (log.code === 0) {
+                        record.ocean["clone"] = {
+                            title: "clone",
+                            status: EStatus.IN_PROGRESS,
+                        };
+                        record.logs["clone"].push({
+                            log: log,
+                            title: "clone",
+                            sub_title: command,
+                            mess: undefined,
+                            status: EStatus.IN_PROGRESS,
+                        });
+                        socket.emit("planCiCd", record);
+                        command = `cd ${service!.repo} && git checkout ${
+                            env!.branch
+                        }`;
+                        log = await ssh.execCommand(command);
+                    }
+                    if (log.code === 0) {
+                        record.logs["clone"].push({
+                            log: log,
+                            title: "clone",
+                            sub_title: command,
+                            mess: undefined,
+                            status: EStatus.IN_PROGRESS,
+                        });
+                        socket.emit("planCiCd", record);
+                        for (const docker_file of env!.docker_file) {
+                            command = `cat > ${service.repo}/${docker_file.location}`;
+                            log = await ssh.execCommand(command, {
+                                stdin: docker_file.content,
+                            });
+                            if (log.code !== 0) {
+                                record.ocean["clone"] = {
+                                    title: "clone",
+                                    status: EStatus.ERROR,
+                                };
+                                record.logs["clone"].push({
+                                    log: log,
+                                    title: "clone",
+                                    sub_title: `${command}`,
+                                    mess: undefined,
+                                    status: EStatus.ERROR,
+                                });
+                                socket.emit("planCiCd", record);
+                                return false;
+                            }
+                            record.logs["clone"].push({
+                                log: log,
+                                title: "clone",
+                                sub_title: `${command}`,
+                                mess: undefined,
+                                status: EStatus.IN_PROGRESS,
+                            });
+                            socket.emit("planCiCd", record);
+                        }
+                    }
+                    if (log.code === 0) {
+                        record.ocean["clone"] = {
+                            title: "clone",
+                            status: EStatus.SUCCESSFULLY,
+                        };
+                        socket.emit("planCiCd", record);
+                    }
+
+                    if (log.code !== 0) {
+                        record.ocean["clone"] = {
+                            title: "clone",
+                            status: EStatus.ERROR,
+                        };
+                        record.logs["clone"].push({
+                            log: log,
+                            title: "clone",
+                            sub_title: `${command}`,
+                            mess: undefined,
+                            status: EStatus.ERROR,
+                        });
+                        socket.emit("planCiCd", record);
+                    }
+                }
+                if (record.ocean["clone"].status === EStatus.SUCCESSFULLY) {
+                    record.ocean["scanSyntax"] = {
+                        title: "scanSyntax",
+                        status: EStatus.START,
+                    };
+                    record.logs["scanSyntax"] = [];
+                    socket.emit("planCiCd", record);
+                    if (env?.docker_file && env.docker_file.length > 0) {
+                        for (const docker_file of env.docker_file) {
+                            // command = `cd  ${service.repo} /${docker_file.location}`;
+                            command =
+                                "cd " +
+                                service.repo +
+                                " && hadolint " +
+                                docker_file.location;
+                            log = await ssh.execCommand(command);
+                            if (log.code !== 0) {
+                                record.ocean["scanSyntax"] = {
+                                    title: "scanSyntax",
+                                    status: EStatus.ERROR,
+                                };
+                                record.logs["scanSyntax"].push({
+                                    log: log,
+                                    title: "scanSyntax",
+                                    sub_title: `${command}`,
+                                    mess: undefined,
+                                    status: EStatus.ERROR,
+                                });
+                                socket.emit("planCiCd", record);
+                                return false;
+                            }
+                            record.logs["scanSyntax"].push({
+                                log: log,
+                                title: "scanSyntax",
+                                sub_title: `${command}`,
+                                mess: undefined,
+                                status: EStatus.IN_PROGRESS,
+                            });
+                            socket.emit("planCiCd", record);
+                        }
+                    }
+                    if (env?.docker_compose && env.docker_compose.length > 0) {
+                        for (const docker_compose of env.docker_compose) {
+                            // command = `cd  ${service.repo} /${docker_file.location}`;
+                            command =
+                                "cd " +
+                                service.repo +
+                                " && hadolint " +
+                                docker_compose.location;
+                            log = await ssh.execCommand(command);
+                            if (log.code !== 0) {
+                                record.ocean["scanSyntax"] = {
+                                    title: "scanSyntax",
+                                    status: EStatus.ERROR,
+                                };
+                                record.logs["scanSyntax"].push({
+                                    log: log,
+                                    title: "scanSyntax",
+                                    sub_title: `${command}`,
+                                    mess: undefined,
+                                    status: EStatus.ERROR,
+                                });
+                                socket.emit("planCiCd", record);
+                                return false;
+                            }
+                            record.logs["scanSyntax"].push({
+                                log: log,
+                                title: "scanSyntax",
+                                sub_title: `${command}`,
+                                mess: undefined,
+                                status: EStatus.IN_PROGRESS,
+                            });
+                            socket.emit("planCiCd", record);
+                        }
+                    }
+                    if (log && log.code === 0) {
+                        record.ocean["scanSyntax"] = {
+                            title: "scanSyntax",
+                            status: EStatus.SUCCESSFULLY,
+                        };
+                        socket.emit("planCiCd", record);
+                    }
+
+                    if (log && log.code !== 0) {
+                        record.ocean["scanSyntax"] = {
+                            title: "scanSyntax",
+                            status: EStatus.ERROR,
+                        };
+                        record.logs["scanSyntax"].push({
+                            log: log,
+                            title: "scanSyntax",
+                            sub_title: `${command}`,
+                            mess: undefined,
+                            status: EStatus.ERROR,
+                        });
+                        socket.emit("planCiCd", record);
+                    }
                 }
 
-                for (const docker_file of env!.docker_file) {
-                    const command = `cat > ${service.repo}/${docker_file.location}`;
-                    await ssh.execCommand(command, {
-                        stdin: docker_file.content,
-                    });
-                }
-
-                if (log.code === 0) {
-                    socket.emit("planCiCd", {
-                        log: log,
-                        title: "clone",
-                        sub_title: undefined,
-                        mess: "SUCCESSFULLY",
-                        status: "SUCCESSFULLY",
-                    });
-                    // ssh.dispose()
-                    return true;
-                }
-                if (log.code !== 0) {
-                    socket.emit("planCiCd", {
-                        log: log,
-                        title: "clone",
-                        sub_title: undefined,
-                        mess: "ERROR",
-                        status: "ERROR",
-                    });
-                    // ssh.dispose()
-                    return false;
+                if (
+                    record.ocean["scanSyntax"].status === EStatus.SUCCESSFULLY
+                ) {
+                    record.ocean["clear"] = {
+                        title: "clear",
+                        status: EStatus.START,
+                    };
+                    record.logs["clear"] = [];
+                    socket.emit("planCiCd", record);
                 }
             }
             return false;

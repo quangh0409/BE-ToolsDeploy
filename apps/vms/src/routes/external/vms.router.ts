@@ -20,7 +20,7 @@ router.get(
     }
 );
 
-router.post("/:vms", async (req: Request, _: Response, next: NextFunction) => {
+router.get("/:vms", async (req: Request, _: Response, next: NextFunction) => {
     const vms = req.params.vms;
     const result = await getVmsById({
         vms,
