@@ -25,12 +25,6 @@ const ticketSchame = new mongoose.Schema(
                 require: false,
             },
         ],
-        record_ids: [
-            {
-                type: String,
-                require: false,
-            },
-        ],
     },
     {
         versionKey: false,

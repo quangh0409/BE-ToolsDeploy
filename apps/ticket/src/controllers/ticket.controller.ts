@@ -11,7 +11,6 @@ export async function createdTicket(params: {
     gitlab_id?: string;
     user_id: string;
     vms_ids?: string[];
-    record_ids?: string[];
 }): Promise<ResultSuccess> {
     const check = await Ticket.findOne({ user_id: params.user_id });
 
@@ -34,7 +33,6 @@ export async function createdTicket(params: {
         gitlab_id: params.gitlab_id,
         user_id: params.user_id,
         vms_ids: params.vms_ids,
-        record_ids: params.record_ids,
     });
 
     await ticket.save();
@@ -45,19 +43,12 @@ export async function createdTicket(params: {
 export async function updateTicket(params: {
     user_id: string;
     vms_ids?: string;
-    record_ids?: string;
 }) {
     const set: UpdateQuery<ITicket> = {};
     if (params.vms_ids) {
         set.$push = {
             ...set.$push,
             vms_ids: params.vms_ids,
-        };
-    }
-    if (params.record_ids) {
-        set.$push = {
-            ...set.$push,
-            record_ids: params.record_ids,
         };
     }
 
