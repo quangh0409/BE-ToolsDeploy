@@ -275,9 +275,45 @@ export async function getVmsById(params: {
         throw new HttpError(err);
     }
 
+    const ssh = new NodeSSH();
+
+    await ssh.connect({
+        host: check.host,
+        username: check.user,
+        password: check.pass,
+    });
+
+    let log;
+    log = await ssh.execCommand("landscape-sysinfo");
+    let obj: { [key: string]: string } = {};
+    const regex = /([\w\s\/]+):\s*([^\n]+?)(?=\s{2,}[\w\s\/]+:|$)/g;
+    let match;
+
+    while ((match = regex.exec(log.stdout)) !== null) {
+        let key = match[1].trim().replace(/\s+/g, " "); // Normalize whitespace in keys
+        let value = match[2].trim();
+        // Handle cases where multiple entries might be on the same line
+        if (value.includes("   ")) {
+            let parts = value.split("   ").map((part) => part.trim());
+            let lastKey = key;
+            parts.forEach((part, index) => {
+                if (index === 0) {
+                    obj[lastKey] = part;
+                } else {
+                    let newSplit = part.split(": ");
+                    lastKey = newSplit[0].trim().replace(/\s+/g, " ");
+                    obj[lastKey] = newSplit[1]?.trim();
+                }
+            });
+        } else {
+            obj[key] = value;
+        }
+    }
+
     return success.ok({
         ...check.toJSON(),
         _id: undefined,
+        landscape_sysinfo: obj,
     });
 }
 
@@ -556,7 +592,6 @@ export async function sshInstallDocker(
                         status: "ERROR",
                     });
                 }
-
 
                 ssh.dispose();
             }

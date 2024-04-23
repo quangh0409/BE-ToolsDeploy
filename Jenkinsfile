@@ -59,15 +59,4 @@ node {
         sh "ssh -o StrictHostKeyChecking=no -i ssh_id_rsa quangvt@27.71.26.164 'cd BE-ToolsDeploy && docker-compose -f ./docker-compose.yaml up --build -d'"
      }
   }
-  // stage("Test"){
-  //   withCredentials([file(credentialsId: 'ssh_key_remote', variable: 'ssh_key_remote')]) {
-  //       sh "cat $ssh_key_remote > ssh_id_rsa"
-  //       sh "chmod 400 ssh_id_rsa"
-  //       sh "ssh -o StrictHostKeyChecking=no -i ssh_id_rsa quangvt@27.71.26.164 'cd CHECK-P-ToolsDeploy/ && docker compose up --build'"
-  //    }    
-  //       // println("I am Test")
-  //       // sh "whoami"
-  //       // sh "pwd"
-  //       // sh "cd ~/../home/quangvt/eploy/ && docker compose -f ~/../home/quangvt/eploy/ up --build"
-  // }
 }
