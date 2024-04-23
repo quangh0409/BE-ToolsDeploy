@@ -1,6 +1,6 @@
 FROM node:18-alpine AS builder
 ARG module
-RUN npm install -g pnpm
+RUN npm install -g npm@10.5.2
 WORKDIR /root/ca
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm fetch

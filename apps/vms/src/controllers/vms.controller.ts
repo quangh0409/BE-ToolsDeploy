@@ -153,33 +153,6 @@ export async function createVms(params: {
             set_up.docker = log.stdout;
         }
 
-        /**
-         * lscpu 
-         *  CPU(s):                             2
-            On-line CPU(s) list:                0,1
-            Thread(s) per core:                 2
-            Core(s) per socket:                 1
-            Socket(s):                          1
-
-         *  hostnamectl
-                Operating System: Ubuntu 22.04.4 LTS
-                Kernel: Linux 6.5.0-1018-azure
-                Architecture: x86-64
-            uname -o operating-system 
-                GNU/Linux
-             cat /etc/os-release
-                HOME_URL="https://www.ubuntu.com/"
-                SUPPORT_URL="https://help.ubuntu.com/"
-                BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/"
-                PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"
-
-            landscape-sysinfo
-                  System load:  0.0               Processes:                106
-                    Usage of /:   5.4% of 61.84GB   Users logged in:          1
-                    Memory usage: 39%               IPv4 address for docker0: 172.17.0.1
-                    Swap usage:   0%                IPv4 address for eth0:    10.1.1.4
-         */
-
         ssh.dispose();
         const result = new Vms({
             id: v1(),
@@ -567,6 +540,7 @@ export async function sshInstallDocker(
                         status: "IN_PROGRESS",
                     });
                 }
+                log = await ssh.execCommand(`docker --version`);
                 if (log.code === 0) {
                     socket.emit("logInstallDocker", {
                         log: log,
@@ -582,6 +556,8 @@ export async function sshInstallDocker(
                         status: "ERROR",
                     });
                 }
+
+
                 ssh.dispose();
             }
         }
@@ -754,6 +730,7 @@ export async function sshInstallTrivy(
                         status: "IN_PROGRESS",
                     });
                 }
+                log = await ssh.execCommand(`trivy -v`);
                 if (log.code === 0) {
                     socket.emit("logInstallTrivy", {
                         log: log,
@@ -891,6 +868,7 @@ export async function sshInstallHadolint(
                         status: "IN_PROGRESS",
                     });
                 }
+                log = await ssh.execCommand(`hadolint --version`);
                 if (log.code === 0) {
                     socket.emit("logInstallHadolint", {
                         log: log,

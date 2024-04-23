@@ -318,7 +318,8 @@ export async function GetPathFileDockerByAccessToken(params: {
     );
 
     let path_Dockerfile: { path: string; name: string; content: string }[] = [];
-    let path_docker_compose: { path: string; name: string; content: string }[] = [];
+    let path_docker_compose: { path: string; name: string; content: string }[] =
+        [];
 
     for (const t of response.data.tree) {
         if (t.path.toLowerCase().includes("dockerfile")) {
@@ -390,6 +391,41 @@ export async function GetContentsByAccessToken(params: {
     ).toString("utf-8");
 
     return success.ok({ content });
+}
+
+export async function GetLastCommitByAccessToken(params: {
+    userId: string;
+    repository: string;
+    branch: string;
+}) {
+    const ticket = await findTicketByUserId({ user_id: params.userId });
+
+    const github = await Github.findOne({ git_id: ticket.body?.github_id });
+
+    if (!github) {
+        throw new HttpError(
+            error.notFound({
+                location: "token",
+                param: "token",
+                message: "git_id of user_id not exits",
+            })
+        );
+    }
+    ///repos/:owner/:repo/commits/master
+    const response = await axios.get(
+        `https://api.github.com/repos/${github.git_user}/${params.repository}/commits/${params.branch}`,
+        {
+            headers: {
+                Accept: "application/vnd.github+json",
+                Authorization: `Bearer ${github.access_token}`,
+                "X-GitHub-Api-Version": "2022-11-28",
+            },
+        }
+    );
+
+    const result = response.data;
+
+    return success.ok(result);
 }
 
 function parseAccessToken(input: string): {

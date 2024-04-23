@@ -14,6 +14,7 @@ import {
     clear,
     clone,
     deploy,
+    planCiCd,
     scanDockerfile,
     scanImages,
 } from "../../controllers/service.controller";
@@ -97,6 +98,10 @@ export class SocketServer {
 
         socket.on("deploy", async (token, vm_id, service_id, env_name) => {
             await deploy(socket, token, vm_id, service_id, env_name);
+        });
+
+        socket.on("planCiCd", async (token, vm_id, service_id, env_name) => {
+            await planCiCd(socket, token, vm_id, service_id, env_name);
         });
 
         // Kết thúc (Done or out)

@@ -6,6 +6,7 @@ import {
     GetInfoUserGit,
     GetInfoUserGitByAccesToken,
     GetLanguagesByAccessToken,
+    GetLastCommitByAccessToken,
     GetPathFileDockerByAccessToken,
     GetReposGitByAccessToken,
 } from "../../controllers/github.controller";
@@ -84,6 +85,20 @@ router.post(
             userId: id,
             repository: repository,
             sha: sha,
+        });
+        next(result);
+    }
+);
+
+router.post(
+    "/last-commit",
+    async (req: Request, _: Response, next: NextFunction) => {
+        const { repository, branch } = req.body;
+        const { id } = req.payload as Payload;
+        const result = await GetLastCommitByAccessToken({
+            userId: id,
+            repository: repository,
+            branch: branch,
         });
         next(result);
     }

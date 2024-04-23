@@ -25,7 +25,7 @@ export interface ILog {
 }
 
 export interface ILogContent {
-    log?: ILogCommand;
+    log?: string[];
     title: string;
     sub_title: string;
     mess?: string;
