@@ -34,7 +34,7 @@ node {
     withCredentials([file(credentialsId: 'ssh_key_remote', variable: 'ssh_key_remote')]) {
         sh "cat $ssh_key_remote > ssh_id_rsa"
         sh "chmod 400 ssh_id_rsa"
-        sh "ssh -o StrictHostKeyChecking=no -i ssh_id_rsa quangvt@27.71.26.164 'cd BE-ToolsDeploy && chmod +x ./nginx/entrypoint.sh && chmod +x docker-compose.yaml  && docker-compose -f ./docker-compose.yaml build'"
+        sh "ssh -o StrictHostKeyChecking=no -i ssh_id_rsa quangvt@27.71.26.164 'cd BE-ToolsDeploy && chmod +x ./nginx/entrypoint.sh && chmod +x docker compose.yaml  && docker-compose -f ./docker-compose.yaml build'"
     }
   }
   // stage("ScanImages"){
@@ -56,7 +56,7 @@ node {
     withCredentials([file(credentialsId: 'ssh_key_remote', variable: 'ssh_key_remote')]) {
         sh "cat $ssh_key_remote > ssh_id_rsa"
         sh "chmod 400 ssh_id_rsa"
-        sh "ssh -o StrictHostKeyChecking=no -i ssh_id_rsa quangvt@27.71.26.164 'cd BE-ToolsDeploy && docker-compose -f ./docker-compose.yaml up --build -d'"
+        sh "ssh -o StrictHostKeyChecking=no -i ssh_id_rsa quangvt@27.71.26.164 'cd BE-ToolsDeploy && docker compose -f ./docker-compose.yaml up --build -d'"
      }
   }
 }

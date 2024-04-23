@@ -1,0 +1,1178 @@
+[33mcommit 681b07149f70a0e3b2037b0c75db7a3b3209b9d3[m[33m ([m[1;36mHEAD -> [m[1;32mdev[m[33m)[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Wed Apr 24 00:00:07 2024 +0700
+
+    Refactor: api get vms by id
+
+[33mcommit 370b6cd394028648bf39d16e9475db19642a379d[m[33m ([m[1;31morigin/dev[m[33m)[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Tue Apr 23 21:47:19 2024 +0700
+
+    Fix: Docker file
+
+[33mcommit 72841c23a1c63992d521560917bf2995fade85be[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Tue Apr 23 18:38:28 2024 +0700
+
+    Chore: xóa file
+
+[33mcommit d92767d2dc196d2a72b79b017ea022032b6d8a8c[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Tue Apr 23 18:14:22 2024 +0700
+
+    Fix: content docker file
+
+[33mcommit 106aa15c425b26b7c1d37527618984a5b9ed5f8d[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Tue Apr 23 18:11:39 2024 +0700
+
+    Fix: command run docker file
+
+[33mcommit f6e739d5097d6fb360655b176d484f035e0841ad[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Tue Apr 23 10:27:58 2024 +0700
+
+    Refactor: modified jenkins file
+
+[33mcommit 83ad84ba443e42bd96ca6db0321f5627ebf04549[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Sun Apr 21 14:20:44 2024 +0700
+
+    Fix: error method http
+
+[33mcommit 628ff2774459b6b3953b7938dae926477b4c9590[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Sat Apr 20 22:26:35 2024 +0700
+
+    Refactor: modified interface model
+
+[33mcommit 2b5d8a7dce959d2432fcc085f85384b5192afe48[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Sat Apr 20 19:26:22 2024 +0700
+
+    Fix: remove commit
+
+[33mcommit a3cd089a44075a82e29ab9d835f430810cd26705[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Apr 19 17:36:43 2024 +0700
+
+    Refactor: add field cho interface model Vms
+
+[33mcommit d1a700e35144a62f1a4b458cb275c44bf10ff156[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Tue Apr 16 22:47:35 2024 +0700
+
+    Feat: create feature check api export report
+
+[33mcommit 7f91873169702213c08ad60c8a2241bb0f206995[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Mon Apr 15 09:00:05 2024 +0700
+
+    Fix: docker-compose
+
+[33mcommit 2fa8285e82d9bbd031081f723ef73ac8c1717182[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Mon Apr 15 06:44:12 2024 +0700
+
+    Create: function scan image of service
+
+[33mcommit 2a691afdabc0391dde73b45c9419ef1958dd3e74[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Mon Apr 15 05:34:28 2024 +0700
+
+    Feat: create function get images of service on env
+
+[33mcommit ece7b673fc8450421e7175ff33d8ab992ba25391[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Mon Apr 15 03:04:02 2024 +0700
+
+    Feat: create function handle webhook
+
+[33mcommit d25d554ea075dfb8caad283027016a95be2166d1[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Sun Apr 14 16:59:52 2024 +0700
+
+    Fix: error res socker emit
+
+[33mcommit a443ee01f98559c22db01761ddc154783470989d[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Sun Apr 14 16:40:37 2024 +0700
+
+    Fix: error res socker emit
+
+[33mcommit 8e6fc4830d07f08a26ff6e04568dd0837314557a[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Sun Apr 14 15:47:26 2024 +0700
+
+    Fix: error logic
+
+[33mcommit ed68b95aa9cb2ff20cfe896a02e61cd47db35cb3[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Sun Apr 14 15:40:36 2024 +0700
+
+    Fix: try catch of scan function
+
+[33mcommit c4bc6e97e5853cab653208575c0ba11cb8c78e03[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Sun Apr 14 15:35:23 2024 +0700
+
+    Fix: check error
+
+[33mcommit f016078f0b2318e55b2a43be354353421561613a[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Sun Apr 14 15:29:26 2024 +0700
+
+    Fix: try catch of scan function
+
+[33mcommit ecd92810efe47bac9c77b81793a6e0b538bbdf5b[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Sun Apr 14 10:44:11 2024 +0700
+
+    Fix: api scan image
+
+[33mcommit f83bd9bca455e2972b7390ebf3f035eb9c4a32e0[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Sun Apr 14 10:27:15 2024 +0700
+
+    Create: api scan images
+
+[33mcommit 7696b51b09a5578921f31d4112db0b1ac0a7de8e[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Sun Apr 14 08:22:40 2024 +0700
+
+    Create: function scanImages
+
+[33mcommit fd34567c910b944dfb29feb2802d465e50ce380b[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Sat Apr 13 01:33:49 2024 +0700
+
+    Created: functions delete service by id
+
+[33mcommit 50df1f67ace9817766e831bd3e62dbe4f2ab42ea[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Apr 12 19:04:24 2024 +0700
+
+    Fix:
+
+[33mcommit 36ff2024865033fcf3dbd136b8fc19f3a1cee348[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Apr 12 18:53:45 2024 +0700
+
+    Fix:
+
+[33mcommit b0c5f508e1c09a9b4c5e61f35c93695c5a22ebdf[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Apr 12 18:22:12 2024 +0700
+
+    Fix: gateway api
+
+[33mcommit d97c68636f79689f193e9c0b5d113f7481073a8a[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Apr 12 18:09:29 2024 +0700
+
+    Build: module scan
+
+[33mcommit 8ba6995d90c878ed3d7ef37eb22c1205c533a4f1[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Apr 12 16:39:00 2024 +0700
+
+    Fix: response function GetPathFileDockerByAccessToken
+
+[33mcommit db663b53c97b17ed49a08f93271e86d523e62582[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Mon Apr 8 01:48:49 2024 +0700
+
+    Create: api get a service by id
+
+[33mcommit 8e268f48806c2331fb5a39010c72091ae144ce0c[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Mon Apr 8 00:41:24 2024 +0700
+
+    Modified: add field user to model, interface
+
+[33mcommit 40266a27b8f135939ec020c84c04c7efadfc26a2[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Sun Apr 7 19:38:12 2024 +0700
+
+    Create: function get services by id of vm
+
+[33mcommit a603efcc8e267784847b25e350c5ad8fe5eeaf86[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Sun Apr 7 19:19:05 2024 +0700
+
+    Fix: add service id to vms
+
+[33mcommit d8213bfa51eb39ac3c795f2dfc9c2fcba41a27b5[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Sun Apr 7 17:54:46 2024 +0700
+
+    Fix: define schema model service
+
+[33mcommit 17843980d41e2dd7d39f0d19a156c6822fd8b457[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Sun Apr 7 17:36:56 2024 +0700
+
+    Fix: interface ServiceBody
+
+[33mcommit 3888618947b38e722c6890c55e56b7dcdfdecfee[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Sun Apr 7 16:19:45 2024 +0700
+
+    Modified: model, interface service
+
+[33mcommit a8f3bbb561c45ca7d3aabf294950cf44ff82655e[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Sun Apr 7 14:27:15 2024 +0700
+
+    Modified: function get path file config docker, content file docker
+
+[33mcommit 001d66e79273c4983c992fb11915b9ccf9f53e3f[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Sun Apr 7 10:21:55 2024 +0700
+
+    Create: Funtion read file from git
+
+[33mcommit f8fa10a4f65965e9312f53c6b848ba56a5344408[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Sun Apr 7 01:35:52 2024 +0700
+
+    Create: function check path file docker file
+
+[33mcommit ce31bd9782ec49e9370cea2ff918be99b69cb02b[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Sat Apr 6 23:12:24 2024 +0700
+
+    Fix: install function install  hadolint
+
+[33mcommit e6d05834c7116668b9c235af984df5aa0a914d17[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Sat Apr 6 22:19:10 2024 +0700
+
+    Fix: install docker vms
+
+[33mcommit 6a5100aaf26ee85b1466263bac2cfead1bb7ee83[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Apr 5 18:13:40 2024 +0700
+
+    Fix: docker compose
+
+[33mcommit 7a99ee6a6b1b397606efa10e904ce5481fd1ebf7[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Apr 5 18:00:27 2024 +0700
+
+    Fix: docker compose
+
+[33mcommit 7ebff774b027fb7e60f51e7d9b789d923c5a1501[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Apr 5 17:58:20 2024 +0700
+
+    Fix: docker compose
+
+[33mcommit 0be1da0ff2418784c34e93d5c1f0f7f91639bba7[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Apr 5 17:25:48 2024 +0700
+
+    Modified: create service in module vms
+
+[33mcommit a7fe1fefef5cda31609690235df10145e78d3acf[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Thu Apr 4 23:11:00 2024 +0700
+
+    Update: catch event webhooks and handle socket
+
+[33mcommit 44bdb2b9337aad7ff263c8d05fa3bdec8a329d49[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Mon Apr 1 17:34:30 2024 +0700
+
+    Test: web hook
+
+[33mcommit dbe56aa1e19cd50e969945d6a75ac62c24870fec[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Mon Apr 1 17:11:19 2024 +0700
+
+    creat service , socket, test webhooks
+
+[33mcommit 173f5e221b857d35cf5c632d2740b45ded0e1b07[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Mar 29 10:29:09 2024 +0700
+
+    Modified: add trivy and hadolint for vms
+
+[33mcommit ad83f0e13ef67b5469c065e1a55f38930dd044fb[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Mar 29 10:21:18 2024 +0700
+
+    Modified: add trivy and hadolint for vms
+
+[33mcommit f957a3f31fd8b08a512c98f580eb270d94246968[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Mar 29 10:21:03 2024 +0700
+
+    Modified: add trivy and hadolint for vms
+
+[33mcommit f4d99cb114394e6646bd69d09c14f86d3ca4b3fc[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Mar 29 10:15:28 2024 +0700
+
+    Modified: add trivy and hadolint for vms
+
+[33mcommit 9486f5fa7d024183fadd0be0ddf35085eb937eb0[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Mar 29 10:10:19 2024 +0700
+
+    Modified: add trivy and hadolint for vms
+
+[33mcommit 09b32c49bbe03b4e8eb9df9b08a7e0e5b82a6305[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Mar 29 10:06:20 2024 +0700
+
+    Modified: add trivy and hadolint for vms
+
+[33mcommit 61b3df53d7378dd4eeb302640ca1eabf1f200c2d[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Mar 29 10:01:13 2024 +0700
+
+    Modified: add trivy and hadolint for vms
+
+[33mcommit c8b04241254aa2dc239c2d8542492aa1e911044b[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Mar 29 02:01:12 2024 +0700
+
+    Modified: add trivy and hadolint for vms
+
+[33mcommit 3d02599bd8023069242e07b6fed75cdbd125368a[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Mar 29 01:47:58 2024 +0700
+
+    Modified: add trivy and hadolint for vms
+
+[33mcommit dfe64ea7d80db7157c6218a6c68f0b4bb1893aa8[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Mar 29 01:43:40 2024 +0700
+
+    Modified: add trivy and hadolint for vms
+
+[33mcommit 8e3c8817e5a15d08ab20302e83ff078e5b39946f[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Mar 29 01:38:25 2024 +0700
+
+    Modified: add trivy and hadolint for vms
+
+[33mcommit 5f93da1612582a0c57af055d104fd1fa4055fc6c[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Mar 29 01:33:50 2024 +0700
+
+    Modified: add trivy and hadolint for vms
+
+[33mcommit 0b20898fd2e63700b38b87cce4fd0b310d5930db[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Mar 29 01:30:30 2024 +0700
+
+    Modified: add trivy and hadolint for vms
+
+[33mcommit f1dc95a5e62608c7c685a784de8f39fb087e6389[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Mar 29 01:20:59 2024 +0700
+
+    Modified: add trivy and hadolint for vms
+
+[33mcommit 30e31731aae5d87439ac985683a8e9a7753635b1[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Mar 29 01:10:07 2024 +0700
+
+    Modified: add trivy and hadolint for vms
+
+[33mcommit 2f452cdad8b3989086256bc3eb9b7f7f20aa55ae[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Mar 29 01:07:24 2024 +0700
+
+    Modified: add trivy and hadolint for vms
+
+[33mcommit 6b5ed355d67e431c85681bb1dd212c6ea6ec517d[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Mar 29 01:05:01 2024 +0700
+
+    Modified: add trivy and hadolint for vms
+
+[33mcommit 01919cad0eaafaf74f8ecce5c29c1d57eac7bb0f[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Mar 29 00:59:50 2024 +0700
+
+    Modified: add trivy and hadolint for vms
+
+[33mcommit f65890fbaf8fee2203535817cc9889b4d9133255[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Mar 29 00:55:10 2024 +0700
+
+    Modified: add trivy and hadolint for vms
+
+[33mcommit fbe1b3575f32c1d362cd9f74b73e8b6850a5949a[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Mar 29 00:50:01 2024 +0700
+
+    Modified: add trivy and hadolint for vms
+
+[33mcommit ef0ea328785695a6bb9dbf8e56ec5685ff0721dc[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Mar 29 00:46:41 2024 +0700
+
+    Modified: add trivy and hadolint for vms
+
+[33mcommit d4b6c700191dcd34675dab33b034ddf18794218c[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Mar 29 00:41:09 2024 +0700
+
+    Modified: add trivy and hadolint for vms
+
+[33mcommit cb89cafc28f8bf0d723e07b5432c460ebc9f7a65[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Mar 29 00:36:24 2024 +0700
+
+    Modified: add trivy and hadolint for vms
+
+[33mcommit 124d62622ff218409f809b43807471083e09e1be[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Mar 29 00:34:56 2024 +0700
+
+    Modified: add trivy and hadolint for vms
+
+[33mcommit 05179a66fce6dc3b7f1c40c56935997fdcaa94d6[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Mar 29 00:31:16 2024 +0700
+
+    Modified: add trivy and hadolint for vms
+
+[33mcommit 4daf64010afd5e6061ea358c243fb09d6d0101d1[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Mar 29 00:22:47 2024 +0700
+
+    Modified: add trivy and hadolint for vms
+
+[33mcommit 7bdf302d3fd6c3ab469bba1b7c86340371c087ed[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Mar 29 00:18:36 2024 +0700
+
+    Modified: add trivy and hadolint for vms
+
+[33mcommit d522c52c36ce6baf72bf23626f21e60a534e0a1a[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Thu Mar 28 22:56:18 2024 +0700
+
+    Modified: response function created vms
+
+[33mcommit 35377da2a5f8d5df0521f25d02910e6b94b295e1[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Thu Mar 28 22:35:40 2024 +0700
+
+    Modified: function create  get vms
+
+[33mcommit b2c0cc51f7b6f3bc81fbcb6e3f4a0a03bf4a75ce[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Thu Mar 28 01:54:27 2024 +0700
+
+    Modified: config nginx for socker
+
+[33mcommit 6e7bec0d850e29a26c424748618fd3645a73bf56[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Thu Mar 28 01:09:11 2024 +0700
+
+    Feature: socket(send log real time), method update, get vms in module vms
+
+[33mcommit 28555db79176d4690b6df6f775a5d931c8972d47[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Sun Mar 24 21:23:35 2024 +0700
+
+    Create: interface, model, function create, update vms, update ticket
+
+[33mcommit 242ac1304a376b82557673aba7945b5ea6360507[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Mar 22 13:12:54 2024 +0700
+
+    Created: api test ssh install docker image vms
+
+[33mcommit 393e37473e8a55760fa1a8178d573c68d3cea3be[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Mar 22 12:58:08 2024 +0700
+
+    Created: api test ssh install docker image vms
+
+[33mcommit ed8be692fc1e5101e5b627bf7687f4b1d04adf65[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Mar 22 12:47:15 2024 +0700
+
+    Created: api test ssh install docker image vms
+
+[33mcommit 16fd85403346185666545404031f2e55c1b31715[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Mar 22 12:25:58 2024 +0700
+
+    Created: api test ssh install docker image vms
+
+[33mcommit b43e5702861fc5fdd5eec4f9d4f28122e00da808[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Mar 22 12:19:44 2024 +0700
+
+    Created: api test ssh install docker image vms
+
+[33mcommit ddbdd6d06cf12e8e163c05fb46c5ad00c4a0ea7b[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Mar 22 12:14:41 2024 +0700
+
+    Created: api test ssh install docker image vms
+
+[33mcommit d959c1cc4a10094630e7ba24ad7c6c755dd87862[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Mar 22 12:09:41 2024 +0700
+
+    Created: api test ssh install docker image vms
+
+[33mcommit ce0b66b6ac22c77db05eef3d3a9512744c48a8b3[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Mar 22 11:53:58 2024 +0700
+
+    Created: api test ssh in docker image vms
+
+[33mcommit fff0dea5b8a82f00b2b7833c656043a8a6d837ae[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Mar 22 11:49:44 2024 +0700
+
+    Created: api test ssh in docker image vms
+
+[33mcommit 50523ff91192b2497ac1e9c1f24dc3b4c7054864[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Mar 22 11:47:51 2024 +0700
+
+    Created: api test ssh in docker image vms
+
+[33mcommit 12ab29b397a8da0b3c5b4d8e46f40f0760bb9d9d[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Mar 22 11:42:40 2024 +0700
+
+    Created: api test ssh in docker image vms
+
+[33mcommit d99d5c561901c237db087219dfc0123f8a66a215[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Mar 22 11:28:03 2024 +0700
+
+    Modified: vloumes for image vms
+
+[33mcommit 4e02cb1eddc57820bca73c3b03db802799052fe0[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Mar 22 11:24:40 2024 +0700
+
+    Modified: vloumes for image vms
+
+[33mcommit f38d078cf01837cb827de15bc1e67e275c41f861[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Mar 22 10:31:15 2024 +0700
+
+    Modified: vloumes for image vms
+
+[33mcommit 03b8da09570917f9e5ac0ec3a1f6dea5bb01e8ce[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Fri Mar 22 10:29:40 2024 +0700
+
+    Modified: vloumes for image vms
+
+[33mcommit 8951851fdd112b2a255f2db7c9685237799fa9c2[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Wed Mar 20 16:24:43 2024 +0700
+
+    Modified: file id rsa pub
+
+[33mcommit 3a79eeba9260629639bc104bae88765005e3354b[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Wed Mar 20 16:16:45 2024 +0700
+
+    Modified: file id rsa pub
+
+[33mcommit f3ec5103627842f6605fa0f44213eeb42bd937ac[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Wed Mar 20 16:11:39 2024 +0700
+
+    Modified: file id rsa pub
+
+[33mcommit b0740bd2ba4d3e5af80d665990a5a3369c63f2b9[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Wed Mar 20 15:42:09 2024 +0700
+
+    Modified: docker compose file
+
+[33mcommit 94475f22c77cdca33e2290e6893d766c6610c098[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Wed Mar 20 15:33:39 2024 +0700
+
+    Modified: docker compose file
+
+[33mcommit fb3a77574b3185791a71849a06de8b4a75cc7b57[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Wed Mar 20 15:28:32 2024 +0700
+
+    Modified: add api in gateway for module vms
+
+[33mcommit d7560d7bcf985c58afa4d0e52b34ce987f61e22d[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Wed Mar 20 15:25:18 2024 +0700
+
+    Created: module vms, sp download key pub
+
+[33mcommit 0bd5f8152f35773ec5971d21ca74137c5201a723[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Wed Mar 20 14:00:00 2024 +0700
+
+    Fix: call api internal in module git
+
+[33mcommit be972e13ead7dcb88a8004c92cce4f219144cb12[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Wed Mar 20 10:48:04 2024 +0700
+
+    Modified: compose docker
+
+[33mcommit 185063914b25915d722b121dd5f05cf38827d621[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Wed Mar 20 10:30:12 2024 +0700
+
+    Modified: paramater of functions in module git
+
+[33mcommit 98c5a5d91f9d79a26c8d251ba9fddaf0f96bf033[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Tue Mar 19 21:02:34 2024 +0700
+
+    Fix: response of function getUserById, getGithubDetail in module auth, git
+
+[33mcommit 2a84367ebcb330598fd17f8b6039b47e6c65fdbc[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Tue Mar 19 20:57:29 2024 +0700
+
+    Fix: modified thu tu router method http get in module git
+
+[33mcommit f7f97a918d6ba3f717b3d2f0112f35d3bf526c6c[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Tue Mar 19 20:43:29 2024 +0700
+
+    Fix: error miss saveTokenSignature in function login by github
+
+[33mcommit 2aeb0bf7b86a198714764c2e4113a46917b5117a[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Tue Mar 19 20:11:03 2024 +0700
+
+    Debug: error token
+
+[33mcommit 0b5a8984e4fe8809f117fba8886aa40f64d11c00[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Tue Mar 19 19:57:37 2024 +0700
+
+    Fix: response of function getUserById, getGithubDetail in module auth, git
+
+[33mcommit a2dffdb951c43532289dfe47f69a5b1d643faeda[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Tue Mar 19 19:40:42 2024 +0700
+
+    Fix: modified thu tu router method http get in module git
+
+[33mcommit 90bdee2cb6505a8ed36a9568999625cf0396e34d[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Tue Mar 19 19:19:29 2024 +0700
+
+    Created: feature get ticket detail in module ticket
+
+[33mcommit 39dbcca3a328c74db1d17d21855837e560fc3063[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Tue Mar 19 13:04:27 2024 +0700
+
+    Modefied: function loginByGithub of module auth
+
+[33mcommit da0b0ed0c09dbe26e810ec11bbddb8176364d856[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Tue Mar 19 12:34:29 2024 +0700
+
+    Modefied: jenkins
+
+[33mcommit f1847cf44337581e111848cd50886324c54e70e0[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Tue Mar 19 12:32:27 2024 +0700
+
+    Modefied: jenkins
+
+[33mcommit d5376a6cdff504adac1c3b3ef919e9801f5fd86e[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Tue Mar 19 12:24:28 2024 +0700
+
+    Modefied: jenkins
+
+[33mcommit 1f7578f1d04c5682e7595f32ec03245ef746e464[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Tue Mar 19 12:16:25 2024 +0700
+
+    Modefied: docker compose file
+
+[33mcommit 04b29f4f5159f903224d17437231940c7258f06e[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Tue Mar 19 12:01:46 2024 +0700
+
+    Modified: jenkins file
+
+[33mcommit 0d406ddc87b2a714776ca349c37924110ca67f38[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Tue Mar 19 11:15:33 2024 +0700
+
+    Vreated: branch dev
+
+[33mcommit 0cbe4e7b053bcf324bbadaa0ffb9495cb238962e[m[33m ([m[1;31morigin/main[m[33m, [m[1;32mmain[m[33m)[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Tue Mar 19 05:02:04 2024 +0700
+
+    Modified: jenkins file
+
+[33mcommit c5bc1fb0a0600c1fe555362880db13be8911a0fc[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Tue Mar 19 03:07:41 2024 +0700
+
+    Modified: docker compose
+
+[33mcommit 0afbb0a1de77d7a8b0b4635edfaf4614c3b01243[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Tue Mar 19 02:38:27 2024 +0700
+
+    Modified: module nginx gateway
+
+[33mcommit c6a3f820c2b5c1c5fae54e32e476d39b803ea8f7[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Tue Mar 19 02:17:23 2024 +0700
+
+    Modified: file config docker file
+
+[33mcommit 78b6c9eb748279f07ba5d4c1e3fa35bb6d49a0a1[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Tue Mar 19 02:11:10 2024 +0700
+
+    Modified: file config docker file
+
+[33mcommit fc0cc12dfec2e46bd8659cbd0010af210d7f6449[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Tue Mar 19 02:10:13 2024 +0700
+
+    Modified: file config docker file
+
+[33mcommit 684dc96e00800caa50168e7883ab370ef49522b8[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Tue Mar 19 02:01:59 2024 +0700
+
+    Modified: module nginx gateway
+
+[33mcommit 1d7045c16ebd6c339c2182ef6061ca1e75830cfe[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Tue Mar 19 01:42:51 2024 +0700
+
+    Modified: module nginx gateway
+
+[33mcommit 2c2c41baed58b726d8a65cb3bd5dcb3b78ec1b52[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Tue Mar 19 01:27:37 2024 +0700
+
+    Modified: module nginx gateway
+
+[33mcommit dbb490e9e21d100e136d30b7f1b3d8e2efe045c1[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Tue Mar 19 00:56:59 2024 +0700
+
+    Modified: jenkins file
+
+[33mcommit cdefbc32ec09253f672e8cd9f75a72346e681fb8[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Tue Mar 19 00:48:56 2024 +0700
+
+    Modified: jenkins file
+
+[33mcommit 707a5a8c8390d4740c388ef97bf396531c703d3f[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Tue Mar 19 00:47:24 2024 +0700
+
+    Modified: jenkins file
+
+[33mcommit c6a799d57055548929e2e4aabd7ec0f111a68cfb[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Tue Mar 19 00:45:21 2024 +0700
+
+    Modified: jenkins file
+
+[33mcommit 5f502b2c2ea4c3ff5bd7f30779f096cf5d36b007[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Tue Mar 19 00:33:39 2024 +0700
+
+    Modified: jenkins file
+
+[33mcommit 050ea0cf97feed2c66e9d125b41420221a14e340[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Mon Mar 18 23:48:47 2024 +0700
+
+    Created: module git, ticket Modified dockerfile
+
+[33mcommit 4fbc1886689acb06f4ccb01fb3939eddc906f782[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 12:00:17 2024 +0700
+
+    fix: logic command pipeline
+
+[33mcommit ba6260356a66b9ced4f1dfb8f69125c82043c5b4[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 11:24:41 2024 +0700
+
+    fix: logic command pipeline
+
+[33mcommit c7b54e4e1079f13b0a5f9f47d52bd0df06c83059[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 11:17:09 2024 +0700
+
+    fix: logic command pipeline
+
+[33mcommit b5da32193403968984987df2cbf545494f596017[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 11:15:31 2024 +0700
+
+    fix: logic command pipeline
+
+[33mcommit 1f5c8eb1b65915ec88b57a69d6630d79467bfe86[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 11:11:35 2024 +0700
+
+    fix: logic command pipeline
+
+[33mcommit 43f2ea3bc6cccd003896b26b1c2f71602cd7fa8e[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 11:07:27 2024 +0700
+
+    fix: logic command pipeline
+
+[33mcommit 0f6ef5c9704e1d5a8d63bdea79aae95c9b9605d2[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 11:05:17 2024 +0700
+
+    fix: logic command pipeline
+
+[33mcommit 34472274fd4d22a2057b6dd472936b3d52db10e2[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 10:51:45 2024 +0700
+
+    fix: logic command pipeline
+
+[33mcommit 2d35307d2218435707716410512163c7c41ec1fc[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 10:46:11 2024 +0700
+
+    fix: logic command pipeline
+
+[33mcommit 08f8eb42d744a5dbe50c30a34dd9d04ce9380ab3[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 10:43:26 2024 +0700
+
+    fix: logic command pipeline
+
+[33mcommit 909a89bae97cba24139a2d7ad5ec5eb13b3394c0[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 10:38:16 2024 +0700
+
+    fix: logic command pipeline
+
+[33mcommit 93860a803234aa5e812fa314129390771f59d83d[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 10:30:41 2024 +0700
+
+    fix: logic command
+
+[33mcommit b9cc88cd9451f09213b051aa1af5333ba5dbcdfc[m
+Author: Vũ Trọng Quảng <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 09:43:43 2024 +0700
+
+    Update Jenkinsfile
+
+[33mcommit 2ad2ddd040359682db5533ea8dfe4a38aa6136df[m
+Author: Vũ Trọng Quảng <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 09:39:21 2024 +0700
+
+    Update Jenkinsfile
+
+[33mcommit 418e190b32af071e3ec91aaba26eea5ae86fa14d[m
+Author: Vũ Trọng Quảng <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 09:33:46 2024 +0700
+
+    Update Jenkinsfile
+
+[33mcommit f1792d3b0cf914e430cc2258488c45f79f35ee8a[m
+Author: Vũ Trọng Quảng <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 09:29:35 2024 +0700
+
+    Update Jenkinsfile
+
+[33mcommit 63a7ee041b28cb9f7e1cc87df9a50228b9379e60[m
+Author: Vũ Trọng Quảng <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 08:54:01 2024 +0700
+
+    Update:  Jenkinsfile stage test
+
+[33mcommit 2c9879993c399cfc4fbf38ad68ae2f4dea0fbfca[m
+Author: Vũ Trọng Quảng <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 08:51:09 2024 +0700
+
+    Modified: stage test
+
+[33mcommit e9c7ec0604a8192a3d23518b109f6a24932bf67c[m
+Author: Vũ Trọng Quảng <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 05:41:05 2024 +0700
+
+    Test: check demo heath check docker
+
+[33mcommit 3171f6643176a3cfbbb34aa93c1f5b968e94f054[m
+Author: Vũ Trọng Quảng <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 05:33:54 2024 +0700
+
+    Test: check demo heath check docker
+
+[33mcommit 122ee05f9561620f83feeb2d63f9589afd6f34b1[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 05:30:45 2024 +0700
+
+    Test: check demo heath check docker
+
+[33mcommit fd7eacf0c45843e6d8e78a68e9349b4fb2295ca5[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 05:28:07 2024 +0700
+
+    Test: check demo heath check docker
+
+[33mcommit 6c00e84f898e11983de2a5a06a4020cd34d77b50[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 05:25:50 2024 +0700
+
+    Test: check demo heath check docker
+
+[33mcommit 974600bdc9de62808dfbd4e01a1f1d24b0c561da[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 05:23:13 2024 +0700
+
+    Test: check demo heath check docker
+
+[33mcommit efd6c25e34c5edad7932851050ab722e70a003d8[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 05:18:01 2024 +0700
+
+    Test: check demo heath check docker
+
+[33mcommit e02828ecf89e0f1e546a97a36bc6aa60a8d6f025[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 02:39:42 2024 +0700
+
+    Modified: fix syntax jenkins file
+
+[33mcommit 8d4e317449ce5776f13c10264537a756919bd9a3[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 02:36:26 2024 +0700
+
+    Modified: fix syntax jenkins file
+
+[33mcommit 722989ca107ffc2b58edbe2b34478c24c2795378[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 02:34:44 2024 +0700
+
+    Modified: fix syntax jenkins file
+
+[33mcommit d844860ac2c3d425ff125abadf9ff7f24fc4a0ba[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 02:30:24 2024 +0700
+
+    Modified: file docker compose and jenkins file
+
+[33mcommit 4cccf0c0cfcac68dff01109b3271cc02659ff5c3[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 01:36:07 2024 +0700
+
+    Modified: file docker compose build,deploy and service nginx
+
+[33mcommit 9aa3e49aa366d3036ac33d3ff0e6a5fede42a10b[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 01:26:13 2024 +0700
+
+    Modified: file docker compose build,deploy
+
+[33mcommit d1ccd17a3e6f5acc0215bd3c41566f62a47405ad[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 01:17:36 2024 +0700
+
+    Modified: file .env nginx
+
+[33mcommit 91250f080c7972347af0bb0162c5b245a57c831a[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 01:15:32 2024 +0700
+
+    Modified: file docker compose build
+
+[33mcommit e2e5a0785dba2c5b54f8d39525130693f67ebde7[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 01:08:26 2024 +0700
+
+    Modified: file .env nginx
+
+[33mcommit 9259af1f2168750066c690dff76e22d0c2efbdcc[m
+Merge: 5b44055 48945b3
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 01:00:04 2024 +0700
+
+    Merge branch 'main' of https://github.com/quangh0409/BE-ToolsDeploy
+
+[33mcommit 5b44055b23974a9553f3f75c2bfe1ff823f2d94e[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 00:59:52 2024 +0700
+
+    Update: file .env nginx
+
+[33mcommit 48945b3c791ae36367a492ffeab99412fef44fa8[m
+Author: Vũ Trọng Quảng <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 00:57:40 2024 +0700
+
+    Modified Jenkinsfile - fix error logic
+
+[33mcommit 57d828d4e386bd1e109bc53f236c5c3489e1a4b1[m
+Merge: 6c6b1f4 1452bc5
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 00:53:45 2024 +0700
+
+    Merge branch 'main' of https://github.com/quangh0409/BE-ToolsDeploy
+
+[33mcommit 6c6b1f4fab533d2d09d7f0d4aabed3e93a0709d9[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 00:53:26 2024 +0700
+
+    Modified: .gitignore
+
+[33mcommit 1452bc50d02ee14dfb11932d571d0971f311a13f[m
+Author: Vũ Trọng Quảng <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 00:50:12 2024 +0700
+
+    Modified Jenkinsfile - fix error logic
+
+[33mcommit 7a3ea902b5b3f0f794c587295b9a87100b324c63[m
+Author: Vũ Trọng Quảng <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 00:47:39 2024 +0700
+
+    Modified Jenkinsfile - fix error logic
+
+[33mcommit 99968fa452d984ad176dd1241116cfd65ae47531[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 00:42:05 2024 +0700
+
+    Modified: fix docker compose deploy line 13,14
+
+[33mcommit eb1c9996d859e5656d57226876c5b847ed67b504[m
+Author: Vũ Trọng Quảng <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 00:36:52 2024 +0700
+
+    Modified Jenkinsfile - fix error syntax
+
+[33mcommit f7fa238af19c3d0c8da3795036c9894f577e5ec4[m
+Author: Vũ Trọng Quảng <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 00:31:59 2024 +0700
+
+    Modified Jenkinsfile - fix error syntax
+
+[33mcommit 735987fdbdf05b5d6768fef30a39d24868a3135c[m
+Author: Vũ Trọng Quảng <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 00:27:28 2024 +0700
+
+    Modified Jenkinsfile - fix error syntax
+
+[33mcommit b0527fd2d855ab1944cc378382eb933798ebcb5c[m
+Author: Vũ Trọng Quảng <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 00:25:42 2024 +0700
+
+    Modified Jenkinsfile - fix error syntax
+
+[33mcommit 498805d5f2ea57dd7eec7fc9fcb3b7628d640f09[m
+Author: Vũ Trọng Quảng <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 00:23:54 2024 +0700
+
+    Modified Jenkinsfile - fix error syntax
+
+[33mcommit 9813cc0be6a95bc01bafdf7ef86e56eb4470d22c[m
+Author: Vũ Trọng Quảng <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 00:08:13 2024 +0700
+
+    Modified Jenkinsfile - fix error syntax
+
+[33mcommit f176f7cfef03595c4ee5c69093e08f4a565727f6[m
+Author: Vũ Trọng Quảng <trongquangvu80@gmail.com>
+Date:   Mon Mar 11 00:07:14 2024 +0700
+
+    Modified Jenkinsfile - fix error syntax
+
+[33mcommit 5233f83897b39c8a00061c70c797d0847210d005[m
+Author: Vũ Trọng Quảng <trongquangvu80@gmail.com>
+Date:   Sun Mar 10 23:51:44 2024 +0700
+
+    Modified Jenkinsfile - fix error syntax
+
+[33mcommit dadf511ea4392e19f0355cb59ba95e868bbcea3d[m
+Author: Vũ Trọng Quảng <trongquangvu80@gmail.com>
+Date:   Sun Mar 10 23:46:25 2024 +0700
+
+    Modified Jenkinsfile - stage clone
+
+[33mcommit d29541d1f9d5d1e81a3b99c705d33329eff36106[m
+Author: Vũ Trọng Quảng <trongquangvu80@gmail.com>
+Date:   Sun Mar 10 23:15:05 2024 +0700
+
+    Modified Jenkinsfile syntax in line 21,29
+
+[33mcommit d3ba9e07aa1d5035859ce88fad6205e977e583d1[m
+Author: Vũ Trọng Quảng <trongquangvu80@gmail.com>
+Date:   Sun Mar 10 23:10:06 2024 +0700
+
+    Modified Jenkinsfile line 15
+
+[33mcommit edacb4aa44eec4436b4ce145da4efae253fc5502[m
+Author: Vũ Trọng Quảng <trongquangvu80@gmail.com>
+Date:   Sun Mar 10 22:37:28 2024 +0700
+
+    Modified Jenkinsfile - test pipeline ssh, clone, build, deploy
+
+[33mcommit cd2ca468c0ac28dcd7d654099b5a1403486f1319[m
+Merge: b9fa240 7405eb8
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Sun Mar 10 22:34:58 2024 +0700
+
+    Merge branch 'main' of https://github.com/quangh0409/BE-ToolsDeploy
+
+[33mcommit b9fa24097b65d30b48126394d2530475c8ba3d9c[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Sun Mar 10 22:34:31 2024 +0700
+
+    Created: file config docker compose with target build, deploy
+
+[33mcommit 7405eb80104620432840f4592b6220ea3770f501[m
+Author: Vũ Trọng Quảng <trongquangvu80@gmail.com>
+Date:   Sun Mar 10 21:42:32 2024 +0700
+
+    Update Jenkinsfile - modified syntax in line 3
+
+[33mcommit 28eb8b36066bdb61bab9b49195635c2a659c0c5a[m
+Author: Vũ Trọng Quảng <trongquangvu80@gmail.com>
+Date:   Sun Mar 10 21:36:39 2024 +0700
+
+    Update Jenkinsfile - test ssh VM remote
+
+[33mcommit d37d241de16935990828392166bb0ebf40cfef28[m
+Author: Vũ Trọng Quảng <trongquangvu80@gmail.com>
+Date:   Sun Mar 10 21:32:06 2024 +0700
+
+    Update Jenkinsfile - test
+
+[33mcommit a784ac368b49c6ed119d8861d6f7d265abcaa204[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Sun Mar 10 20:57:40 2024 +0700
+
+    Modified docker-compose.yaml and service nginx(gateway)
+
+[33mcommit a1f4d00b04ce03ab263483d69da0065c1721116f[m
+Author: quanh0409 <trongquangvu80@gmail.com>
+Date:   Sun Mar 10 20:53:05 2024 +0700
+
+    Feature: build service auth
