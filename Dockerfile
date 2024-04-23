@@ -1,5 +1,6 @@
 FROM node:18-alpine AS builder
 ARG module
+RUN npm install -g npm@10.5.2
 RUN npm install -g pnpm
 WORKDIR /root/ca
 COPY package.json pnpm-lock.yaml ./
