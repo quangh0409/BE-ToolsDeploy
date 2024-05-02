@@ -90,6 +90,7 @@ services:
     env_file: ./apps/vms/.env
     environment:
       - CA_VMS_TICKET_SERVICE_HOST=http://ticket
+      - CA_VMS_GIT_SERVICE_HOST=http://git 
     image: docker.io/vutrongquang/vms
 
   scan:

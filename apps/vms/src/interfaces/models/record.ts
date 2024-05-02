@@ -7,7 +7,9 @@ export interface IRecord {
     created_time: Date;
     commit_id: string;
     commit_message: string;
-    index: number
+    index: number;
+    branch: string;
+    end_time: Date;
 }
 
 export interface IOceanContent {

@@ -107,7 +107,7 @@ export async function getAGithubByCode(params: {
     code: string;
 }): Promise<Result> {
     const client_id = "66602684d99f3683ebe0";
-    const client_secret = "2a5519307a6d3f29668a8a2924622af5970bcde2";
+    const client_secret = "a95ebd7fcda578afe5b23a5bce239933566c549f";
 
     try {
         const response = await axios.post(
@@ -425,7 +425,13 @@ export async function GetLastCommitByAccessToken(params: {
 
     const result = response.data;
 
-    return success.ok(result);
+    return success.ok({
+        commit_id: result.sha,
+        commit_message: result.commit.message,
+        branch: params.branch,
+        repository: params.repository,
+        committer: result.commit.committer.name,
+    });
 }
 
 function parseAccessToken(input: string): {

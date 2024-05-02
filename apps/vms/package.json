@@ -7,8 +7,8 @@
         "clean": "rm -rf build tsconfig.tsbuildinfo",
         "lint": "npx eslint src/** --fix --cache",
         "format": "npx prettier --write \"!**/build\" \"**/*.{ts,tsx,md,js,json}\"",
-        "start": "node build/ca.vms.js",
-        "start:dev": "npx nodemon",
+        "start": "node --max-old-space-size=4096 build/ca.vms.js",
+        "start:dev": "npx --node-options=\"--max-old-space-size=4096\" nodemon",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "prettier": "prettier-config-custom",

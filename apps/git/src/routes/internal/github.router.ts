@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response, Router } from "express";
 import {
     GetInfoUserGitByAccesToken,
+    GetLastCommitByAccessToken,
     createGitHub,
     getAGithubByCode,
     getGitHubById,
@@ -32,6 +33,18 @@ router.post(
         const { token } = req.body;
         const result = await GetInfoUserGitByAccesToken({
             access_token: token,
+        });
+        next(result);
+    }
+);
+router.post(
+    "/last-commit",
+    async (req: Request, _: Response, next: NextFunction) => {
+        const { repository, branch, userId } = req.body;
+        const result = await GetLastCommitByAccessToken({
+            userId: userId,
+            repository: repository,
+            branch: branch,
         });
         next(result);
     }

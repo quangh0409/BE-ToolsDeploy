@@ -69,6 +69,14 @@ export const configs = {
                 return `${this.host}:${this.port}${this.prefix}`;
             },
         },
+        git: {
+            prefix: process.env.CA_VMS_GIT_SERVICE_PREFIX || "/api/v1/in/git",
+            host: process.env.CA_VMS_GIT_SERVICE_HOST || "http://127.0.0.1",
+            port: process.env.CA_VMS_GIT_SERVICE_PORT || "6802",
+            getUrl: function (): string {
+                return `${this.host}:${this.port}${this.prefix}`;
+            },
+        },
     },
 };
 

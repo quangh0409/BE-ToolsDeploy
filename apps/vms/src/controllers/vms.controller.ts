@@ -310,6 +310,32 @@ export async function getVmsById(params: {
         }
     }
 
+    const set_up: {
+        docker: string;
+        hadolint: string;
+        trivy: string;
+    } = {
+        docker: "",
+        hadolint: "",
+        trivy: "",
+    };
+    log = await ssh.execCommand(`hadolint --version`);
+    if (log.code === 0) {
+        set_up.hadolint = log.stdout;
+    }
+    log = await ssh.execCommand(`trivy -v`);
+    if (log.code === 0) {
+        set_up.trivy = log.stdout.split("\n")[0];
+    }
+    log = await ssh.execCommand(`docker --version`);
+    if (log.code === 0) {
+        set_up.docker = log.stdout;
+    }
+
+    check.set_up = set_up;
+
+    await check.save();
+
     return success.ok({
         ...check.toJSON(),
         _id: undefined,
@@ -421,6 +447,9 @@ export async function updateVms(params: {
     last_connect?: Date;
     user?: string;
     pass?: string;
+    docker: string;
+    hadolint: string;
+    trivy: string;
 }): Promise<ResultSuccess> {
     const vm = await Vms.aggregate([
         {
@@ -433,6 +462,9 @@ export async function updateVms(params: {
                 user: params.user,
                 pass: params.pass,
                 last_connect: params.last_connect,
+                "set_up.docker": params.docker,
+                "set_up.hadolint": params.hadolint,
+                "set_up.trivy": params.trivy,
             },
         },
         {

@@ -18,6 +18,8 @@ import { v1 } from "uuid";
 import Record from "../models/record";
 import { EStatus, ILogCommand } from "../interfaces/models";
 import { time } from "console";
+import { GetLastCommitByAccessToken } from "../services/git.service";
+import { SocketServer } from "../utils";
 
 export async function createService(
     params: IServiceBody
@@ -1081,7 +1083,7 @@ export async function planCiCd(
                 });
 
                 if (!vm) {
-                    socket.emit("planCiCd", {
+                    socket.emit(`logPlanCiCd-${payload.id}`, {
                         log: undefined,
                         title: "vm",
                         sub_title: undefined,
@@ -1095,7 +1097,7 @@ export async function planCiCd(
                 const service = await Service.findOne({ id: service_id });
 
                 if (!service) {
-                    socket.emit("planCiCd", {
+                    socket.emit(`logPlanCiCd-${payload.id}`, {
                         log: undefined,
                         title: "service",
                         sub_title: undefined,
@@ -1116,10 +1118,22 @@ export async function planCiCd(
                     }
                 );
 
+                const commit = await GetLastCommitByAccessToken({
+                    userId: payload.id,
+                    repository: repo,
+                    branch: env!.branch,
+                });
+
                 const record = new Record({
                     id: v1(),
                     status: EStatus.START,
                     index: service.environment[env_index].record.length + 1,
+                    logs: {},
+                    ocean: {},
+                    created_time: new Date(),
+                    branch: env!.branch,
+                    commit_id: commit.body!.commit_id,
+                    commit_message: commit.body!.commit_message,
                 });
                 /** handle stage ssh  */
                 try {
@@ -1136,7 +1150,10 @@ export async function planCiCd(
                         title: "ssh",
                         status: EStatus.START,
                     };
-                    socket.emit("planCiCd", record);
+                    SocketServer.getInstance().io.emit(
+                        `logPlanCiCd-${payload.id}`,
+                        record
+                    );
                     await ssh.connect({
                         host: vm!.host,
                         username: vm!.user,
@@ -1156,8 +1173,12 @@ export async function planCiCd(
                         },
                     ];
 
-                    socket.emit("planCiCd", record);
+                    SocketServer.getInstance().io.emit(
+                        `logPlanCiCd-${payload.id}`,
+                        record
+                    );
                 } catch (err: any) {
+                    console.log("🚀 ~ err:", err);
                     record.ocean["ssh"] = {
                         title: "ssh",
                         status: EStatus.ERROR,
@@ -1171,8 +1192,14 @@ export async function planCiCd(
                             status: EStatus.ERROR,
                         },
                     ];
-                    socket.emit("planCiCd", record);
+                    SocketServer.getInstance().io.emit(
+                        `logPlanCiCd-${payload.id}`,
+                        record
+                    );
+                    service.environment[env_index].record.push(record.id);
+                    record.end_time = new Date();
                     await record.save();
+                    await service.save();
                     return false;
                 }
 
@@ -1185,7 +1212,10 @@ export async function planCiCd(
                         status: EStatus.START,
                     };
                     record.logs["clone"] = [];
-                    socket.emit("planCiCd", record);
+                    SocketServer.getInstance().io.emit(
+                        `logPlanCiCd-${payload.id}`,
+                        record
+                    );
                     command = `git clone ${
                         service!.source
                     } 2> /dev/null || (rm -rf ${service!.repo} ; git clone ${
@@ -1204,7 +1234,10 @@ export async function planCiCd(
                             mess: undefined,
                             status: EStatus.IN_PROGRESS,
                         });
-                        socket.emit("planCiCd", record);
+                        SocketServer.getInstance().io.emit(
+                            `logPlanCiCd-${payload.id}`,
+                            record
+                        );
                         command = `cd ${service!.repo} && git checkout ${
                             env!.branch
                         }`;
@@ -1218,7 +1251,10 @@ export async function planCiCd(
                             mess: undefined,
                             status: EStatus.IN_PROGRESS,
                         });
-                        socket.emit("planCiCd", record);
+                        SocketServer.getInstance().io.emit(
+                            `logPlanCiCd-${payload.id}`,
+                            record
+                        );
                         for (const docker_file of env!.docker_file) {
                             command = `cat > ${service.repo}/${docker_file.location}`;
                             log = await ssh.execCommand(command, {
@@ -1236,7 +1272,10 @@ export async function planCiCd(
                                     mess: undefined,
                                     status: EStatus.ERROR,
                                 });
-                                socket.emit("planCiCd", record);
+                                SocketServer.getInstance().io.emit(
+                                    `logPlanCiCd-${payload.id}`,
+                                    record
+                                );
                                 await record.save();
                                 return false;
                             }
@@ -1247,7 +1286,10 @@ export async function planCiCd(
                                 mess: undefined,
                                 status: EStatus.IN_PROGRESS,
                             });
-                            socket.emit("planCiCd", record);
+                            SocketServer.getInstance().io.emit(
+                                `logPlanCiCd-${payload.id}`,
+                                record
+                            );
                         }
                     }
                     if (log.code === 0) {
@@ -1255,7 +1297,10 @@ export async function planCiCd(
                             title: "clone",
                             status: EStatus.SUCCESSFULLY,
                         };
-                        socket.emit("planCiCd", record);
+                        SocketServer.getInstance().io.emit(
+                            `logPlanCiCd-${payload.id}`,
+                            record
+                        );
                     }
 
                     if (log.code !== 0) {
@@ -1270,8 +1315,14 @@ export async function planCiCd(
                             mess: undefined,
                             status: EStatus.ERROR,
                         });
-                        socket.emit("planCiCd", record);
+                        SocketServer.getInstance().io.emit(
+                            `logPlanCiCd-${payload.id}`,
+                            record
+                        );
+                        service.environment[env_index].record.push(record.id);
+                        record.end_time = new Date();
                         await record.save();
+                        await service.save();
                         return false;
                     }
                 }
@@ -1282,12 +1333,18 @@ export async function planCiCd(
                         status: EStatus.START,
                     };
                     record.logs["scanSyntax"] = [];
-                    socket.emit("planCiCd", record);
+                    SocketServer.getInstance().io.emit(
+                        `logPlanCiCd-${payload.id}`,
+                        record
+                    );
                     record.ocean["scanSyntax"] = {
                         title: "scanSyntax",
                         status: EStatus.IN_PROGRESS,
                     };
-                    socket.emit("planCiCd", record);
+                    SocketServer.getInstance().io.emit(
+                        `logPlanCiCd-${payload.id}`,
+                        record
+                    );
                     if (env?.docker_file && env.docker_file.length > 0) {
                         for (const docker_file of env.docker_file) {
                             // command = `cd  ${service.repo} /${docker_file.location}`;
@@ -1295,7 +1352,8 @@ export async function planCiCd(
                                 "cd " +
                                 service.repo +
                                 " && hadolint " +
-                                docker_file.location;
+                                docker_file.location +
+                                " --no-fail";
                             log = await ssh.execCommand(command);
                             if (log.code !== 0) {
                                 record.ocean["scanSyntax"] = {
@@ -1309,8 +1367,16 @@ export async function planCiCd(
                                     mess: undefined,
                                     status: EStatus.ERROR,
                                 });
-                                socket.emit("planCiCd", record);
+                                SocketServer.getInstance().io.emit(
+                                    `logPlanCiCd-${payload.id}`,
+                                    record
+                                );
+                                service.environment[env_index].record.push(
+                                    record.id
+                                );
+                                record.end_time = new Date();
                                 await record.save();
+                                await service.save();
                                 return false;
                             }
                             record.logs["scanSyntax"].push({
@@ -1320,7 +1386,10 @@ export async function planCiCd(
                                 mess: undefined,
                                 status: EStatus.IN_PROGRESS,
                             });
-                            socket.emit("planCiCd", record);
+                            SocketServer.getInstance().io.emit(
+                                `logPlanCiCd-${payload.id}`,
+                                record
+                            );
                         }
                     }
                     if (env?.docker_compose && env.docker_compose.length > 0) {
@@ -1330,7 +1399,8 @@ export async function planCiCd(
                                 "cd " +
                                 service.repo +
                                 " && hadolint " +
-                                docker_compose.location;
+                                docker_compose.location +
+                                " --no-fail";
                             log = await ssh.execCommand(command);
                             if (log.code !== 0) {
                                 record.ocean["scanSyntax"] = {
@@ -1344,8 +1414,16 @@ export async function planCiCd(
                                     mess: undefined,
                                     status: EStatus.ERROR,
                                 });
-                                socket.emit("planCiCd", record);
+                                SocketServer.getInstance().io.emit(
+                                    `logPlanCiCd-${payload.id}`,
+                                    record
+                                );
+                                service.environment[env_index].record.push(
+                                    record.id
+                                );
+                                record.end_time = new Date();
                                 await record.save();
+                                await service.save();
                                 return false;
                             }
                             record.logs["scanSyntax"].push({
@@ -1355,7 +1433,10 @@ export async function planCiCd(
                                 mess: undefined,
                                 status: EStatus.IN_PROGRESS,
                             });
-                            socket.emit("planCiCd", record);
+                            SocketServer.getInstance().io.emit(
+                                `logPlanCiCd-${payload.id}`,
+                                record
+                            );
                         }
                     }
                     if (log && log.code === 0) {
@@ -1363,7 +1444,10 @@ export async function planCiCd(
                             title: "scanSyntax",
                             status: EStatus.SUCCESSFULLY,
                         };
-                        socket.emit("planCiCd", record);
+                        SocketServer.getInstance().io.emit(
+                            `logPlanCiCd-${payload.id}`,
+                            record
+                        );
                     }
 
                     if (log && log.code !== 0) {
@@ -1378,8 +1462,14 @@ export async function planCiCd(
                             mess: undefined,
                             status: EStatus.ERROR,
                         });
-                        socket.emit("planCiCd", record);
+                        SocketServer.getInstance().io.emit(
+                            `logPlanCiCd-${payload.id}`,
+                            record
+                        );
+                        service.environment[env_index].record.push(record.id);
+                        record.end_time = new Date();
                         await record.save();
+                        await service.save();
                         return false;
                     }
                 }
@@ -1392,7 +1482,10 @@ export async function planCiCd(
                         status: EStatus.START,
                     };
                     record.logs["clear"] = [];
-                    socket.emit("planCiCd", record);
+                    SocketServer.getInstance().io.emit(
+                        `logPlanCiCd-${payload.id}`,
+                        record
+                    );
                     record.ocean["clear"] = {
                         title: "clear",
                         status: EStatus.IN_PROGRESS,
@@ -1406,7 +1499,10 @@ export async function planCiCd(
                         mess: undefined,
                         status: EStatus.IN_PROGRESS,
                     });
-                    socket.emit("planCiCd", record);
+                    SocketServer.getInstance().io.emit(
+                        `logPlanCiCd-${payload.id}`,
+                        record
+                    );
                     log = await ssh.execCommand(
                         command,
 
@@ -1419,7 +1515,10 @@ export async function planCiCd(
                                     .split("\n")
                                     .map((l) => {
                                         record.logs["clear"][0].log?.push(l);
-                                        socket.emit("planCiCd", record);
+                                        SocketServer.getInstance().io.emit(
+                                            `logPlanCiCd-${payload.id}`,
+                                            record
+                                        );
                                     });
                             },
                         }
@@ -1429,15 +1528,24 @@ export async function planCiCd(
                             title: "clear",
                             status: EStatus.SUCCESSFULLY,
                         };
-                        socket.emit("planCiCd", record);
+                        SocketServer.getInstance().io.emit(
+                            `logPlanCiCd-${payload.id}`,
+                            record
+                        );
                     }
                     if (log.code !== 0) {
                         record.ocean["clear"] = {
                             title: "clear",
                             status: EStatus.ERROR,
                         };
-                        socket.emit("planCiCd", record);
+                        SocketServer.getInstance().io.emit(
+                            `logPlanCiCd-${payload.id}`,
+                            record
+                        );
+                        service.environment[env_index].record.push(record.id);
+                        record.end_time = new Date();
                         await record.save();
+                        await service.save();
                         return false;
                     }
                 }
@@ -1448,7 +1556,10 @@ export async function planCiCd(
                         status: EStatus.START,
                     };
                     record.logs["build"] = [];
-                    socket.emit("planCiCd", record);
+                    SocketServer.getInstance().io.emit(
+                        `logPlanCiCd-${payload.id}`,
+                        record
+                    );
                     record.ocean["build"] = {
                         title: "build",
                         status: EStatus.IN_PROGRESS,
@@ -1463,7 +1574,10 @@ export async function planCiCd(
                         mess: undefined,
                         status: EStatus.IN_PROGRESS,
                     });
-                    socket.emit("planCiCd", record);
+                    SocketServer.getInstance().io.emit(
+                        `logPlanCiCd-${payload.id}`,
+                        record
+                    );
                     log = await ssh.execCommand(command, {
                         onStdout(chunk) {
                             // Gửi log mới đến client
@@ -1473,7 +1587,10 @@ export async function planCiCd(
                                 .split("\n")
                                 .map((l) => {
                                     record.logs["build"][0].log?.push(l);
-                                    socket.emit("planCiCd", record);
+                                    SocketServer.getInstance().io.emit(
+                                        `logPlanCiCd-${payload.id}`,
+                                        record
+                                    );
                                 });
                         },
                     });
@@ -1482,15 +1599,24 @@ export async function planCiCd(
                             title: "build",
                             status: EStatus.SUCCESSFULLY,
                         };
-                        socket.emit("planCiCd", record);
+                        SocketServer.getInstance().io.emit(
+                            `logPlanCiCd-${payload.id}`,
+                            record
+                        );
                     }
                     if (log.code !== 0) {
                         record.ocean["build"] = {
                             title: "build",
                             status: EStatus.ERROR,
                         };
-                        socket.emit("planCiCd", record);
+                        SocketServer.getInstance().io.emit(
+                            `logPlanCiCd-${payload.id}`,
+                            record
+                        );
+                        service.environment[env_index].record.push(record.id);
+                        record.end_time = new Date();
                         await record.save();
+                        await service.save();
                         return false;
                     }
                 }
@@ -1501,12 +1627,18 @@ export async function planCiCd(
                         status: EStatus.START,
                     };
                     record.logs["scanImages"] = [];
-                    socket.emit("planCiCd", record);
+                    SocketServer.getInstance().io.emit(
+                        `logPlanCiCd-${payload.id}`,
+                        record
+                    );
                     record.ocean["scanImages"] = {
                         title: "scanImages",
                         status: EStatus.IN_PROGRESS,
                     };
-                    socket.emit("planCiCd", record);
+                    SocketServer.getInstance().io.emit(
+                        `logPlanCiCd-${payload.id}`,
+                        record
+                    );
 
                     const imageRegex = /image:\s*docker.io\/(.*)/g;
                     let match: RegExpExecArray | null;
@@ -1529,17 +1661,31 @@ export async function planCiCd(
                             mess: undefined,
                             status: EStatus.IN_PROGRESS,
                         });
-                        socket.emit("planCiCd", record);
+                        SocketServer.getInstance().io.emit(
+                            `logPlanCiCd-${payload.id}`,
+                            record
+                        );
                         log = await ssh.execCommand(command);
                         record.logs["scanImages"][i].log?.push(log.stdout);
-                        socket.emit("planCiCd", record);
+                        SocketServer.getInstance().io.emit(
+                            `logPlanCiCd-${payload.id}`,
+                            record
+                        );
                         if (log.code !== 0) {
                             record.ocean["scanImages"] = {
                                 title: "scanImages",
                                 status: EStatus.ERROR,
                             };
-                            socket.emit("planCiCd", record);
+                            SocketServer.getInstance().io.emit(
+                                `logPlanCiCd-${payload.id}`,
+                                record
+                            );
+                            service.environment[env_index].record.push(
+                                record.id
+                            );
+                            record.end_time = new Date();
                             await record.save();
+                            await service.save();
                             return false;
                         }
 
@@ -1550,7 +1696,10 @@ export async function planCiCd(
                             title: "scanImages",
                             status: EStatus.SUCCESSFULLY,
                         };
-                        socket.emit("planCiCd", record);
+                        SocketServer.getInstance().io.emit(
+                            `logPlanCiCd-${payload.id}`,
+                            record
+                        );
                     }
                 }
                 /** handle stage deploy  */
@@ -1562,7 +1711,10 @@ export async function planCiCd(
                         status: EStatus.START,
                     };
                     record.logs["deploy"] = [];
-                    socket.emit("planCiCd", record);
+                    SocketServer.getInstance().io.emit(
+                        `logPlanCiCd-${payload.id}`,
+                        record
+                    );
                     record.ocean["deploy"] = {
                         title: "deploy",
                         status: EStatus.IN_PROGRESS,
@@ -1577,7 +1729,10 @@ export async function planCiCd(
                         mess: undefined,
                         status: EStatus.IN_PROGRESS,
                     });
-                    socket.emit("planCiCd", record);
+                    SocketServer.getInstance().io.emit(
+                        `logPlanCiCd-${payload.id}`,
+                        record
+                    );
                     log = await ssh.execCommand(command, {
                         onStdout(chunk) {
                             // Gửi log mới đến client
@@ -1587,7 +1742,10 @@ export async function planCiCd(
                                 .split("\n")
                                 .map((l) => {
                                     record.logs["deploy"][0].log?.push(l);
-                                    socket.emit("planCiCd", record);
+                                    SocketServer.getInstance().io.emit(
+                                        `logPlanCiCd-${payload.id}`,
+                                        record
+                                    );
                                 });
                         },
                     });
@@ -1596,20 +1754,32 @@ export async function planCiCd(
                             title: "deploy",
                             status: EStatus.SUCCESSFULLY,
                         };
-                        socket.emit("planCiCd", record);
+                        SocketServer.getInstance().io.emit(
+                            `logPlanCiCd-${payload.id}`,
+                            record
+                        );
                     }
                     if (log.code !== 0) {
                         record.ocean["deploy"] = {
                             title: "deploy",
                             status: EStatus.ERROR,
                         };
-                        socket.emit("planCiCd", record);
+                        SocketServer.getInstance().io.emit(
+                            `logPlanCiCd-${payload.id}`,
+                            record
+                        );
+                        service.environment[env_index].record.push(record.id);
+                        record.end_time = new Date();
                         await record.save();
+                        await service.save();
                         return false;
                     }
                 }
                 if (record.ocean["deploy"].status === EStatus.SUCCESSFULLY) {
+                    service.environment[env_index].record.push(record.id);
+                    record.end_time = new Date();
                     await record.save();
+                    await service.save();
                     return true;
                 }
             }

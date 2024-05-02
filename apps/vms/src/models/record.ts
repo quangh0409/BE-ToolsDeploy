@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import { EStatus, IRecord } from "../interfaces/models";
 
-
 const recordSchema = new mongoose.Schema(
     {
         id: {
@@ -35,6 +34,14 @@ const recordSchema = new mongoose.Schema(
         },
         index: {
             type: Number,
+            require: true,
+        },
+        branch: {
+            type: String,
+            require: true,
+        },
+        end_time: {
+            type: Date,
             require: true,
         },
     },

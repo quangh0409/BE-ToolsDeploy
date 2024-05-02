@@ -1,7 +1,7 @@
 import "dotenv/config";
 
 export const configs = {
-    service: "auth",
+    service: "git",
     environment: process.env.CA_GIT_ENVIRONMENT || "dev",
     app: {
         prefix: "/api/v1",
@@ -79,6 +79,10 @@ export const configs = {
                 return `${this.host}:${this.port}${this.prefix}`;
             },
         },
+    },
+    github: {
+        clientId: process.env.CA_GIT_CLIENT_ID,
+        clientSecret: process.env.CA_GIT_CLIENT_SECRET,
     },
 };
 
