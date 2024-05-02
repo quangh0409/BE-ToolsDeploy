@@ -30,18 +30,18 @@ export async function webhookHandle(params: {
                 repo: repo,
                 source: source,
             });
-            console.log("🚀 ~ service:", service);
             if (service) {
-                const socket = await redis.get(user_id);
-                console.log("🚀 ~ socket:", socket);
                 const env = service.environment.find(
                     (e) => e.branch === branch
                 );
 
-                if (socket) {
-                    SocketServer.getInstance()
-                        .io
-                        .emit("webhooks", user_id, service.id, env!.name);
+                if (env) {
+                    SocketServer.getInstance().io.emit(
+                        "webhooks",
+                        user_id,
+                        service.id,
+                        env!.name
+                    );
                 }
             }
             // SocketServer.getInstance()
