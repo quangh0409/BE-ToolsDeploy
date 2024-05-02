@@ -1566,7 +1566,7 @@ export async function planCiCd(
                     };
                     command = `cd ${
                         service!.repo
-                    } && chmod +x ./nginx/entrypoint.sh && chmod +x docker-compose.yaml  && docker compose -f ./docker-compose.yaml build`;
+                    } && chmod +x ./nginx/entrypoint.sh && chmod +x docker-compose.yaml  && docker-compose -f ./docker-compose.yaml build`;
                     record.logs["build"].push({
                         log: [],
                         title: "build",
@@ -1721,7 +1721,7 @@ export async function planCiCd(
                     };
                     command = `cd ${
                         service!.repo
-                    } && docker compose -f ./docker-compose.yaml up --build -d`;
+                    } && docker-compose -f ./docker-compose.yaml up --build -d`;
                     record.logs["deploy"].push({
                         log: [],
                         title: "deploy",
