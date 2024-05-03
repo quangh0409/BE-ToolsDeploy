@@ -37,7 +37,7 @@ export async function webhookHandle(params: {
 
                 if (env) {
                     SocketServer.getInstance().io.emit(
-                        "webhooks",
+                        `webhooks-${user_id}`,
                         user_id,
                         service.id,
                         env!.name
