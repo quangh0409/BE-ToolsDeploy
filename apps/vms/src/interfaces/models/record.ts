@@ -7,6 +7,7 @@ export interface IRecord {
     created_time: Date;
     commit_id: string;
     commit_message: string;
+    commit_html_url: string;
     index: number;
     branch: string;
     end_time: Date;

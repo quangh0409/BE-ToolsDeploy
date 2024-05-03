@@ -431,6 +431,7 @@ export async function GetLastCommitByAccessToken(params: {
         branch: params.branch,
         repository: params.repository,
         committer: result.commit.committer.name,
+        url: result.html_url,
     });
 }
 

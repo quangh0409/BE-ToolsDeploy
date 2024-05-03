@@ -32,6 +32,10 @@ const recordSchema = new mongoose.Schema(
             type: String,
             require: true,
         },
+        commit_html_url: {
+            type: String,
+            require: true,
+        },
         index: {
             type: Number,
             require: true,

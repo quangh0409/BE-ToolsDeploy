@@ -1147,6 +1147,7 @@ export async function planCiCd(
                     branch: env!.branch,
                     commit_id: commit.body!.commit_id,
                     commit_message: commit.body!.commit_message,
+                    commit_html_url: commit.body!.url,
                 });
                 /** handle stage ssh  */
                 try {
@@ -1591,7 +1592,7 @@ export async function planCiCd(
                     };
                     command = `cd ${
                         service!.repo
-                    } && chmod +x ./nginx/entrypoint.sh && chmod +x docker-compose.yaml  && docker-compose -f ./docker-compose.yaml build`;
+                    } && docker-compose build`;
                     record.logs["build"].push({
                         log: [],
                         title: "build",

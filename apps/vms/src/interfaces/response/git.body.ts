@@ -4,4 +4,5 @@ export interface ILastCommit {
     branch: string;
     repository: string;
     committer: string;
+    url: string;
 }
