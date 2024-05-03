@@ -105,3 +105,45 @@ export async function updateRecord(params: {
 
     return success.ok(record);
 }
+
+export async function getRecordsOfService(params: {
+    service: string;
+    env: string;
+}): Promise<ResultSuccess> {
+    const service = await Service.findOne({ id: params.service });
+
+    if (!service) {
+        throw new HttpError(
+            error.notFound({
+                location: "params",
+                param: "service",
+                value: params.service,
+                message: "service not exit",
+            })
+        );
+    }
+
+    const env = service.environment.find((e) => e.name === params.env);
+
+    if (!env) {
+        throw new HttpError(
+            error.notFound({
+                location: "params",
+                param: "env",
+                value: params.env,
+                message: "env not exit",
+            })
+        );
+    }
+
+    const records = await Record.find(
+        {
+            id: {
+                $in: env.record,
+            },
+        },
+        { _id: 0 }
+    );
+
+    return success.ok(records);
+}

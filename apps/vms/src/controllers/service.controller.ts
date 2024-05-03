@@ -121,7 +121,21 @@ export async function getServiceById(params: {
     if (!service) {
         throw new HttpError(err);
     }
-    return success.ok(service);
+    const result = service.toJSON();
+    const envs = [];
+    for (const e of result.environment) {
+        const vm = await Vms.findOne({ id: e.vm });
+        const temp = Object.assign({}, e, {
+            vm: {
+                id: vm?.id,
+                host: vm?.host,
+            },
+        });
+        envs.push(temp);
+    }
+
+    Object.assign(result, { environment: envs });
+    return success.ok(result);
 }
 
 export async function UpdateStatusServiceById(params: {
@@ -1069,7 +1083,6 @@ export async function planCiCd(
     const payload = await verifyToken(token);
     const ticket = await findTicketByUserId({ user_id: payload.id });
 
-    const record = new Record({});
     if (ticket.body && ticket.status === 200) {
         if (ticket.body.vms_ids) {
             const check = ticket.body.vms_ids.find((id) => {
@@ -1198,6 +1211,7 @@ export async function planCiCd(
                     );
                     service.environment[env_index].record.push(record.id);
                     record.end_time = new Date();
+                    record.status = EStatus.ERROR;
                     await record.save();
                     await service.save();
                     return false;
@@ -1276,7 +1290,13 @@ export async function planCiCd(
                                     `logPlanCiCd-${payload.id}`,
                                     record
                                 );
+                                service.environment[env_index].record.push(
+                                    record.id
+                                );
+                                record.end_time = new Date();
+                                record.status = EStatus.ERROR;
                                 await record.save();
+                                await service.save();
                                 return false;
                             }
                             record.logs["clone"].push({
@@ -1321,6 +1341,7 @@ export async function planCiCd(
                         );
                         service.environment[env_index].record.push(record.id);
                         record.end_time = new Date();
+                        record.status = EStatus.ERROR;
                         await record.save();
                         await service.save();
                         return false;
@@ -1375,6 +1396,7 @@ export async function planCiCd(
                                     record.id
                                 );
                                 record.end_time = new Date();
+                                record.status = EStatus.ERROR;
                                 await record.save();
                                 await service.save();
                                 return false;
@@ -1422,6 +1444,7 @@ export async function planCiCd(
                                     record.id
                                 );
                                 record.end_time = new Date();
+                                record.status = EStatus.ERROR;
                                 await record.save();
                                 await service.save();
                                 return false;
@@ -1468,6 +1491,7 @@ export async function planCiCd(
                         );
                         service.environment[env_index].record.push(record.id);
                         record.end_time = new Date();
+                        record.status = EStatus.ERROR;
                         await record.save();
                         await service.save();
                         return false;
@@ -1544,6 +1568,7 @@ export async function planCiCd(
                         );
                         service.environment[env_index].record.push(record.id);
                         record.end_time = new Date();
+                        record.status = EStatus.ERROR;
                         await record.save();
                         await service.save();
                         return false;
@@ -1615,6 +1640,7 @@ export async function planCiCd(
                         );
                         service.environment[env_index].record.push(record.id);
                         record.end_time = new Date();
+                        record.status = EStatus.ERROR;
                         await record.save();
                         await service.save();
                         return false;
@@ -1684,6 +1710,7 @@ export async function planCiCd(
                                 record.id
                             );
                             record.end_time = new Date();
+                            record.status = EStatus.ERROR;
                             await record.save();
                             await service.save();
                             return false;
@@ -1770,6 +1797,7 @@ export async function planCiCd(
                         );
                         service.environment[env_index].record.push(record.id);
                         record.end_time = new Date();
+                        record.status = EStatus.ERROR;
                         await record.save();
                         await service.save();
                         return false;
@@ -1778,6 +1806,7 @@ export async function planCiCd(
                 if (record.ocean["deploy"].status === EStatus.SUCCESSFULLY) {
                     service.environment[env_index].record.push(record.id);
                     record.end_time = new Date();
+                    record.status = EStatus.SUCCESSFULLY;
                     await record.save();
                     await service.save();
                     return true;
