@@ -143,7 +143,9 @@ export async function getRecordsOfService(params: {
             },
         },
         { _id: 0 }
-    );
+    ).sort({
+        created_time: -1,
+    });
 
     return success.ok(records);
 }
