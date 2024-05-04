@@ -1590,9 +1590,8 @@ export async function planCiCd(
                         title: "build",
                         status: EStatus.IN_PROGRESS,
                     };
-                    command = `cd ${
-                        service!.repo
-                    } && docker-compose build`;
+                    // command = `cd ${service!.repo} && docker-compose build`;
+                    command = `whoami`;
                     record.logs["build"].push({
                         log: [],
                         title: "build",
@@ -1749,7 +1748,7 @@ export async function planCiCd(
                     };
                     command = `cd ${
                         service!.repo
-                    } && docker-compose -f ./docker-compose.yaml up --build -d`;
+                    } && docker-compose up --build -d`;
                     record.logs["deploy"].push({
                         log: [],
                         title: "deploy",
