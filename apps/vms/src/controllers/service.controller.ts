@@ -1590,8 +1590,10 @@ export async function planCiCd(
                         title: "build",
                         status: EStatus.IN_PROGRESS,
                     };
-                    // command = `cd ${service!.repo} && docker-compose build`;
-                    command = `whoami`;
+                    command = `whoami && cd ${
+                        service!.repo
+                    } && docker-compose build`;
+                    // command = `whoami`;
                     record.logs["build"].push({
                         log: [],
                         title: "build",
@@ -1618,8 +1620,22 @@ export async function planCiCd(
                                     );
                                 });
                         },
+                        onStderr(chunk) {
+                            // Gửi log mới đến client
+                            // console.log(chunk.toString("utf8"));
+                            chunk
+                                .toString("utf8")
+                                .split("\n")
+                                .map((l) => {
+                                    record.logs["build"][0].log?.push(l);
+                                    SocketServer.getInstance().io.emit(
+                                        `logPlanCiCd-${payload.id}`,
+                                        record
+                                    );
+                                });
+                        },
                     });
-                    if (log.code === 0) {
+                    if (log.code === 0 || log.code === 255) {
                         record.ocean["build"] = {
                             title: "build",
                             status: EStatus.SUCCESSFULLY,
@@ -1775,8 +1791,23 @@ export async function planCiCd(
                                     );
                                 });
                         },
+                        onStderr(chunk) {
+                            // Gửi log mới đến client
+                            // console.log(chunk.toString("utf8"));
+                            chunk
+                                .toString("utf8")
+                                .split("\n")
+                                .map((l) => {
+                                    record.logs["deploy"][0].log?.push(l);
+                                    SocketServer.getInstance().io.emit(
+                                        `logPlanCiCd-${payload.id}`,
+                                        record
+                                    );
+                                });
+                        },
                     });
-                    if (log.code === 0) {
+                    console.log("🚀 ~ log:", log);
+                    if (log.code === 0 || log.code === 255) {
                         record.ocean["deploy"] = {
                             title: "deploy",
                             status: EStatus.SUCCESSFULLY,
