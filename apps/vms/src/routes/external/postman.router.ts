@@ -10,6 +10,7 @@ router.post("/", async (req: Request, res: Response, next: NextFunction) => {
     const { id: userId } = req.payload as Payload;
     const result = await runPostman({ userId, collection });
     res.setHeader("Content-Type", "text/html");
+
     res.status(HttpStatus.OK).send(result).end();
     // next(result);
 });

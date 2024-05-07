@@ -4,11 +4,13 @@ import { resolve } from "path";
 import fs from "fs";
 import { promisify } from "util";
 const readFileAsync = promisify(fs.readFile);
+const util = require("util");
+const newPostman = util.promisify(newman.run);
 
 export async function runPostman(params: {
     userId: string;
     collection: string;
-}): Promise<Buffer> {
+}): Promise<Buffer | undefined> {
     const path = __dirname;
     const file_path = resolve(
         path,
@@ -19,27 +21,20 @@ export async function runPostman(params: {
         "utf-8"
     );
 
-    // Chạy Newman và đọc tệp cùng lúc
-    await new Promise((resolve, reject) => {
-        newman.run(
-            {
-                collection: JSON.parse(collection),
-                reporters: ["htmlextra"],
-                reporter: {
-                    htmlextra: { export: file_path }, // Không xuất ra tệp
-                },
+    try {
+        await newPostman({
+            collection: JSON.parse(collection),
+            reporters: ["htmlextra"],
+            reporter: {
+                htmlextra: { export: file_path }, // Không xuất ra tệp
             },
-            function (err, summary) {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(summary);
-                }
-            }
-        );
-    });
+        });
 
-    let htmlContent = fs.readFileSync(file_path);
-    fs.unlinkSync(file_path);
-    return htmlContent;
+        let htmlContent = fs.readFileSync(file_path);
+        fs.unlinkSync(file_path);
+        return htmlContent;
+    } catch (err) {
+        console.error(err);
+        return;
+    }
 }
