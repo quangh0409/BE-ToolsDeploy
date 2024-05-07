@@ -5,6 +5,7 @@ import { HttpStatus } from "app";
 import {
     createVms,
     deleteVmsById,
+    findVmsByHost,
     getVmsById,
     getVmsByIds,
 } from "../../controllers/vms.controller";
@@ -19,6 +20,14 @@ router.get(
         res.download(file_name, "id_rsa.pub");
     }
 );
+
+router.get("/", async (req: Request, _: Response, next: NextFunction) => {
+    const host = req.query.host as string;
+    const result = await findVmsByHost({
+        host,
+    });
+    next(result);
+});
 
 router.get("/:vms", async (req: Request, _: Response, next: NextFunction) => {
     const vms = req.params.vms;
@@ -43,10 +52,11 @@ router.post("/", async (req: Request, res: Response, next: NextFunction) => {
 });
 
 router.delete(
-    "/:vms",
+    "/:vms/ticket/:ticket",
     async (req: Request, res: Response, next: NextFunction) => {
         const vms = req.params.vms;
-        const result = await deleteVmsById({ vms });
+        const ticket = req.params.ticket;
+        const result = await deleteVmsById({ vms, ticket });
         next(result);
     }
 );

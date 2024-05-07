@@ -7,6 +7,7 @@ import {
     deleteService,
     getImagesOfServiceById,
     scanImageOfService,
+    findServiceInVmsByName,
 } from "../../controllers/service.controller";
 import { IRecordReqBodyCreate } from "../../interfaces/request/record.body";
 import { createRecord } from "../../controllers/record.controller";
@@ -16,14 +17,6 @@ export const router: Router = Router();
 router.post("/", async (req: Request, _: Response, next: NextFunction) => {
     const body = req.body.service as IServiceBody;
     const result = await createService(body);
-    next(result);
-});
-
-router.get("/vm/:vm", async (req: Request, _: Response, next: NextFunction) => {
-    const vm = req.params.vm as string;
-    const result = await getAllService({
-        vm,
-    });
     next(result);
 });
 
@@ -66,6 +59,24 @@ router.get("/images", async (req: Request, _: Response, next: NextFunction) => {
     next(result);
 });
 
+router.get("/vm/:vm", async (req: Request, _: Response, next: NextFunction) => {
+    const vm = req.params.vm as string;
+    const result = await getAllService({
+        vm,
+    });
+    next(result);
+});
+
+router.get("/", async (req: Request, _: Response, next: NextFunction) => {
+    const service = req.query.service as string;
+    const vm = req.query.vm as string;
+    const result = await findServiceInVmsByName({
+        vm,
+        service,
+    });
+    next(result);
+});
+
 router.get(
     "/:service",
     async (req: Request, _: Response, next: NextFunction) => {
@@ -78,11 +89,13 @@ router.get(
 );
 
 router.delete(
-    "/:service",
+    "/:service/vm/:vm",
     async (req: Request, _: Response, next: NextFunction) => {
         const service = req.params.service as string;
+        const vm = req.params.vm as string;
         const result = await deleteService({
             id: service,
+            vm: vm
         });
         next(result);
     }

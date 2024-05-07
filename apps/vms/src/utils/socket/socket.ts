@@ -1,24 +1,15 @@
 import { Server, Socket } from "socket.io";
 import { Server as HttpServer } from "http"; // Sử dụng createServer từ http
 import logger from "logger";
-import { database } from "app/build/result/error";
 import {
     sshCheckConnect,
     sshInstallDocker,
     sshInstallHadolint,
     sshInstallTrivy,
-    verifyToken,
 } from "../../controllers/vms.controller";
-import {
-    build,
-    clear,
-    clone,
-    deploy,
-    planCiCd,
-    scanDockerfile,
-    scanImages,
-} from "../../controllers/service.controller";
-import { redis } from "../../database";
+import { logOfDockerCompose, planCiCd } from "../../controllers/service.controller";
+import * as ssh2 from "ssh2";
+import { NodeSSH } from "node-ssh";
 
 export class SocketServer {
     static instance: SocketServer;
@@ -52,12 +43,8 @@ export class SocketServer {
     onConnection = (socket: Socket) => {
         logger.info(`socket '${socket.id}' connected!`);
 
-        socket.on("register", async (token) => {
-            if (redis.status !== "ready") {
-                await redis.connect();
-            }
-            const payload = await verifyToken(token);
-            await redis.set(payload.id, socket.id);
+        socket.on("logs", async (service, env) => {
+            await logOfDockerCompose(service, env, socket);
         });
 
         socket.on("CheckConnectVM", async (token, vm_id) => {
@@ -74,30 +61,6 @@ export class SocketServer {
 
         socket.on("InstallHadolint", async (token, vm_id) => {
             await sshInstallHadolint(socket, token, vm_id);
-        });
-
-        socket.on("clone", async (token, vm_id, service_id, env_name) => {
-            await clone(socket, token, vm_id, service_id, env_name);
-        });
-
-        socket.on("scanSyntax", async (token, vm_id, service_id, env_name) => {
-            await scanDockerfile(socket, token, vm_id, service_id, env_name);
-        });
-
-        socket.on("clear", async (token, vm_id, service_id, env_name) => {
-            await clear(socket, token, vm_id, service_id, env_name);
-        });
-
-        socket.on("build", async (token, vm_id, service_id, env_name) => {
-            await build(socket, token, vm_id, service_id, env_name);
-        });
-
-        socket.on("scanImages", async (token, vm_id, service_id, env_name) => {
-            await scanImages(socket, token, vm_id, service_id, env_name);
-        });
-
-        socket.on("deploy", async (token, vm_id, service_id, env_name) => {
-            await deploy(socket, token, vm_id, service_id, env_name);
         });
 
         socket.on("planCiCd", async (token, vm_id, service_id, env_name) => {

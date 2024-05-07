@@ -547,6 +547,9 @@ importers:
       '@types/socket.io':
         specifier: ^3.0.2
         version: 3.0.2
+      '@types/ssh2':
+        specifier: ^1.15.0
+        version: 1.15.0
       app:
         specifier: workspace:*
         version: link:../../packages/app

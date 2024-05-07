@@ -18,7 +18,10 @@ import { v1 } from "uuid";
 import jsonwebtoken, { VerifyOptions } from "jsonwebtoken";
 import { configs } from "../configs";
 import { getExpireTime } from "../middlewares";
-import { findTicketByUserId } from "../services/ticket.service";
+import {
+    deleteVmsOfTicketById,
+    findTicketByUserId,
+} from "../services/ticket.service";
 import { EStatus } from "../interfaces/models/vms";
 
 export async function createVms(params: {
@@ -442,6 +445,24 @@ export async function getVmsByIds(params: {
     return success.ok(result);
 }
 
+export async function findVmsByHost(params: {
+    host: string;
+}): Promise<ResultSuccess> {
+    const hosts = await Vms.find(
+        {
+            host: {
+                $regex: `${params.host}`,
+                $options: "i",
+            },
+        },
+        {
+            _id: 0,
+        }
+    );
+
+    return success.ok(hosts);
+}
+
 export async function updateVms(params: {
     id: string;
     last_connect?: Date;
@@ -488,6 +509,7 @@ export async function updateVms(params: {
 
 export async function deleteVmsById(params: {
     vms: string;
+    ticket: string;
 }): Promise<ResultSuccess> {
     const check = await Vms.findOne({ id: params.vms });
     const err: ResultError = {
@@ -506,7 +528,14 @@ export async function deleteVmsById(params: {
 
     const result = await Vms.deleteOne({ id: params.vms });
 
-    return success.ok({ message: "deleted successfully" });
+    const isDelete = await deleteVmsOfTicketById({
+        ticket: params.ticket,
+        vm: params.vms,
+    });
+    if (isDelete.body?.isDelete && result.deletedCount === 1) {
+        return success.ok({ message: "deleted successfully" });
+    }
+    return success.ok({ message: "deleted fail" });
 }
 
 export async function sshInstallDocker(

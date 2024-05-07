@@ -3,23 +3,30 @@ import {
     checkTicketExitsByGithubId,
     checkTicketExitsByUserId,
     createdTicket,
+    deleteVmsOfTicketById,
     findTicketByGithubId,
     findTicketByUserId,
 } from "../../controllers/ticket.controller";
 
 export const router: Router = Router();
 
-router.get("/by-user-id", async (req: Request, _: Response, next: NextFunction) => {
-    const user_id = req.query.user_id as string;
-    const result = await findTicketByUserId({ user_id: user_id });
-    next(result);
-});
+router.get(
+    "/by-user-id",
+    async (req: Request, _: Response, next: NextFunction) => {
+        const user_id = req.query.user_id as string;
+        const result = await findTicketByUserId({ user_id: user_id });
+        next(result);
+    }
+);
 
-router.get("/by-github-id", async (req: Request, _: Response, next: NextFunction) => {
-    const github_id = req.query.github_id as string;
-    const result = await findTicketByGithubId({ github_id: github_id });
-    next(result);
-});
+router.get(
+    "/by-github-id",
+    async (req: Request, _: Response, next: NextFunction) => {
+        const github_id = req.query.github_id as string;
+        const result = await findTicketByGithubId({ github_id: github_id });
+        next(result);
+    }
+);
 
 router.get(
     "/check-ticket-by-user/:user_id",
@@ -40,6 +47,11 @@ router.get(
         next(result);
     }
 );
+router.post("/delete-vms", async (req: Request, _: Response, next: NextFunction) => {
+    const body = req.body;
+    const result = await deleteVmsOfTicketById({ ...body });
+    next(result);
+});
 
 router.post("/", async (req: Request, _: Response, next: NextFunction) => {
     const body = req.body;

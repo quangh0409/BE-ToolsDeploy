@@ -2,6 +2,7 @@ import { NextFunction, Request, Response, Router } from "express";
 import { Payload } from "app";
 import {
     createRecord,
+    getRecordById,
     getRecordsOfService,
     updateRecord,
 } from "../../controllers/record.controller";
@@ -27,3 +28,12 @@ router.get("/", async (req: Request, _: Response, next: NextFunction) => {
     const result = await getRecordsOfService({ service, env });
     next(result);
 });
+
+router.get(
+    "/:record",
+    async (req: Request, _: Response, next: NextFunction) => {
+        const record = req.params.record as string;
+        const result = await getRecordById({ record });
+        next(result);
+    }
+);

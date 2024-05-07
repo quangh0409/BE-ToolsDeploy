@@ -40,6 +40,6 @@ export async function runPostman(params: {
     });
 
     let htmlContent = fs.readFileSync(file_path);
-
+    fs.unlinkSync(file_path);
     return htmlContent;
 }

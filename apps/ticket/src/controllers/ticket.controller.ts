@@ -5,6 +5,7 @@ import Ticket from "../models/ticket";
 import { getUserById } from "../services/user.service";
 import { getGithubById } from "../services/git.service";
 import { UpdateQuery } from "mongoose";
+import { v1 } from "uuid";
 
 export async function createdTicket(params: {
     github_id?: string;
@@ -29,6 +30,7 @@ export async function createdTicket(params: {
     }
 
     const ticket = new Ticket({
+        id: v1(),
         github_id: params.github_id,
         gitlab_id: params.gitlab_id,
         user_id: params.user_id,
@@ -179,4 +181,35 @@ export async function checkTicketExitsByGithubId(params: {
         return success.ok({ exits: true });
     }
     return success.ok({ exits: false });
+}
+
+export async function deleteVmsOfTicketById(params: {
+    ticket: string;
+    vm: string;
+}): Promise<ResultSuccess> {
+    const ticket = await Ticket.findOne({ id: params.ticket });
+
+    if (!ticket) {
+        throw new HttpError({
+            status: HttpStatus.NOT_FOUND,
+            code: "TICKET_NOT_EXITS",
+            errors: [
+                {
+                    param: "ticket",
+                    location: "params",
+                    value: params.ticket,
+                },
+            ],
+        });
+    }
+
+    const vms = ticket.vms_ids.filter((id) => id !== params.vm);
+
+    if (vms.length === ticket.vms_ids.length - 1) {
+        ticket.vms_ids = vms;
+        await ticket.save();
+        return success.ok({ isDelete: true });
+    }
+
+    return success.ok({ isDelete: false });
 }
