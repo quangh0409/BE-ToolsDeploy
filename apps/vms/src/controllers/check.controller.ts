@@ -16,6 +16,7 @@ export async function runPostman(params: {
     env: string;
     branch: string;
 }): Promise<Buffer | undefined> {
+    console.log("🚀 ~ params:", params);
     const path = __dirname;
     const file_path = resolve(
         path,
@@ -28,7 +29,7 @@ export async function runPostman(params: {
     const environment = Buffer.from(params.environment, "base64").toString(
         "utf-8"
     );
-
+    const title = `Report test service(${params.service}) environment(${params.env}) branch(${params.branch})`;
     try {
         await newPostman({
             collection: JSON.parse(collection),
@@ -36,13 +37,17 @@ export async function runPostman(params: {
 
             reporters: ["htmlextra"],
             reporter: {
-                htmlextra: { export: file_path }, // Không xuất ra tệp
-                title: `Report test service-${params.service} environment-${params.env} branch-${params.branch}`,
+                htmlextra: {
+                    export: file_path,
+                    title: title,
+                    titleSize: 1,
+                    browserTitle: title,
+                }, // Không xuất ra tệp
             },
         });
 
         let htmlContent = fs.readFileSync(file_path);
-        fs.unlinkSync(file_path);
+        // fs.unlinkSync(file_path);
         return htmlContent;
     } catch (err) {
         console.error(err);
