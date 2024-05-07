@@ -197,11 +197,11 @@ export async function createVms(params: {
         });
         await result.save();
 
-        throw new HttpError(
-            error.notFound({
-                message: "wrong user or pass",
-            })
-        );
+        return success.ok({
+            ...result.toJSON(),
+            pass: undefined,
+            _id: undefined,
+        });
     }
 }
 
