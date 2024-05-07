@@ -10,6 +10,7 @@ const newPostman = util.promisify(newman.run);
 export async function runPostman(params: {
     userId: string;
     collection: string;
+    environment: string;
 }): Promise<Buffer | undefined> {
     const path = __dirname;
     const file_path = resolve(
@@ -20,10 +21,15 @@ export async function runPostman(params: {
     const collection = Buffer.from(params.collection, "base64").toString(
         "utf-8"
     );
+    const environment = Buffer.from(params.environment, "base64").toString(
+        "utf-8"
+    );
 
     try {
         await newPostman({
             collection: JSON.parse(collection),
+            environment: JSON.parse(environment),
+
             reporters: ["htmlextra"],
             reporter: {
                 htmlextra: { export: file_path }, // Không xuất ra tệp
@@ -31,7 +37,7 @@ export async function runPostman(params: {
         });
 
         let htmlContent = fs.readFileSync(file_path);
-        fs.unlinkSync(file_path);
+        // fs.unlinkSync(file_path);
         return htmlContent;
     } catch (err) {
         console.error(err);

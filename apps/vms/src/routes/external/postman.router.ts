@@ -6,9 +6,9 @@ export const router: Router = Router();
 
 router.post("/", async (req: Request, res: Response, next: NextFunction) => {
     const collection = req.body.collection as string;
-    console.log(req.payload)
+    const environment = req.body.environment as string;
     const { id: userId } = req.payload as Payload;
-    const result = await runPostman({ userId, collection });
+    const result = await runPostman({ userId, collection, environment });
     res.setHeader("Content-Type", "text/html");
 
     res.status(HttpStatus.OK).send(result).end();
