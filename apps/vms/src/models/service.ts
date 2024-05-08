@@ -88,12 +88,32 @@ const serviceSchema = new mongoose.Schema(
                     },
                     postman: {
                         type: {
-                            name: {
-                                type: String,
+                            collection: {
+                                type: {
+                                    content: {
+                                        type: String,
+                                        require: true,
+                                    },
+                                    name: {
+                                        type: String,
+                                        require: true,
+                                    },
+                                },
+                                _id: false,
                                 required: true,
                             },
-                            content: {
-                                type: String,
+                            environment: {
+                                type: {
+                                    content: {
+                                        type: String,
+                                        require: true,
+                                    },
+                                    name: {
+                                        type: String,
+                                        require: true,
+                                    },
+                                },
+                                _id: false,
                                 required: true,
                             },
                         },
