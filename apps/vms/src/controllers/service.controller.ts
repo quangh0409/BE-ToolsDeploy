@@ -196,9 +196,9 @@ export async function getServiceById(params: {
     const result = service.toJSON();
     const envs = [];
     for (const e of result.environment) {
-        console.log("🚀 ~ e:", e)
+        console.log("🚀 ~ e:", e);
         const vm = await Vms.findOne({ id: e.vm });
-        console.log("🚀 ~ vm:", vm)
+        console.log("🚀 ~ vm:", vm);
         const temp = Object.assign({}, e, {
             vm: {
                 id: vm?.id,
@@ -368,7 +368,7 @@ export async function logOfDockerCompose(
 ): Promise<boolean> {
     const ser = await Service.findOne({ id: service });
     const ssh = new NodeSSH();
-
+    console.log(service, env);
     if (ser) {
         const environment = ser.environment.find((e) => e.name === env);
 
