@@ -471,15 +471,11 @@ export async function findVmsByHost(params: {
 
 export async function updateVms(params: {
     id: string;
-    user?: string;
-    pass?: string;
+    user: string;
+    pass: string;
 }): Promise<ResultSuccess> {
-    const vm = await Vms.aggregate([
-        {
-            $match: {
-                id: params.id,
-            },
-        },
+    const vm = await Vms.findOneAndUpdate(
+        { id: params.id },
         {
             $set: {
                 user: params.user,
@@ -487,11 +483,9 @@ export async function updateVms(params: {
             },
         },
         {
-            $project: {
-                _id: 0,
-            },
-        },
-    ]);
+            new: true,
+        }
+    );
 
     if (!vm) {
         throw new HttpError(
@@ -502,7 +496,162 @@ export async function updateVms(params: {
         );
     }
 
-    return success.ok(vm);
+    const ssh = new NodeSSH();
+    try {
+        await ssh.connect({
+            host: vm.host,
+            username: params.user,
+            password: params.pass,
+        });
+
+        let log;
+        log = await ssh.execCommand("hostnamectl");
+        let operating_system: string = "";
+        let kernel: string = "";
+        let architecture: string = "";
+        log.stdout.split("\n").map((t) => {
+            const ob = t.split(": ");
+            if ("Operating System" === ob[0].trim()) {
+                operating_system = ob[1];
+            }
+            if ("Kernel" === ob[0].trim()) {
+                kernel = ob[1];
+            }
+            if ("Architecture" === ob[0].trim()) {
+                architecture = ob[1];
+            }
+        });
+        log = await ssh.execCommand("uname -o");
+        operating_system += ` ${log.stdout}`;
+        log = await ssh.execCommand("cat /etc/os-release");
+        let home_url: string = "";
+        let support_url: string = "";
+        let bug_report_url: string = "";
+        let privacy_policy_url: string = "";
+        log.stdout.split("\n").map((t) => {
+            const ob = t.split("=");
+            if ("HOME_URL" === ob[0]) {
+                home_url = `${ob[1].replace(/"/g, "")}`;
+            } else if ("SUPPORT_URL" === ob[0]) {
+                support_url = `${ob[1].replace(/"/g, "")}`;
+            } else if ("BUG_REPORT_URL" === ob[0]) {
+                bug_report_url = `${ob[1].replace(/"/g, "")}`;
+            } else if ("PRIVACY_POLICY_URL" === ob[0]) {
+                privacy_policy_url = `${ob[1].replace(/"/g, "")}`;
+            }
+        });
+        log = await ssh.execCommand("landscape-sysinfo");
+        let obj: { [key: string]: string } = {};
+        const regex = /([\w\s\/]+):\s*([^\n]+?)(?=\s{2,}[\w\s\/]+:|$)/g;
+        let match;
+
+        while ((match = regex.exec(log.stdout)) !== null) {
+            let key = match[1].trim().replace(/\s+/g, " "); // Normalize whitespace in keys
+            let value = match[2].trim();
+            // Handle cases where multiple entries might be on the same line
+            if (value.includes("   ")) {
+                let parts = value.split("   ").map((part) => part.trim());
+                let lastKey = key;
+                parts.forEach((part, index) => {
+                    if (index === 0) {
+                        obj[lastKey] = part;
+                    } else {
+                        let newSplit = part.split(": ");
+                        lastKey = newSplit[0].trim().replace(/\s+/g, " ");
+                        obj[lastKey] = newSplit[1]?.trim();
+                    }
+                });
+            } else {
+                obj[key] = value;
+            }
+        }
+        log = await ssh.execCommand(`lscpu | grep '^CPU(s):'`);
+        const cpus = log.stdout.split(/\s{2,}/g)[1];
+        log = await ssh.execCommand(`lscpu | grep 'Socket(s)'`);
+        const sockets = log.stdout.split(/\s{2,}/g)[1];
+        log = await ssh.execCommand(`lscpu | grep 'Core(s) per socket'`);
+        const cores = `${
+            Number.parseInt(log.stdout.split(/\s{2,}/g)[1]) *
+            Number.parseInt(sockets)
+        }`;
+        log = await ssh.execCommand(`lscpu | grep 'Thread(s) per core'`);
+        const thread = `${
+            Number.parseInt(log.stdout.split(/\s{2,}/g)[1]) *
+            Number.parseInt(cores)
+        }`;
+        log = await ssh.execCommand(`free --giga | awk '/Mem/{print $2}'`);
+        let ram;
+        if (log.stdout === "0") {
+            log = await ssh.execCommand(`free -m | awk '/Mem/{print $2}'`);
+            ram = `${log.stdout}MB`;
+        } else {
+            ram = `${log.stdout}GB`;
+        }
+        const set_up: {
+            docker: string;
+            hadolint: string;
+            trivy: string;
+        } = {
+            docker: "",
+            hadolint: "",
+            trivy: "",
+        };
+        log = await ssh.execCommand(`hadolint --version`);
+        if (log.code === 0) {
+            set_up.hadolint = log.stdout;
+        }
+        log = await ssh.execCommand(`trivy -v`);
+        if (log.code === 0) {
+            set_up.trivy = log.stdout.split("\n")[0];
+        }
+        log = await ssh.execCommand(`docker --version`);
+        if (log.code === 0) {
+            set_up.docker = log.stdout;
+        }
+
+        ssh.dispose();
+        const result = await Vms.findOneAndUpdate(
+            {
+                id: params.id,
+            },
+            {
+                $set: {
+                    user: params.user,
+                    pass: params.pass,
+                    status: EStatus.CONNECT,
+                    last_connect: new Date(),
+                    operating_system: operating_system,
+                    kernel: kernel,
+                    architecture: architecture,
+                    home_url: home_url,
+                    support_url: support_url,
+                    bug_report_url: bug_report_url,
+                    privacy_policy_url: privacy_policy_url,
+                    cpus: cpus,
+                    cores: cores,
+                    sockets: sockets,
+                    ram: ram,
+                    thread: thread,
+                    set_up: set_up,
+                },
+            },
+            {
+                new: true,
+            }
+        );
+
+        return success.ok({
+            ...result!.toJSON(),
+            _id: undefined,
+            landscape_sysinfo: obj,
+        });
+    } catch (err) {
+        console.log("🚀 ~ err:", err);
+        return success.ok({
+            ...vm.toJSON(),
+            _id: undefined,
+        });
+    }
 }
 
 export async function deleteVmsById(params: {
