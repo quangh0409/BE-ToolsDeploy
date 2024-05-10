@@ -63,7 +63,7 @@ export async function updateService(
 ): Promise<ResultSuccess> {
     const service = await Service.findOneAndUpdate(
         {
-            id: v1(),
+            id: params.id,
         },
         {
             name: params.name,
