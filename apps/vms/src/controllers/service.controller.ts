@@ -66,13 +66,15 @@ export async function updateService(
             id: params.id,
         },
         {
-            name: params.name,
-            architectura: params.architectura,
-            language: params.language,
-            repo: params.repo,
-            source: params.source,
-            user: params.user,
-            environment: [...params.environments],
+            $set: {
+                name: params.name,
+                architectura: params.architectura,
+                language: params.language,
+                repo: params.repo,
+                source: params.source,
+                user: params.user,
+                environment: [...params.environments],
+            },
         }
     );
 
