@@ -108,5 +108,6 @@ router.put(
         const service = req.params.service as string;
         const body = req.body.service as IServiceBody;
         const result = await updateService({ ...body, id: service });
+        next(result);
     }
 );
