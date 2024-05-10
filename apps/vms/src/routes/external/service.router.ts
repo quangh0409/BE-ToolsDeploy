@@ -8,6 +8,7 @@ import {
     getImagesOfServiceById,
     scanImageOfService,
     findServiceInVmsByName,
+    updateService,
 } from "../../controllers/service.controller";
 import { IRecordReqBodyCreate } from "../../interfaces/request/record.body";
 import { createRecord } from "../../controllers/record.controller";
@@ -95,8 +96,17 @@ router.delete(
         const vm = req.params.vm as string;
         const result = await deleteService({
             id: service,
-            vm: vm
+            vm: vm,
         });
         next(result);
+    }
+);
+
+router.put(
+    "/:service",
+    async (req: Request, _: Response, next: NextFunction) => {
+        const service = req.params.service as string;
+        const body = req.body.service as IServiceBody;
+        const result = await updateService({ ...body, id: service });
     }
 );

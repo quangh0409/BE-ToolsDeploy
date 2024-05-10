@@ -56,6 +56,58 @@ export async function createService(
     return success.ok(service);
 }
 
+export async function updateService(
+    params: IServiceBody & {
+        id: string;
+    }
+): Promise<ResultSuccess> {
+    const service = await Service.findOneAndUpdate(
+        {
+            id: v1(),
+        },
+        {
+            name: params.name,
+            architectura: params.architectura,
+            language: params.language,
+            repo: params.repo,
+            source: params.source,
+            user: params.user,
+            environment: [...params.environments],
+        }
+    );
+
+    const vms_ids = params.environments.map((env) => {
+        return env.vm;
+    });
+
+    if (!service) {
+        throw new HttpError(
+            error.notFound({
+                location: "params",
+                param: "service",
+                message: `service not exit`,
+                value: params.id,
+            })
+        );
+    }
+
+    await Vms.updateMany(
+        {
+            id: {
+                $in: vms_ids,
+            },
+        },
+        {
+            $push: {
+                services: service.id,
+            },
+        }
+    );
+
+    await service.save();
+    return success.ok(service);
+}
+
 export async function deleteService(params: {
     id: string;
     vm: string;
@@ -679,7 +731,7 @@ export async function planCiCd(
                                 service.repo +
                                 " && hadolint " +
                                 docker_file.location +
-                                " --no-fail";
+                                " --no-fail --format json";
                             log = await ssh.execCommand(command);
                             if (log.code !== 0) {
                                 record.ocean["scanSyntax"] = {
@@ -740,7 +792,7 @@ export async function planCiCd(
                                     status: EStatus.ERROR,
                                 };
                                 record.logs["scanSyntax"].push({
-                                    log: [log.stdout],
+                                    log: [""],
                                     title: "scanSyntax",
                                     sub_title: `${command}`,
                                     mess: undefined,
@@ -831,12 +883,12 @@ export async function planCiCd(
                         status: EStatus.IN_PROGRESS,
                     };
                     start_time = new Date();
-                    command = `docker builder prune -f`;
+                    command = `cd ${service.repo} && docker-compose down && docker builder prune -f`;
                     record.logs["clear"].push({
                         log: [],
                         title: "clear",
                         // sub_title: `docker stop $(docker ps -aq) || echo no container && docker rmi -f $(docker images -q) || echo no image && docker builder prune -f`,
-                        sub_title: `docker builder prune -f`,
+                        sub_title: command,
                         mess: undefined,
                         status: EStatus.IN_PROGRESS,
                         start_time: new Date(),
