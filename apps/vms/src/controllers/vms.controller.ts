@@ -279,71 +279,77 @@ export async function getVmsById(params: {
     }
 
     const ssh = new NodeSSH();
+    try {
+        await ssh.connect({
+            host: check.host,
+            username: check.user,
+            password: check.pass,
+        });
 
-    await ssh.connect({
-        host: check.host,
-        username: check.user,
-        password: check.pass,
-    });
+        let log;
+        log = await ssh.execCommand("landscape-sysinfo");
+        let obj: { [key: string]: string } = {};
+        const regex = /([\w\s\/]+):\s*([^\n]+?)(?=\s{2,}[\w\s\/]+:|$)/g;
+        let match;
 
-    let log;
-    log = await ssh.execCommand("landscape-sysinfo");
-    let obj: { [key: string]: string } = {};
-    const regex = /([\w\s\/]+):\s*([^\n]+?)(?=\s{2,}[\w\s\/]+:|$)/g;
-    let match;
-
-    while ((match = regex.exec(log.stdout)) !== null) {
-        let key = match[1].trim().replace(/\s+/g, " "); // Normalize whitespace in keys
-        let value = match[2].trim();
-        // Handle cases where multiple entries might be on the same line
-        if (value.includes("   ")) {
-            let parts = value.split("   ").map((part) => part.trim());
-            let lastKey = key;
-            parts.forEach((part, index) => {
-                if (index === 0) {
-                    obj[lastKey] = part;
-                } else {
-                    let newSplit = part.split(": ");
-                    lastKey = newSplit[0].trim().replace(/\s+/g, " ");
-                    obj[lastKey] = newSplit[1]?.trim();
-                }
-            });
-        } else {
-            obj[key] = value;
+        while ((match = regex.exec(log.stdout)) !== null) {
+            let key = match[1].trim().replace(/\s+/g, " "); // Normalize whitespace in keys
+            let value = match[2].trim();
+            // Handle cases where multiple entries might be on the same line
+            if (value.includes("   ")) {
+                let parts = value.split("   ").map((part) => part.trim());
+                let lastKey = key;
+                parts.forEach((part, index) => {
+                    if (index === 0) {
+                        obj[lastKey] = part;
+                    } else {
+                        let newSplit = part.split(": ");
+                        lastKey = newSplit[0].trim().replace(/\s+/g, " ");
+                        obj[lastKey] = newSplit[1]?.trim();
+                    }
+                });
+            } else {
+                obj[key] = value;
+            }
         }
-    }
 
-    const set_up: {
-        docker: string;
-        hadolint: string;
-        trivy: string;
-    } = {
-        docker: "",
-        hadolint: "",
-        trivy: "",
-    };
-    log = await ssh.execCommand(`hadolint --version`);
-    if (log.code === 0) {
-        set_up.hadolint = log.stdout;
-    }
-    log = await ssh.execCommand(`trivy -v`);
-    if (log.code === 0) {
-        set_up.trivy = log.stdout.split("\n")[0];
-    }
-    log = await ssh.execCommand(`docker --version`);
-    if (log.code === 0) {
-        set_up.docker = log.stdout;
-    }
+        const set_up: {
+            docker: string;
+            hadolint: string;
+            trivy: string;
+        } = {
+            docker: "",
+            hadolint: "",
+            trivy: "",
+        };
+        log = await ssh.execCommand(`hadolint --version`);
+        if (log.code === 0) {
+            set_up.hadolint = log.stdout;
+        }
+        log = await ssh.execCommand(`trivy -v`);
+        if (log.code === 0) {
+            set_up.trivy = log.stdout.split("\n")[0];
+        }
+        log = await ssh.execCommand(`docker --version`);
+        if (log.code === 0) {
+            set_up.docker = log.stdout;
+        }
 
-    check.set_up = set_up;
+        check.set_up = set_up;
 
-    await check.save();
+        await check.save();
 
-    return success.ok({
-        ...check.toJSON(),
-        _id: undefined,
-        landscape_sysinfo: obj,
-    });
+        return success.ok({
+            ...check.toJSON(),
+            _id: undefined,
+            landscape_sysinfo: obj,
+        });
+    } catch (error) {
+        return success.ok({
+            ...check.toJSON(),
+            _id: undefined,
+        });
+    }
 }
 
 export async function getVmsByIds(params: {
