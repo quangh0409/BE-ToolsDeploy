@@ -1,3 +1,4 @@
+import logger from "logger";
 import { redis } from "../database";
 import Service from "../models/service";
 import { findTicketByGithubId } from "../services/ticket.service";
@@ -36,6 +37,13 @@ export async function webhookHandle(params: {
                 );
 
                 if (env) {
+                    console.log(
+                        "đã  gửi socket tới FE",
+                        `webhooks-${user_id}`,
+                        user_id,
+                        service.id,
+                        env!.name
+                    );
                     SocketServer.getInstance().io.emit(
                         `webhooks-${user_id}`,
                         user_id,
