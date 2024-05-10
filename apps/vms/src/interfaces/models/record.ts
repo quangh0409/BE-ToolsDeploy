@@ -33,6 +33,8 @@ export interface ILogContent {
     sub_title: string;
     mess?: string;
     status: EStatus;
+    start_time: Date;
+    end_time?: Date;
 }
 
 export interface ILogCommand {

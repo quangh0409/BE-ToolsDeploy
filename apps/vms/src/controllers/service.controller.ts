@@ -82,7 +82,7 @@ export async function deleteService(params: {
     }
 
     const services = vm.services?.filter((service) => service != params.id);
-    console.log("🚀 ~ services:", services)
+    console.log("🚀 ~ services:", services);
 
     vm.services = services;
     await vm.save();
@@ -431,6 +431,8 @@ export async function planCiCd(
                     commit_html_url: commit.body!.url,
                 });
                 /** handle stage ssh  */
+                let start_time = new Date();
+
                 try {
                     record.logs["ssh"] = [
                         {
@@ -439,6 +441,7 @@ export async function planCiCd(
                             sub_title: "ssh connect",
                             mess: "CONNECT",
                             status: EStatus.START,
+                            start_time: start_time,
                         },
                     ];
                     record.ocean["ssh"] = {
@@ -465,6 +468,8 @@ export async function planCiCd(
                             sub_title: "ssh connect successfully",
                             mess: "CONNECT SUCCESSFULLY",
                             status: EStatus.DONE,
+                            start_time: start_time,
+                            end_time: new Date(),
                         },
                     ];
 
@@ -484,7 +489,9 @@ export async function planCiCd(
                             title: "ssh",
                             sub_title: "ssh connect failed",
                             mess: JSON.stringify(err),
+                            start_time: start_time,
                             status: EStatus.ERROR,
+                            end_time: new Date(),
                         },
                     ];
                     SocketServer.getInstance().io.emit(
@@ -502,6 +509,7 @@ export async function planCiCd(
                 let log;
                 let command;
                 /** handle stage clone  */
+
                 if (record.ocean["ssh"].status === EStatus.DONE) {
                     record.ocean["clone"] = {
                         title: "clone",
@@ -517,6 +525,7 @@ export async function planCiCd(
                     } 2> /dev/null || (rm -rf ${service!.repo} ; git clone ${
                         service!.source
                     })`;
+                    start_time = new Date();
                     log = await ssh.execCommand(command);
                     if (log.code === 0) {
                         record.ocean["clone"] = {
@@ -528,7 +537,9 @@ export async function planCiCd(
                             title: "clone",
                             sub_title: command,
                             mess: undefined,
-                            status: EStatus.IN_PROGRESS,
+                            status: EStatus.SUCCESSFULLY,
+                            start_time: start_time,
+                            end_time: new Date(),
                         });
                         SocketServer.getInstance().io.emit(
                             `logPlanCiCd-${payload.id}`,
@@ -537,6 +548,7 @@ export async function planCiCd(
                         command = `cd ${service!.repo} && git checkout ${
                             env!.branch
                         }`;
+                        start_time = new Date();
                         log = await ssh.execCommand(command);
                     }
                     if (log.code === 0) {
@@ -545,13 +557,17 @@ export async function planCiCd(
                             title: "clone",
                             sub_title: command,
                             mess: undefined,
-                            status: EStatus.IN_PROGRESS,
+                            status: EStatus.SUCCESSFULLY,
+                            start_time: start_time,
+                            end_time: new Date(),
                         });
                         SocketServer.getInstance().io.emit(
                             `logPlanCiCd-${payload.id}`,
                             record
                         );
+
                         for (const docker_file of env!.docker_file) {
+                            start_time = new Date();
                             command = `cat > ${service.repo}/${docker_file.location}`;
                             log = await ssh.execCommand(command, {
                                 stdin: docker_file.content,
@@ -567,6 +583,8 @@ export async function planCiCd(
                                     sub_title: `${command}`,
                                     mess: undefined,
                                     status: EStatus.ERROR,
+                                    start_time: start_time,
+                                    end_time: new Date(),
                                 });
                                 SocketServer.getInstance().io.emit(
                                     `logPlanCiCd-${payload.id}`,
@@ -586,7 +604,9 @@ export async function planCiCd(
                                 title: "clone",
                                 sub_title: `${command}`,
                                 mess: undefined,
-                                status: EStatus.IN_PROGRESS,
+                                status: EStatus.SUCCESSFULLY,
+                                start_time: start_time,
+                                end_time: new Date(),
                             });
                             SocketServer.getInstance().io.emit(
                                 `logPlanCiCd-${payload.id}`,
@@ -616,6 +636,8 @@ export async function planCiCd(
                             sub_title: `${command}`,
                             mess: undefined,
                             status: EStatus.ERROR,
+                            start_time: start_time,
+                            end_time: new Date(),
                         });
                         SocketServer.getInstance().io.emit(
                             `logPlanCiCd-${payload.id}`,
@@ -650,6 +672,7 @@ export async function planCiCd(
                     );
                     if (env?.docker_file && env.docker_file.length > 0) {
                         for (const docker_file of env.docker_file) {
+                            start_time = new Date();
                             // command = `cd  ${service.repo} /${docker_file.location}`;
                             command =
                                 "cd " +
@@ -669,6 +692,8 @@ export async function planCiCd(
                                     sub_title: `${command}`,
                                     mess: undefined,
                                     status: EStatus.ERROR,
+                                    start_time: start_time,
+                                    end_time: new Date(),
                                 });
                                 SocketServer.getInstance().io.emit(
                                     `logPlanCiCd-${payload.id}`,
@@ -688,7 +713,9 @@ export async function planCiCd(
                                 title: "scanSyntax",
                                 sub_title: `${command}`,
                                 mess: undefined,
-                                status: EStatus.IN_PROGRESS,
+                                status: EStatus.SUCCESSFULLY,
+                                start_time: start_time,
+                                end_time: new Date(),
                             });
                             SocketServer.getInstance().io.emit(
                                 `logPlanCiCd-${payload.id}`,
@@ -699,6 +726,7 @@ export async function planCiCd(
                     if (env?.docker_compose && env.docker_compose.length > 0) {
                         for (const docker_compose of env.docker_compose) {
                             // command = `cd  ${service.repo} /${docker_file.location}`;
+                            start_time = new Date();
                             command =
                                 "cd " +
                                 service.repo +
@@ -717,6 +745,8 @@ export async function planCiCd(
                                     sub_title: `${command}`,
                                     mess: undefined,
                                     status: EStatus.ERROR,
+                                    start_time: start_time,
+                                    end_time: new Date(),
                                 });
                                 SocketServer.getInstance().io.emit(
                                     `logPlanCiCd-${payload.id}`,
@@ -736,7 +766,9 @@ export async function planCiCd(
                                 title: "scanSyntax",
                                 sub_title: `${command}`,
                                 mess: undefined,
-                                status: EStatus.IN_PROGRESS,
+                                status: EStatus.SUCCESSFULLY,
+                                start_time: start_time,
+                                end_time: new Date(),
                             });
                             SocketServer.getInstance().io.emit(
                                 `logPlanCiCd-${payload.id}`,
@@ -766,6 +798,8 @@ export async function planCiCd(
                             sub_title: `${command}`,
                             mess: undefined,
                             status: EStatus.ERROR,
+                            start_time: start_time,
+                            end_time: new Date(),
                         });
                         SocketServer.getInstance().io.emit(
                             `logPlanCiCd-${payload.id}`,
@@ -796,6 +830,7 @@ export async function planCiCd(
                         title: "clear",
                         status: EStatus.IN_PROGRESS,
                     };
+                    start_time = new Date();
                     command = `docker builder prune -f`;
                     record.logs["clear"].push({
                         log: [],
@@ -804,6 +839,7 @@ export async function planCiCd(
                         sub_title: `docker builder prune -f`,
                         mess: undefined,
                         status: EStatus.IN_PROGRESS,
+                        start_time: new Date(),
                     });
                     SocketServer.getInstance().io.emit(
                         `logPlanCiCd-${payload.id}`,
@@ -834,6 +870,8 @@ export async function planCiCd(
                             title: "clear",
                             status: EStatus.SUCCESSFULLY,
                         };
+                        record.logs["clear"][0].end_time = new Date();
+                        record.logs["clear"][0].status = EStatus.SUCCESSFULLY;
                         SocketServer.getInstance().io.emit(
                             `logPlanCiCd-${payload.id}`,
                             record
@@ -844,6 +882,8 @@ export async function planCiCd(
                             title: "clear",
                             status: EStatus.ERROR,
                         };
+                        record.logs["clear"][0].end_time = new Date();
+                        record.logs["clear"][0].status = EStatus.ERROR;
                         SocketServer.getInstance().io.emit(
                             `logPlanCiCd-${payload.id}`,
                             record
@@ -871,6 +911,7 @@ export async function planCiCd(
                         title: "build",
                         status: EStatus.IN_PROGRESS,
                     };
+                    start_time = new Date();
                     command = `whoami && cd ${
                         service!.repo
                     } && docker-compose build`;
@@ -881,6 +922,7 @@ export async function planCiCd(
                         sub_title: command,
                         mess: undefined,
                         status: EStatus.IN_PROGRESS,
+                        start_time: start_time,
                     });
                     SocketServer.getInstance().io.emit(
                         `logPlanCiCd-${payload.id}`,
@@ -921,6 +963,8 @@ export async function planCiCd(
                             title: "build",
                             status: EStatus.SUCCESSFULLY,
                         };
+                        record.logs["build"][0].end_time = new Date();
+                        record.logs["build"][0].status = EStatus.SUCCESSFULLY;
                         SocketServer.getInstance().io.emit(
                             `logPlanCiCd-${payload.id}`,
                             record
@@ -931,6 +975,8 @@ export async function planCiCd(
                             title: "build",
                             status: EStatus.ERROR,
                         };
+                        record.logs["build"][0].end_time = new Date();
+                        record.logs["build"][0].status = EStatus.ERROR;
                         SocketServer.getInstance().io.emit(
                             `logPlanCiCd-${payload.id}`,
                             record
@@ -976,6 +1022,7 @@ export async function planCiCd(
                     }
                     let i = 0;
                     for (const image of images) {
+                        start_time = new Date();
                         command = `trivy image ${image} --format json --scanners vuln`;
                         record.logs["scanImages"].push({
                             log: [],
@@ -983,22 +1030,21 @@ export async function planCiCd(
                             sub_title: command,
                             mess: undefined,
                             status: EStatus.IN_PROGRESS,
+                            start_time: start_time,
                         });
                         SocketServer.getInstance().io.emit(
                             `logPlanCiCd-${payload.id}`,
                             record
                         );
                         log = await ssh.execCommand(command);
-                        record.logs["scanImages"][i].log?.push(log.stdout);
-                        SocketServer.getInstance().io.emit(
-                            `logPlanCiCd-${payload.id}`,
-                            record
-                        );
+
                         if (log.code !== 0) {
                             record.ocean["scanImages"] = {
                                 title: "scanImages",
                                 status: EStatus.ERROR,
                             };
+                            record.logs["scanImages"][i].end_time = new Date();
+                            record.logs["scanImages"][i].status = EStatus.ERROR;
                             SocketServer.getInstance().io.emit(
                                 `logPlanCiCd-${payload.id}`,
                                 record
@@ -1012,6 +1058,14 @@ export async function planCiCd(
                             await service.save();
                             return false;
                         }
+                        record.logs["scanImages"][i].log?.push(log.stdout);
+                        record.logs["scanImages"][i].end_time = new Date();
+                        record.logs["scanImages"][i].status =
+                            EStatus.SUCCESSFULLY;
+                        SocketServer.getInstance().io.emit(
+                            `logPlanCiCd-${payload.id}`,
+                            record
+                        );
 
                         i++;
                     }
@@ -1043,6 +1097,7 @@ export async function planCiCd(
                         title: "deploy",
                         status: EStatus.IN_PROGRESS,
                     };
+                    start_time = new Date();
                     command = `cd ${
                         service!.repo
                     } && docker-compose up --build -d`;
@@ -1052,6 +1107,7 @@ export async function planCiCd(
                         sub_title: command,
                         mess: undefined,
                         status: EStatus.IN_PROGRESS,
+                        start_time: start_time,
                     });
                     SocketServer.getInstance().io.emit(
                         `logPlanCiCd-${payload.id}`,
@@ -1092,6 +1148,9 @@ export async function planCiCd(
                             title: "deploy",
                             status: EStatus.SUCCESSFULLY,
                         };
+                        record.logs["deploy"][0].end_time = new Date();
+                        record.logs["deploy"][0].status = EStatus.SUCCESSFULLY;
+                        record.end_time = new Date();
                         SocketServer.getInstance().io.emit(
                             `logPlanCiCd-${payload.id}`,
                             record
@@ -1102,10 +1161,13 @@ export async function planCiCd(
                             title: "deploy",
                             status: EStatus.ERROR,
                         };
+                        record.logs["deploy"][0].end_time = new Date();
+                        record.logs["deploy"][0].status = EStatus.ERROR;
                         SocketServer.getInstance().io.emit(
                             `logPlanCiCd-${payload.id}`,
                             record
                         );
+
                         service.environment[env_index].record.push(record.id);
                         record.end_time = new Date();
                         record.status = EStatus.ERROR;

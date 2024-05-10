@@ -40,7 +40,7 @@ export async function runPostman(params: {
                 htmlextra: {
                     export: file_path,
                     title: title,
-                    titleSize: 1,
+                    titleSize: 6,
                     browserTitle: title,
                 }, // Không xuất ra tệp
             },
