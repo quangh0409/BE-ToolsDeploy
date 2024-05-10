@@ -1156,7 +1156,7 @@ export async function planCiCd(
                     start_time = new Date();
                     command = `cd ${
                         service!.repo
-                    } && docker-compose up --build`;
+                    } && docker-compose up --build -d`;
                     record.logs["deploy"].push({
                         log: [],
                         title: "deploy",
