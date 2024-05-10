@@ -155,16 +155,5 @@ export async function getRecordById(params: {
 }): Promise<ResultSuccess> {
     const record = await Record.findOne({ id: params.record }, { _id: 0 });
 
-    if (!record) {
-        throw new HttpError(
-            error.notFound({
-                location: "params",
-                param: "record",
-                value: params.record,
-                message: "record not exit",
-            })
-        );
-    }
-
     return success.ok(record);
 }

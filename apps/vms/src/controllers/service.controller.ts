@@ -196,7 +196,9 @@ export async function getServiceById(params: {
     const result = service.toJSON();
     const envs = [];
     for (const e of result.environment) {
+        console.log("🚀 ~ e:", e)
         const vm = await Vms.findOne({ id: e.vm });
+        console.log("🚀 ~ vm:", vm)
         const temp = Object.assign({}, e, {
             vm: {
                 id: vm?.id,
