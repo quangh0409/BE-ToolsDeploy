@@ -816,7 +816,7 @@ export async function planCiCd(
                                 return false;
                             }
                             record.logs["scanSyntax"].push({
-                                log: [log.stdout],
+                                log: [""],
                                 title: "scanSyntax",
                                 sub_title: `${command}`,
                                 mess: undefined,
@@ -1205,6 +1205,7 @@ export async function planCiCd(
                         record.logs["deploy"][0].end_time = new Date();
                         record.logs["deploy"][0].status = EStatus.SUCCESSFULLY;
                         record.end_time = new Date();
+                        record.status = EStatus.SUCCESSFULLY;
                         SocketServer.getInstance().io.emit(
                             `logPlanCiCd-${payload.id}`,
                             record

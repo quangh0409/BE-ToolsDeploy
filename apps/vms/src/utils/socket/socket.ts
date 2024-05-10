@@ -7,7 +7,10 @@ import {
     sshInstallHadolint,
     sshInstallTrivy,
 } from "../../controllers/vms.controller";
-import { logOfDockerCompose, planCiCd } from "../../controllers/service.controller";
+import {
+    logOfDockerCompose,
+    planCiCd,
+} from "../../controllers/service.controller";
 import * as ssh2 from "ssh2";
 import { NodeSSH } from "node-ssh";
 
@@ -64,6 +67,13 @@ export class SocketServer {
         });
 
         socket.on("planCiCd", async (token, vm_id, service_id, env_name) => {
+            console.log(
+                "🚀 ~ SocketServer ~ socket.on ~ token, vm_id, service_id, env_name:",
+                token,
+                vm_id,
+                service_id,
+                env_name
+            );
             await planCiCd(socket, token, vm_id, service_id, env_name);
         });
 
