@@ -465,12 +465,8 @@ export async function findVmsByHost(params: {
 
 export async function updateVms(params: {
     id: string;
-    last_connect?: Date;
     user?: string;
     pass?: string;
-    docker: string;
-    hadolint: string;
-    trivy: string;
 }): Promise<ResultSuccess> {
     const vm = await Vms.aggregate([
         {
@@ -482,10 +478,6 @@ export async function updateVms(params: {
             $set: {
                 user: params.user,
                 pass: params.pass,
-                last_connect: params.last_connect,
-                "set_up.docker": params.docker,
-                "set_up.hadolint": params.hadolint,
-                "set_up.trivy": params.trivy,
             },
         },
         {

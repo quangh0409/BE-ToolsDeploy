@@ -8,6 +8,7 @@ import {
     findVmsByHost,
     getVmsById,
     getVmsByIds,
+    updateVms,
 } from "../../controllers/vms.controller";
 
 export const router: Router = Router();
@@ -48,6 +49,13 @@ router.post("/ids", async (req: Request, _: Response, next: NextFunction) => {
 router.post("/", async (req: Request, res: Response, next: NextFunction) => {
     const { host, user, pass } = req.body;
     const result = await createVms({ host, user, pass });
+    next(result);
+});
+
+router.put("/:vms", async (req: Request, res: Response, next: NextFunction) => {
+    const id = req.params.vms as string;
+    const { user, pass } = req.body;
+    const result = await updateVms({ id, user, pass });
     next(result);
 });
 
