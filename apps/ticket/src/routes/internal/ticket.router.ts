@@ -47,11 +47,14 @@ router.get(
         next(result);
     }
 );
-router.post("/delete-vms", async (req: Request, _: Response, next: NextFunction) => {
-    const body = req.body;
-    const result = await deleteVmsOfTicketById({ ...body });
-    next(result);
-});
+router.post(
+    "/delete-vms",
+    async (req: Request, _: Response, next: NextFunction) => {
+        const body = req.body;
+        const result = await deleteVmsOfTicketById({ ...body });
+        next(result);
+    }
+);
 
 router.post("/", async (req: Request, _: Response, next: NextFunction) => {
     const body = req.body;

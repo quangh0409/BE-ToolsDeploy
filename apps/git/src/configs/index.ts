@@ -13,14 +13,18 @@ export const configs = {
         username: process.env.CA_GIT_MONGO_USERNAME || "root",
         password: process.env.CA_GIT_MONGO_PASSWORD || "",
         dbName: process.env.CA_GIT_MONGO_DB_NAME || "auth",
-        templateUri:
-            "mongodb+srv://${username}:${password}@${addresses}/${dbName}",
+        templateUri: 
+        "mongodb://${addresses}/${dbName}" +
+        "?serverSelectionTimeoutMS=5000&connectTimeoutMS=10000" +
+        "&directConnection=true",
+        
         getUri: function (): string {
             let uri = this.templateUri;
-            const password = encodeURIComponent(this.password);
-            const username = encodeURIComponent(this.username);
-            uri = uri.replace("${username}", username);
-            uri = uri.replace("${password}", password);
+            // const password = encodeURIComponent(this.password);
+            // const username = encodeURIComponent(this.username);
+            // uri = uri.replace("${username}", username);
+            // uri = uri.replace("${password}", password);
+            // uri = uri.replace("${authSource}", this.authSource);
             uri = uri.replace("${dbName}", this.dbName);
             uri = uri.replace("${addresses}", this.addresses);
             return uri;

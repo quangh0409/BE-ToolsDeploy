@@ -13,14 +13,18 @@ export const configs = {
         username: process.env.CA_SCAN_MONGO_USERNAME || "root",
         password: process.env.CA_SCAN_MONGO_PASSWORD || "",
         dbName: process.env.CA_SCAN_MONGO_DB_NAME || "auth",
-        templateUri:
-            "mongodb+srv://${username}:${password}@${addresses}/${dbName}",
+        templateUri: 
+        "mongodb://${addresses}/${dbName}" +
+        "?serverSelectionTimeoutMS=5000&connectTimeoutMS=10000" +
+        "&directConnection=true",
+        
         getUri: function (): string {
             let uri = this.templateUri;
-            const password = encodeURIComponent(this.password);
-            const username = encodeURIComponent(this.username);
-            uri = uri.replace("${username}", username);
-            uri = uri.replace("${password}", password);
+            // const password = encodeURIComponent(this.password);
+            // const username = encodeURIComponent(this.username);
+            // uri = uri.replace("${username}", username);
+            // uri = uri.replace("${password}", password);
+            // uri = uri.replace("${authSource}", this.authSource);
             uri = uri.replace("${dbName}", this.dbName);
             uri = uri.replace("${addresses}", this.addresses);
             return uri;
@@ -54,7 +58,8 @@ export const configs = {
     saltRounds: process.env.CA_SCAN_SALT_ROUNDS || "10",
     services: {
         auth: {
-            prefix: process.env.CA_SCAN_AUTH_SERVICE_PREFIX || "/api/v1/in/auth",
+            prefix:
+                process.env.CA_SCAN_AUTH_SERVICE_PREFIX || "/api/v1/in/auth",
             host: process.env.CA_SCAN_AUTH_SERVICE_HOST || "http://127.0.0.1",
             port: process.env.CA_SCAN_AUTH_SERVICE_PORT || "6801",
             getUrl: function (): string {
@@ -72,7 +77,8 @@ export const configs = {
         },
         ticket: {
             prefix:
-                process.env.CA_SCAN_TICKET_SERVICE_PREFIX || "/api/v1/in/ticket",
+                process.env.CA_SCAN_TICKET_SERVICE_PREFIX ||
+                "/api/v1/in/ticket",
             host: process.env.CA_SCAN_TICKET_SERVICE_HOST || "http://127.0.0.1",
             port: process.env.CA_SCAN_TICKET_SERVICE_PORT || "6803",
             getUrl: function (): string {

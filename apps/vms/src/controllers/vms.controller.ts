@@ -23,6 +23,7 @@ import {
     findTicketByUserId,
 } from "../services/ticket.service";
 import { EStatus } from "../interfaces/models/vms";
+import Service from "../models/service";
 
 export async function createVms(params: {
     host: string;
@@ -446,7 +447,17 @@ export async function getVmsByIds(params: {
                 pass: 0,
             },
         },
-    ]);
+    ])
+        .then((res) => res[0])
+        .then(async (res) => {
+            console.log("🚀 ~ .then ~ res:", res)
+            // const number_webapp = await Service.count({
+            //     id: {
+            //         $in: res.services,
+            //     },
+            // });
+            // return;
+        });
 
     return success.ok(result);
 }

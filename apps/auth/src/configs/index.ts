@@ -14,18 +14,23 @@ export const configs = {
         port: process.env.CA_AUTH_PORT_NUMBER || "6801",
     },
     mongo: {
-        addresses: process.env.CA_AUTH_MONGO_ADDRESSES || "rs0",
-        username: process.env.CA_AUTH_MONGO_USERNAME || "root",
-        password: process.env.CA_AUTH_MONGO_PASSWORD || "",
+        addresses: process.env.CA_AUTH_MONGO_ADDRESSES || "127.0.0.1:27017",
+        // username: process.env.CA_AUTH_MONGO_USERNAME || "root",
+        // password: process.env.CA_AUTH_MONGO_PASSWORD || "",
+        // authSource: process.env.CA_AUTH_MONGO_AUTHOR_SOURCE || "admin",
         dbName: process.env.CA_AUTH_MONGO_DB_NAME || "auth",
-        templateUri:
-            "mongodb+srv://${username}:${password}@${addresses}/${dbName}",
+        templateUri: 
+        "mongodb://${addresses}/${dbName}" +
+        "?serverSelectionTimeoutMS=5000&connectTimeoutMS=10000" +
+        "&directConnection=true",
+        
         getUri: function (): string {
             let uri = this.templateUri;
-            const password = encodeURIComponent(this.password);
-            const username = encodeURIComponent(this.username);
-            uri = uri.replace("${username}", username);
-            uri = uri.replace("${password}", password);
+            // const password = encodeURIComponent(this.password);
+            // const username = encodeURIComponent(this.username);
+            // uri = uri.replace("${username}", username);
+            // uri = uri.replace("${password}", password);
+            // uri = uri.replace("${authSource}", this.authSource);
             uri = uri.replace("${dbName}", this.dbName);
             uri = uri.replace("${addresses}", this.addresses);
             return uri;
@@ -85,15 +90,15 @@ export const configs = {
                 return `${this.host}:${this.port}${this.prefix}`;
             },
         },
-        // mail: {
-        //     prefix:
-        //         process.env.CA_AUTH_MAIL_SERVICE_PREFIX || "/api/v1/in/mail",
-        //     host: process.env.CA_AUTH_MAIL_SERVICE_HOST || "http://127.0.0.1",
-        //     port: process.env.CA_AUTH_MAIL_SERVICE_PORT || "6803",
-        //     getUrl: function (): string {
-        //         return `${this.host}:${this.port}${this.prefix}`;
-        //     },
-        // },
+        mail: {
+            prefix:
+                process.env.CA_AUTH_MAIL_SERVICE_PREFIX || "/api/v1/in/mail",
+            host: process.env.CA_AUTH_MAIL_SERVICE_HOST || "http://127.0.0.1",
+            port: process.env.CA_AUTH_MAIL_SERVICE_PORT || "6806",
+            getUrl: function (): string {
+                return `${this.host}:${this.port}${this.prefix}`;
+            },
+        },
         // file: {
         //     prefix:
         //         process.env.CA_AUTH_FILE_SERVICE_PREFIX || "/api/v1/in/files",

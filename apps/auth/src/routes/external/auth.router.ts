@@ -10,6 +10,7 @@ import {
 } from "../../controllers";
 import {
     CheckReqBody,
+    LoginGithubReqBody,
     LoginReqBody,
     UpdatePasswordReqBody,
 } from "../../interfaces/request";
@@ -21,13 +22,15 @@ import {
     setPasswordValidator,
     updatePasswordValidator,
     checkAccountValidator,
+    loginGithubValidator,
 } from "../../validator";
+import { validate, matchedBody, matchedQuery } from "app";
 
 export const router: Router = Router();
 
 router.post(
     "/login",
-    loginValidator(),
+    validate.body(loginValidator),
     async (req: Request, _: Response, next: NextFunction) => {
         const body = req.body as LoginReqBody;
         const result = await login(body);
@@ -37,19 +40,10 @@ router.post(
 
 router.get(
     "/login-github",
+    validate.query(loginGithubValidator),
     async (req: Request, _: Response, next: NextFunction) => {
         const code = req.query.code as string;
         const result = await loginByGithub({ code });
-        next(result);
-    }
-);
-
-router.post(
-    "/check",
-    checkAccountValidator(),
-    async (req: Request, _: Response, next: NextFunction) => {
-        const body = req.body as CheckReqBody;
-        const result = await checkAccount(body);
         next(result);
     }
 );

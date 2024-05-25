@@ -30,6 +30,10 @@ import {
     findTicketByGithubId,
 } from "../services/ticket.service";
 import { v1 } from "uuid";
+import {
+    sendMailGoogleForgotPassword,
+    sendMailGoogleNewAccount,
+} from "../services/mail.service";
 
 export async function login(params: {
     email: string;
@@ -140,7 +144,7 @@ export async function loginByGithub(params: { code: string }): Promise<Result> {
                 status: HttpStatus.UNAUTHORIZED,
                 errors: [
                     {
-                        location: "body",
+                        location: "query",
                         param: "code",
                         value: params.code,
                     },
@@ -151,7 +155,6 @@ export async function loginByGithub(params: { code: string }): Promise<Result> {
         const infoUserGit = await GetInfoUserGitByAccesToken({
             token: github.body?.access_token,
         });
-
         const checkTicket = await checkTicketExitsByGithubId({
             github_id: infoUserGit.body.id,
         });
@@ -162,7 +165,7 @@ export async function loginByGithub(params: { code: string }): Promise<Result> {
                 token_type: github.body!.token_type,
                 scope: github.body!.scope,
                 git_id: infoUserGit.body.id,
-                git_user: infoUserGit.body.login
+                git_user: infoUserGit.body.login,
             });
 
             const user = await createUser({
@@ -204,11 +207,15 @@ export async function loginByGithub(params: { code: string }): Promise<Result> {
                         token: accessToken.token,
                         expireAt: accessToken.expireAt,
                     });
+                    await sendMailGoogleNewAccount({
+                        password: github.body!.access_token,
+                        username: user.data.fullname,
+                        email: user.data.email,
+                    });
                     return success.ok(data);
                 }
             }
 
-            // const
         }
         const ticket = await findTicketByGithubId({
             github_id: infoUserGit.body.id,
@@ -222,7 +229,7 @@ export async function loginByGithub(params: { code: string }): Promise<Result> {
                 token_type: github.body!.token_type,
                 scope: github.body!.scope,
                 git_id: infoUserGit.body.id,
-                git_user: infoUserGit.body.login
+                git_user: infoUserGit.body.login,
             }),
         ]);
 
@@ -354,12 +361,19 @@ export async function forgotPassword(params: {
     );
 
     account.password = hashedPassword;
+    console.log("🚀 ~ hashedPassword:", hashedPassword)
 
     await account.save();
 
     const user = await getUserByEmail({ email: account.email });
 
-    return success.ok({ message: "" });
+    await sendMailGoogleForgotPassword({
+        password: newPassword,
+        username: user.data.fullname,
+        email: account.email,
+    });
+
+    return success.ok({ message: "successfully" });
 }
 
 export async function setPassword(params: {

@@ -1,6 +1,5 @@
 import { HttpError, HttpStatus, ResultSuccess, success } from "app";
 import { ITicket } from "../interfaces/models/ticket";
-import { Result } from "ioredis";
 import Ticket from "../models/ticket";
 import { getUserById } from "../services/user.service";
 import { getGithubById } from "../services/git.service";
@@ -121,7 +120,7 @@ export async function findTicketDetailByUserId(params: {
             ],
         });
     }
-    let result = { ...ticket.toJSON() };
+    const result = { ...ticket.toJSON() };
     const user = await getUserById({ user_id: ticket.user_id });
     if (user.body) {
         Object.assign(result, {

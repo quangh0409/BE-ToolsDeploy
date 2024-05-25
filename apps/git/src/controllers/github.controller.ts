@@ -6,6 +6,7 @@ import { createUser } from "../services/user.service";
 import { login } from "../services/auth.service";
 import { findTicketByUserId } from "../services/ticket.service";
 import { error } from "app";
+import { configs } from "../configs";
 
 export async function createGitHub(params: {
     access_token: string;
@@ -106,12 +107,12 @@ export async function getGitHubById(params: {
 export async function getAGithubByCode(params: {
     code: string;
 }): Promise<Result> {
-    const client_id = "66602684d99f3683ebe0";
-    const client_secret = "a95ebd7fcda578afe5b23a5bce239933566c549f";
+    const client_id = configs.github.clientId;
+    const client_secret = configs.github.clientSecret;
 
     try {
         const response = await axios.post(
-            `https://github.com/login/oauth/access_token?client_id=${client_id}&client_secret=${client_secret}&code=${params.code}`,
+            `https://github.com/login/oauth/access_token?client_id=${client_id}&client_secret=${client_secret}&code=${params.code}&scope=repo`,
             {
                 headers: {
                     Accept: "application/json",
@@ -433,6 +434,59 @@ export async function GetLastCommitByAccessToken(params: {
         committer: result.commit.committer.name,
         url: result.html_url,
     });
+}
+
+export async function CreateReleaseByAccessToken(params: {
+    userId: string;
+    repository: string;
+    tag_name: string;
+    target_commitish: string;
+    name: string;
+    body: string;
+}) {
+    const ticket = await findTicketByUserId({ user_id: params.userId });
+
+    const github = await Github.findOne({ git_id: ticket.body?.github_id });
+
+    if (!github) {
+        throw new HttpError(
+            error.notFound({
+                location: "token",
+                param: "token",
+                message: "git_id of user_id not exits",
+            })
+        );
+    }
+
+    const response = await axios.post(
+        `https://api.github.com/repos/${github.git_user}/${params.repository}/releases`,
+        {
+            tag_name: params.tag_name,
+            target_commitish: params.target_commitish,
+            name: params.name,
+            body: params.body,
+            draft: false,
+            prerelease: false,
+            generate_release_notes: false,
+            // tag: { // Add this object to create the tag
+            //     object: params.target_commitish, // The commit SHA to tag
+            //     type: "commit",
+            //     tag: params.tag_name,
+            //     message: "Creating tag for release" // Optional message for the tag
+            // }
+        },
+        {
+            headers: {
+                Accept: "application/vnd.github+json",
+                Authorization: `Bearer ${github.access_token}`,
+                "X-GitHub-Api-Version": "2022-11-28",
+                "X-OAuth-Scopes": "admin:repo_hooks",
+                "X-Accepted-OAuth-Scopes": "admin:repo_hooks",
+            },
+        }
+    );
+
+    return success.ok({ data: response });
 }
 
 function parseAccessToken(input: string): {

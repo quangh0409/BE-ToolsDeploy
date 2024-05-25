@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response, Router } from "express";
-import { Payload } from "app";
 import { scanImages, scanSyntax } from "../../controllers/scan.controller";
 
 export const router: Router = Router();

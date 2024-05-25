@@ -27,7 +27,7 @@ export async function scanSyntax(params: {
         const jsonData = JSON.parse(content.toString());
         return success.ok(jsonData);
     } catch (err) {
-        console.log("🚀 ~ err:", err)
+        console.log("🚀 ~ err:", err);
         throw new HttpError(error.invalidData({ value: err }));
     }
 }

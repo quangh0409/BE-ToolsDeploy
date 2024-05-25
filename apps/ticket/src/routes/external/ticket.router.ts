@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response, Router } from "express";
 import {
     checkTicketExitsByUserId,
-    findTicketByUserId,
     findTicketDetailByUserId,
     updateTicket,
 } from "../../controllers/ticket.controller";

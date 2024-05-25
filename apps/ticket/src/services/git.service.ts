@@ -1,6 +1,5 @@
 import axios from "axios";
 import { configs } from "../configs";
-import { IUser } from "../interfaces/response/user.body";
 import { HttpError, error } from "app";
 import { IGit } from "../interfaces/response/git.body";
 

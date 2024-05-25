@@ -3,6 +3,10 @@ export interface LoginReqBody {
     password: string;
 }
 
+export interface LoginGithubReqBody {
+    code: string;
+}
+
 export interface CheckReqBody {
     email: string;
 }

@@ -17,6 +17,7 @@ services:
       - ticket
       - vms
       - scan
+      - mail
     image: docker.io/vutrongquang/gateway
 
   auth:
@@ -107,6 +108,21 @@ services:
     user: root
     env_file: ./apps/scan/.env
     image: docker.io/vutrongquang/scan
+
+  mail:
+    container_name: mail 
+    hostname: mail
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        module: mail
+    restart: always
+    ports:
+      - 6806:6806
+    user: root
+    env_file: ./apps/mail/.env
+    image: docker.io/vutrongquang/mail
 
 networks:
   default:

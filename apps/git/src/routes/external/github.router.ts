@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response, Router } from "express";
 import {
+    CreateReleaseByAccessToken,
     getAGithubByCode,
     GetBranchesByAccessToken,
     GetContentsByAccessToken,
@@ -99,6 +100,23 @@ router.post(
             userId: id,
             repository: repository,
             branch: branch,
+        });
+        next(result);
+    }
+);
+
+router.post(
+    "/release",
+    async (req: Request, _: Response, next: NextFunction) => {
+        const { repository, tag_name, target_commitish, name, body } = req.body;
+        const { id } = req.payload as Payload;
+        const result = await CreateReleaseByAccessToken({
+            userId: id,
+            repository: repository,
+            tag_name,
+            target_commitish,
+            name,
+            body,
         });
         next(result);
     }
