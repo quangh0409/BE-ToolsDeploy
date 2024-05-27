@@ -50,6 +50,8 @@ export async function createVms(params: {
             host: params.host,
             username: params.user,
             password: params.pass,
+            port: 22,
+            tryKeyboard: true,
         });
 
         let log;
@@ -188,6 +190,7 @@ export async function createVms(params: {
             landscape_sysinfo: obj,
         });
     } catch (err) {
+        console.log("🚀 ~ err:", err);
         const result = new Vms({
             id: v1(),
             host: params.host,
@@ -229,6 +232,8 @@ export async function getSysinfoOfVms(params: {
         host: check.host,
         username: check.user,
         password: check.pass,
+        port: 22,
+        tryKeyboard: true,
     });
 
     let log;
@@ -285,6 +290,8 @@ export async function getVmsById(params: {
             host: check.host,
             username: check.user,
             password: check.pass,
+            port: 22,
+            tryKeyboard: true,
         });
 
         let log;
@@ -353,11 +360,126 @@ export async function getVmsById(params: {
     }
 }
 
+export async function findContaninersOfVmById(params: {
+    vms: string;
+    name?: string;
+}): Promise<ResultSuccess> {
+    const check = await Vms.findOne({ id: params.vms });
+    const err: ResultError = {
+        status: HttpStatus.BAD_REQUEST,
+        errors: [
+            {
+                location: "params",
+                value: params.vms,
+                message: "Vms not exit",
+            },
+        ],
+    };
+    if (!check) {
+        throw new HttpError(err);
+    }
+
+    const ssh = new NodeSSH();
+    try {
+        await ssh.connect({
+            host: check.host,
+            username: check.user,
+            password: check.pass,
+            port: 22,
+            tryKeyboard: true,
+        });
+
+        let log;
+        let containers = [];
+        let command = "docker stats --format json --no-stream";
+
+        log = await ssh.execCommand(command);
+        if (log.stdout !== "") {
+            containers = log.stdout.split("\n").map((r) => JSON.parse(r));
+        }
+
+        if (params.name) {
+            containers = containers.filter((container) => {
+                if (container?.Name?.includes(params.name)) {
+                    return container;
+                }
+            });
+        }
+
+        return success.ok(containers);
+    } catch (error) {
+        console.log("🚀 ~ error:", error);
+        return success.ok([]);
+    }
+}
+
+export async function findImagesOfVmById(params: {
+    vms: string;
+    name?: string;
+}): Promise<ResultSuccess> {
+    const check = await Vms.findOne({ id: params.vms });
+    const err: ResultError = {
+        status: HttpStatus.BAD_REQUEST,
+        errors: [
+            {
+                location: "params",
+                value: params.vms,
+                message: "Vms not exit",
+            },
+        ],
+    };
+    if (!check) {
+        throw new HttpError(err);
+    }
+
+    const ssh = new NodeSSH();
+    try {
+        await ssh.connect({
+            host: check.host,
+            username: check.user,
+            password: check.pass,
+            port: 22,
+            tryKeyboard: true,
+        });
+
+        let images = [];
+        const log = await ssh.execCommand(
+            `docker images --format json | grep -v '<none>'`
+        );
+
+        if (log.stdout !== "") {
+            images = log.stdout.split("\n").map((r) => JSON.parse(r));
+        }
+
+        if (params.name) {
+            images = images.filter((image) => {
+                if (image?.Repository?.includes(params.name)) {
+                    return image;
+                }
+            });
+        }
+
+
+        return success.ok(images);
+    } catch (error) {
+        console.log("🚀 ~ error:", error);
+        return success.ok([]);
+    }
+}
+
 export async function getVmsByIds(params: {
     ids: string[];
 }): Promise<ResultSuccess> {
-    let connect: string[] = [];
-    let disconnect: string[] = [];
+    let connect: {
+        id: any;
+        containers: string | null;
+        images: string | null;
+    }[] = [];
+    let disconnect: {
+        id: any;
+        containers: string | null;
+        images: string | null;
+    }[] = [];
 
     const vms = await Vms.aggregate([
         {
@@ -386,10 +508,17 @@ export async function getVmsByIds(params: {
                 host: vm.host,
                 username: vm.user,
                 password: vm.pass,
+                port: 22,
+                tryKeyboard: true,
             });
-            return vm.id; // Return vm.id if connection is successful
+            let command = "docker ps -q | wc -l";
+            let log1 = await ssh.execCommand(command);
+            command =
+                "docker images --format '{{.Repository}}' | grep -v '<none>' | wc -l";
+            let log2 = await ssh.execCommand(command);
+            return { id: vm.id, containers: log1.stdout, images: log2.stdout }; // Return vm.id if connection is successful
         } catch (error) {
-            return null; // Return null if connection fails
+            return { id: vm.id, containers: null, images: null }; // Return null if connection fails
         } finally {
             ssh.dispose(); // Close the SSH connection
         }
@@ -397,11 +526,11 @@ export async function getVmsByIds(params: {
 
     await Promise.all(
         vms.map(async (vm) => {
-            const id = await connectSSH(vm);
-            if (id) {
-                connect.push(id);
+            const res = await connectSSH(vm);
+            if (res.containers) {
+                connect.push(res);
             } else {
-                disconnect.push(vm.id);
+                disconnect.push(res);
             }
         })
     );
@@ -410,24 +539,26 @@ export async function getVmsByIds(params: {
         Vms.updateMany(
             {
                 id: {
-                    $in: [...connect],
+                    $in: [...connect.map((res) => res.id)],
                 },
             },
             {
                 $set: {
                     status: EStatus.CONNECT,
+                    last_connect: new Date(),
                 },
             }
         ),
         Vms.updateMany(
             {
                 id: {
-                    $in: [...disconnect],
+                    $in: [...disconnect.map((res) => res.id)],
                 },
             },
             {
                 $set: {
                     status: EStatus.DISCONNECT,
+                    last_connect: new Date(),
                 },
             }
         ),
@@ -447,17 +578,21 @@ export async function getVmsByIds(params: {
                 pass: 0,
             },
         },
-    ])
-        .then((res) => res[0])
-        .then(async (res) => {
-            console.log("🚀 ~ .then ~ res:", res)
-            // const number_webapp = await Service.count({
-            //     id: {
-            //         $in: res.services,
-            //     },
-            // });
-            // return;
-        });
+    ]).then((res) => {
+        const data = res;
+
+        for (let i = 0; i < data.length; i++) {
+            const check = connect.find((v) => v.id === data[i].id);
+            if (check) {
+                Object.assign(data[i], {
+                    containers: check.containers,
+                    images: check.images,
+                });
+            }
+        }
+
+        return data;
+    });
 
     return success.ok(result);
 }
@@ -513,6 +648,8 @@ export async function updateVms(params: {
             host: vm.host,
             username: params.user,
             password: params.pass,
+            port: 22,
+            tryKeyboard: true,
         });
 
         let log;
@@ -740,6 +877,8 @@ export async function sshInstallDocker(
                         host: vm!.host,
                         username: vm!.user,
                         password: vm!.pass,
+                        port: 22,
+                        tryKeyboard: true,
                     });
                     socket.emit("logInstallDocker", {
                         log: undefined,
@@ -857,6 +996,8 @@ export async function sshCheckConnect(
                         host: vm!.host,
                         username: vm!.user,
                         password: vm!.pass,
+                        port: 22,
+                        tryKeyboard: true,
                     });
 
                     socket.emit("logCheckConnectVM", {
@@ -896,7 +1037,6 @@ export async function sshInstallTrivy(
             const check = ticket.body.vms_ids.find((id) => {
                 return vm_id === id;
             });
-            console.log("🚀 ~ check ~ check:", check);
             if (check) {
                 const ssh = new NodeSSH();
 
@@ -921,6 +1061,8 @@ export async function sshInstallTrivy(
                         host: vm!.host,
                         username: vm!.user,
                         password: vm!.pass,
+                        port: 22,
+                        tryKeyboard: true,
                     });
 
                     socket.emit("logInstallTrivy", {
@@ -942,34 +1084,16 @@ export async function sshInstallTrivy(
                 log = await ssh.execCommand(
                     `echo "${vm!.pass}" | sudo -S apt-get install -y wget`
                 );
-                socket.emit("logInstallTrivy", {
-                    log: log,
-                    title: `sudo apt-get install -y wget`,
-                    mess: undefined,
-                    status: "IN_PROGRESS",
-                });
 
                 if (log.code === 0) {
                     log = await ssh.execCommand(
                         `cd trivy && wget https://github.com/aquasecurity/trivy/releases/download/v0.50.1/trivy_0.50.1_Linux-64bit.tar.gz`
                     );
-                    socket.emit("logInstallTrivy", {
-                        log: log,
-                        title: `wget https://github.com/aquasecurity/trivy/releases/download/v0.50.1/trivy_0.50.1_Linux-64bit.tar.gz`,
-                        mess: undefined,
-                        status: "IN_PROGRESS",
-                    });
                 }
                 if (log.code === 0) {
                     log = await ssh.execCommand(
                         `cd trivy && tar zxvf trivy_0.50.1_Linux-64bit.tar.gz`
                     );
-                    socket.emit("logInstallTrivy", {
-                        log: log,
-                        title: `cd trivy && tar zxvf trivy_0.50.1_Linux-64bit.tar.gz`,
-                        mess: undefined,
-                        status: "IN_PROGRESS",
-                    });
                 }
                 if (log.code === 0) {
                     log = await ssh.execCommand(
@@ -977,12 +1101,6 @@ export async function sshInstallTrivy(
                             vm!.pass
                         }" | sudo -S mv trivy /usr/local/bin/`
                     );
-                    socket.emit("logInstallTrivy", {
-                        log: log,
-                        title: `cd trivy && mv trivy /usr/local/bin/`,
-                        mess: undefined,
-                        status: "IN_PROGRESS",
-                    });
                 }
                 log = await ssh.execCommand(`trivy -v`);
                 if (log.code === 0) {
@@ -1057,6 +1175,8 @@ export async function sshInstallHadolint(
                         host: vm!.host,
                         username: vm!.user,
                         password: vm!.pass,
+                        port: 22,
+                        tryKeyboard: true,
                     });
 
                     socket.emit("logInstallHadolint", {

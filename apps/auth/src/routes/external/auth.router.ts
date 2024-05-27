@@ -80,7 +80,7 @@ router.post(
 );
 
 router.post(
-    "/update-pasword",
+    "/update-password",
     verifyToken,
     updatePasswordValidator(),
     async (req: Request, _: Response, next: NextFunction) => {

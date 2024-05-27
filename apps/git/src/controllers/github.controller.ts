@@ -185,7 +185,7 @@ export async function GetInfoUserGit(params: {
     return success.ok(response.data);
 }
 
-export async function GetReposGitByAccessToken(params: { userId: string }) {
+export async function GetReposGitByAccessToken(params: { userId: string , name?: string }) {
     const ticket = await findTicketByUserId({ user_id: params.userId });
 
     const github = await Github.findOne({ git_id: ticket.body?.github_id });
@@ -211,7 +211,17 @@ export async function GetReposGitByAccessToken(params: { userId: string }) {
         }
     );
 
-    return success.ok({ data: response.data });
+    let result = response.data;
+
+    if(params.name){
+        result = result.filter((res: any) => {
+            if(res.name.includes(params.name)){
+                return res;
+            }
+        })
+    }
+
+    return success.ok({ data: result });
 }
 
 export async function GetBranchesByAccessToken(params: {

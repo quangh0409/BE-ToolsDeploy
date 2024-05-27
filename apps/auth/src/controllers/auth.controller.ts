@@ -16,7 +16,6 @@ import { genAccessToken, genRefreshToken, getPayload } from "../token";
 import {
     createUser,
     getUserByEmail,
-    updateUserActivity,
 } from "./user.controller";
 import {
     createGitHub,
@@ -206,11 +205,6 @@ export async function loginByGithub(params: { code: string }): Promise<Result> {
                         userId: user.data.id,
                         token: accessToken.token,
                         expireAt: accessToken.expireAt,
-                    });
-                    await sendMailGoogleNewAccount({
-                        password: github.body!.access_token,
-                        username: user.data.fullname,
-                        email: user.data.email,
                     });
                     return success.ok(data);
                 }
@@ -488,11 +482,7 @@ export async function updatePassword(params: {
     );
     account.password = hashedPassword;
     await Promise.all([
-        updateUserActivity({
-            id: account.id,
-            action: "UPDATE_PASSWORD",
-            actor: account.id,
-        }),
+       
         account.save(),
     ]);
     return success.ok({ message: "success" });

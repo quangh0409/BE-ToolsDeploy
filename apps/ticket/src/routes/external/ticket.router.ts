@@ -30,11 +30,12 @@ router.get(
 
 router.put("/", async (req: Request, _: Response, next: NextFunction) => {
     const { id } = req.payload as Payload;
-    const { vms_ids, record_ids } = req.body;
+    const { vms_ids, standard_ids } = req.body;
 
     const result = await updateTicket({
         user_id: id,
         vms_ids: vms_ids,
+        standard_ids: standard_ids
     });
     next(result);
 });

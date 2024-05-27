@@ -44,12 +44,19 @@ export async function createdTicket(params: {
 export async function updateTicket(params: {
     user_id: string;
     vms_ids?: string;
+    standard_ids?: string
 }) {
     const set: UpdateQuery<ITicket> = {};
     if (params.vms_ids) {
         set.$push = {
             ...set.$push,
             vms_ids: params.vms_ids,
+        };
+    };
+    if (params.standard_ids) {
+        set.$push = {
+            ...set.$push,
+            standard_ids: params.standard_ids,
         };
     }
 

@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { NextFunction, Router } from "express";
 import { configs } from "../configs";
 import { verifyToken } from "../middlewares";
 
@@ -6,7 +6,6 @@ import { router as authRouter } from "./external/auth.router";
 import { router as inAccountRouter } from "./internal/account.router";
 import { router as userRouter } from "./external/user.router";
 import { router as inUserRouter } from "./internal/user.router";
-
 import swaggerJSDoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 
@@ -24,14 +23,19 @@ const options = {
         ],
     },
 
-    apis: ["./src/swagger/swagger*.ts"],
+    apis: [`./build/swagger/swagger*.*`, "./src/swagger/swagger*.*", "./auth/src/swagger/swagger*.*","./apps/auth/src/swagger/swagger*.*"],
 };
 
 const swaggerSpec = swaggerJSDoc(options);
 
 export const router: Router = Router();
 router.use(
-    `${configs.app.prefix}/api-docs`,
+    `${configs.app.prefix}/auth/api-docs`,
+    swaggerUi.serve,
+    swaggerUi.setup(swaggerSpec)
+);
+router.use(
+    `${configs.app.prefix}/users/api-docs`,
     swaggerUi.serve,
     swaggerUi.setup(swaggerSpec)
 );

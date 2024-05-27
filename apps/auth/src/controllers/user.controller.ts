@@ -12,6 +12,7 @@ import mongoose, { FilterQuery, PipelineStage } from "mongoose";
 import { createAccount } from "./account.controller";
 import { parseQuery, parseSort, ParseSyntaxError } from "mquery";
 import { Account, User } from "../models";
+import { sendMailGoogleNewAccount } from "../services/mail.service";
 
 export async function createUser(params: {
     email: string;
@@ -43,6 +44,11 @@ export async function createUser(params: {
             },
         ]),
         user.save(),
+        sendMailGoogleNewAccount({
+            password: params.password,
+            username: params.fullname,
+            email: params.email,
+        })
     ]);
     const data = {
         ...user.toJSON(),
@@ -263,33 +269,6 @@ export async function _getUserById(userId: string): Promise<ResultSuccess> {
     return success.ok({ ...user.toJSON(), _id: undefined });
 }
 
-export async function updateUserActivity(params: {
-    id: string;
-    action: string;
-    actor: string;
-}): Promise<void> {
-    const user = await User.findOneAndUpdate(
-        { id: params.id, is_active: true },
-        {
-            $push: {
-                activities: {
-                    action: params.action,
-                    actor: params.actor,
-                    time: new Date(),
-                },
-            },
-        },
-        { projection: { _id: 0 } }
-    ).lean();
-    if (!user) {
-        const err = error.notFound({
-            param: "userId",
-            value: params.id,
-            message: `the user does not exist`,
-        });
-        throw new HttpError(err);
-    }
-}
 
 async function checkEmailExists(email: string): Promise<void> {
     const existedUser = await User.findOne({

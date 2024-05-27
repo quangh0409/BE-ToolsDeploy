@@ -30,8 +30,10 @@ router.post(
     "/repos-git-token",
     async (req: Request, _: Response, next: NextFunction) => {
         const { id } = req.payload as Payload;
+        const name = req.query.name as string;
         const result = await GetReposGitByAccessToken({
             userId: id,
+            name: name,
         });
         next(result);
     }

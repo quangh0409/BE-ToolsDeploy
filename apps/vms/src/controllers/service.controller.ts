@@ -136,7 +136,6 @@ export async function deleteService(params: {
     }
 
     const services = vm.services?.filter((service) => service != params.id);
-    console.log("🚀 ~ services:", services);
 
     vm.services = services;
     await vm.save();
@@ -293,6 +292,8 @@ export async function getImagesOfServiceById(params: {
             host: vm!.host,
             username: vm!.user,
             password: vm!.pass,
+            port: 22,
+            tryKeyboard: true,
         });
 
         const log = await ssh.execCommand(`docker images --format json`);
@@ -343,6 +344,8 @@ export async function scanImageOfService(params: {
             host: vm!.host,
             username: vm!.user,
             password: vm!.pass,
+            port: 22,
+            tryKeyboard: true,
         });
 
         const log = await ssh.execCommand(
@@ -380,6 +383,8 @@ export async function logOfDockerCompose(
             host: vm!.host,
             username: vm!.user,
             password: vm!.pass,
+            port: 22,
+            tryKeyboard: true,
         });
 
         ssh.execCommand(
@@ -512,6 +517,8 @@ export async function planCiCd(
                         host: vm!.host,
                         username: vm!.user,
                         password: vm!.pass,
+                        port: 22,
+                        tryKeyboard: true,
                     });
                     record.ocean["ssh"] = {
                         title: "ssh",
