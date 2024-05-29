@@ -28,4 +28,3 @@ router.post(
         next(result);
     }
 );
-

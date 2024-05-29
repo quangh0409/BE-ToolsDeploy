@@ -3,9 +3,11 @@ import {
     checkTicketExitsByGithubId,
     checkTicketExitsByUserId,
     createdTicket,
+    deleteStandardOfTicketById,
     deleteVmsOfTicketById,
     findTicketByGithubId,
     findTicketByUserId,
+    updateTicket,
 } from "../../controllers/ticket.controller";
 
 export const router: Router = Router();
@@ -56,8 +58,28 @@ router.post(
     }
 );
 
+router.post(
+    "/delete-standard",
+    async (req: Request, _: Response, next: NextFunction) => {
+        const body = req.body;
+        const result = await deleteStandardOfTicketById({ ...body });
+        next(result);
+    }
+);
+
 router.post("/", async (req: Request, _: Response, next: NextFunction) => {
     const body = req.body;
     const result = await createdTicket({ ...body });
+    next(result);
+});
+
+router.put("/", async (req: Request, _: Response, next: NextFunction) => {
+    const { user_id, vms_ids, standard_ids } = req.body;
+
+    const result = await updateTicket({
+        user_id: user_id,
+        vms_ids: vms_ids,
+        standard_ids: standard_ids,
+    });
     next(result);
 });

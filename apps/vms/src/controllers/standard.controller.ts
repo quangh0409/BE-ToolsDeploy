@@ -1,9 +1,15 @@
-import { ResultSuccess, error, success } from "app";
+import { HttpError, HttpStatus, ResultSuccess, error, success } from "app";
 import { v1 } from "uuid";
 import Standard from "../models/standard";
 import Vms from "../models/vms";
+import { NodeSSH } from "node-ssh";
+import {
+    deleteStandardOfTicketById,
+    updateTicket,
+} from "../services/ticket.service";
 
 export async function createStandard(params: {
+    userId: string;
     name: string;
     ram: string;
     cpu: string;
@@ -31,7 +37,13 @@ export async function createStandard(params: {
         architecture: params.architecture,
     });
 
-    await standard.save();
+    await Promise.all([
+        standard.save(),
+        updateTicket({
+            user_id: params.userId,
+            standard_ids: standard.id,
+        }),
+    ]);
 
     return success.ok({ ...standard.toJSON(), _id: undefined });
 }
@@ -89,7 +101,106 @@ export async function compareStandard(params: {
         rate_architecture: rate_architecture,
     });
 }
-   
+
+export async function compareStandardBeforeCreate(params: {
+    standard: string;
+    host: string;
+    user: string;
+    pass: string;
+}): Promise<ResultSuccess> {
+    try {
+        const standard = await Standard.findOne({ id: params.standard });
+
+        if (!standard) {
+            throw error.notFound({
+                value: params.standard,
+                location: "body",
+                message: "The standard not found",
+            });
+        }
+
+        let ram, cpu, core, os, architecture;
+        const ssh = new NodeSSH();
+        await ssh.connect({
+            host: params.host,
+            username: params.user,
+            password: params.pass,
+            port: 22,
+            tryKeyboard: true,
+        });
+
+        let log;
+        log = await ssh.execCommand("hostnamectl");
+        let operating_system = "";
+        let kernel = "";
+        architecture = "";
+        log.stdout.split("\n").map((t) => {
+            const ob = t.split(": ");
+            if ("Operating System" === ob[0].trim()) {
+                operating_system = ob[1];
+            }
+            if ("Kernel" === ob[0].trim()) {
+                kernel = ob[1];
+            }
+            if ("Architecture" === ob[0].trim()) {
+                architecture = ob[1];
+            }
+        });
+        log = await ssh.execCommand("uname -o");
+
+        operating_system += ` ${log.stdout}`;
+
+        log = await ssh.execCommand(`free --giga | awk '/Mem/{print $2}'`);
+        ram = `${log.stdout}GB`;
+        log = await ssh.execCommand(`lscpu | grep '^CPU(s):'`);
+        cpu = log.stdout.split(/\s{2,}/g)[1];
+        log = await ssh.execCommand(`lscpu | grep 'Socket(s)'`);
+        const sockets = log.stdout.split(/\s{2,}/g)[1];
+        log = await ssh.execCommand(`lscpu | grep 'Core(s) per socket'`);
+        core = `${
+            Number.parseInt(log.stdout.split(/\s{2,}/g)[1]) *
+            Number.parseInt(sockets)
+        }`;
+
+        const rate_ram =
+            Number.parseFloat(ram) / Number.parseFloat(standard.ram);
+        const rate_cpu =
+            Number.parseFloat(cpu) / Number.parseFloat(standard.cpu);
+        const rate_core =
+            Number.parseFloat(core) / Number.parseFloat(standard.core);
+        const rate_os = operating_system
+            .toUpperCase()
+            .includes(standard.os.toUpperCase())
+            ? 1
+            : 0;
+        const rate_architecture = architecture
+            .toUpperCase()
+            .includes(standard.architecture.toUpperCase())
+            ? 1
+            : 0;
+        const rate_total =
+            rate_ram * rate_cpu * rate_core * rate_os * rate_architecture;
+
+        return success.ok({
+            rate_total: rate_total,
+            rate_ram: rate_ram,
+            rate_cpu: rate_cpu,
+            rate_core: rate_core,
+            rate_os: rate_os,
+            rate_architecture: rate_architecture,
+        });
+    } catch (error) {
+        throw new HttpError({
+            status: HttpStatus.BAD_REQUEST,
+            errors: [
+                {
+                    value: error,
+                },
+            ],
+        });
+    }
+}
+
 export async function getStandards(params: {
     standards: string[];
 }): Promise<ResultSuccess> {
@@ -100,4 +211,27 @@ export async function getStandards(params: {
     });
 
     return success.ok(standards);
+}
+
+export async function deleteStandard(params: {
+    ticket: string;
+    standard: string;
+}): Promise<ResultSuccess> {
+    const standards = await Standard.deleteOne({ id: params.standard });
+    if (standards.deletedCount === 1) {
+        const result = await deleteStandardOfTicketById({
+            ticket: params.ticket,
+            standard: params.standard,
+        });
+
+        if (result.body?.isDelete) {
+            return success.ok({ message: "success fully" });
+        }
+    }
+
+    throw error.notFound({
+        param: "body",
+        value: params.standard,
+        message: "The standard not found",
+    });
 }

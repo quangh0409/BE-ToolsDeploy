@@ -83,6 +83,10 @@ const vmsSchema = new mongoose.Schema(
             type: String,
             require: false,
         },
+        standard: {
+            type: String,
+            require: false,
+        },
         set_up: {
             type: {
                 docker: {

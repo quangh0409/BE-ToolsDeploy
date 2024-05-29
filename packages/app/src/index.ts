@@ -6,7 +6,7 @@ import {
     securityMiddlewares,
     handleValidation,
     requestInitialization,
-    validate
+    validate,
 } from "./middlewares";
 import "express-async-errors";
 import { AppConfigurations, configAxios, configLogger } from "./configs";

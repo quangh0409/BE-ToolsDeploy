@@ -1,10 +1,6 @@
-import { ResultSuccess, success } from "app";
 import newman from "newman";
 import { resolve } from "path";
 import fs from "fs";
-import { promisify } from "util";
-import { title } from "process";
-const readFileAsync = promisify(fs.readFile);
 const util = require("util");
 const newPostman = util.promisify(newman.run);
 
@@ -46,7 +42,7 @@ export async function runPostman(params: {
             },
         });
 
-        let htmlContent = fs.readFileSync(file_path);
+        const htmlContent = fs.readFileSync(file_path);
         fs.unlinkSync(file_path);
         return htmlContent;
     } catch (err) {

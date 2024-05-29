@@ -39,3 +39,7 @@ RUN wget https://github.com/hadolint/hadolint/releases/download/v2.7.0/hadolint-
 RUN mv hadolint-Linux-x86_64 hadolint
 RUN chmod +x hadolint
 RUN mv hadolint /usr/local/bin/
+
+RUN wget https://github.com/jwilder/dockerize/releases/download/v0.6.1/dockerize-linux-amd64-v0.6.1.tar.gz \
+    && tar -C /usr/local/bin -xzvf dockerize-linux-amd64-v0.6.1.tar.gz \
+    && rm dockerize-linux-amd64-v0.6.1.tar.gz

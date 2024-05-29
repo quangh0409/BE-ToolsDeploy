@@ -9,7 +9,7 @@ export interface IRecordReqBodyCreate {
     commit_message: string;
 }
 
-export interface IRecordReqBodyUpdate{
+export interface IRecordReqBodyUpdate {
     status?: EStatus;
     ocean?: IOcean[];
     logs: ILog;

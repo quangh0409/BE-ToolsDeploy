@@ -48,7 +48,7 @@ export async function createUser(params: {
             password: params.password,
             username: params.fullname,
             email: params.email,
-        })
+        }),
     ]);
     const data = {
         ...user.toJSON(),
@@ -57,12 +57,6 @@ export async function createUser(params: {
         activities: undefined,
     };
     return success.created(data);
-}
-
-export async function createUserByCodeGithub(params: {
-    github_code: string;
-}): Promise<ResultSuccess> {
-    return success.ok({});
 }
 
 export async function updateUser(params: {
@@ -224,8 +218,6 @@ export async function getUserById(params: {
         Account.findOne({ id: params.id }, { _id: 0 }),
     ]);
 
-    const research_area: { [key: string]: string | number | undefined }[] = [];
-
     return error.notFound({
         location: "body",
         param: "userId",
@@ -268,7 +260,6 @@ export async function _getUserById(userId: string): Promise<ResultSuccess> {
     }
     return success.ok({ ...user.toJSON(), _id: undefined });
 }
-
 
 async function checkEmailExists(email: string): Promise<void> {
     const existedUser = await User.findOne({

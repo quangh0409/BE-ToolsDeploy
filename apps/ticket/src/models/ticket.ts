@@ -25,6 +25,12 @@ const ticketSchame = new mongoose.Schema(
                 require: false,
             },
         ],
+        standard_ids: [
+            {
+                type: String,
+                require: false,
+            },
+        ],
     },
     {
         versionKey: false,

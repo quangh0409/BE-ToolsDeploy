@@ -4,4 +4,5 @@ export interface ITicket {
     gitlab_id?: string;
     user_id: string;
     vms_ids: string[];
+    standard_ids: string[];
 }

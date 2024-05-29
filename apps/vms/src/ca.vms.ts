@@ -10,12 +10,14 @@ import {
     connectRedis,
 } from "./database";
 import { SocketServer } from "./utils";
+import cookieParser from "cookie-parser";
 function main(): void {
     const app = createApp(router, configs);
     const host = configs.app.host;
     const port = configs.app.port;
 
     // // config socket
+    app.use(cookieParser()); // For cookie parsing
     const server = createServer(app);
     SocketServer.setInstance(server);
 

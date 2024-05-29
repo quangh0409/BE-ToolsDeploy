@@ -5,6 +5,7 @@ export interface ITicket {
     user_id: string;
     vms_ids?: string[];
     record_ids?: string[];
+    standard_ids?: string[];
 }
 
 export interface IDelete {

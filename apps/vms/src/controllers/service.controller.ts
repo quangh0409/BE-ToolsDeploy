@@ -2,7 +2,6 @@ import { Socket } from "socket.io";
 import { verifyToken } from "./vms.controller";
 import { findTicketByUserId } from "../services/ticket.service";
 import { NodeSSH } from "node-ssh";
-import logger from "logger";
 import Vms from "../models/vms";
 import { IServiceBody } from "../interfaces/request/service.body";
 import {
@@ -16,8 +15,7 @@ import {
 import Service from "../models/service";
 import { v1 } from "uuid";
 import Record from "../models/record";
-import { EStatus, ILogCommand } from "../interfaces/models";
-import { time } from "console";
+import { EStatus } from "../interfaces/models";
 import { GetLastCommitByAccessToken } from "../services/git.service";
 import { SocketServer } from "../utils";
 
@@ -252,7 +250,7 @@ export async function UpdateStatusServiceById(params: {
     id: string;
     status: string;
     env: string;
-}) {
+}): Promise<ResultSuccess> {
     const service = await Service.findOne({ id: params.id });
 
     if (!service) {
@@ -309,7 +307,7 @@ export async function getImagesOfServiceById(params: {
             images.push(match[1]);
         }
 
-        let result = images_.filter((element) =>
+        const result = images_.filter((element) =>
             images.includes(element.Repository)
         );
 
@@ -421,7 +419,7 @@ export async function planCiCd(
     vm_id: string,
     service_id: string,
     env_name: string
-): Promise<Boolean> {
+): Promise<boolean> {
     const payload = await verifyToken(token);
     const ticket = await findTicketByUserId({ user_id: payload.id });
 
@@ -995,30 +993,32 @@ export async function planCiCd(
                         onStdout(chunk) {
                             // Gửi log mới đến client
                             // console.log(chunk.toString("utf8"));
-                            chunk
+                            const log: string[] = chunk
                                 .toString("utf8")
                                 .split("\n")
                                 .map((l) => {
-                                    record.logs["build"][0].log?.push(l);
-                                    SocketServer.getInstance().io.emit(
-                                        `logPlanCiCd-${payload.id}`,
-                                        record
-                                    );
+                                    return l;
                                 });
+                            record.logs["build"][0].log?.push(...log);
+                            SocketServer.getInstance().io.emit(
+                                `logPlanCiCd-${payload.id}`,
+                                record
+                            );
                         },
                         onStderr(chunk) {
                             // Gửi log mới đến client
                             // console.log(chunk.toString("utf8"));
-                            chunk
+                            const log: string[] = chunk
                                 .toString("utf8")
                                 .split("\n")
                                 .map((l) => {
-                                    record.logs["build"][0].log?.push(l);
-                                    SocketServer.getInstance().io.emit(
-                                        `logPlanCiCd-${payload.id}`,
-                                        record
-                                    );
+                                    return l;
                                 });
+                            record.logs["build"][0].log?.push(...log);
+                            SocketServer.getInstance().io.emit(
+                                `logPlanCiCd-${payload.id}`,
+                                record
+                            );
                         },
                     });
                     if (log.code === 0 || log.code === 255) {
@@ -1153,7 +1153,7 @@ export async function planCiCd(
                     };
                     record.logs["deploy"] = [];
                     SocketServer.getInstance().io.emit(
-                        `logPlanCiCd-${payload.id}`,
+                        `logPlanCiCd-${payload.id}-deploy`,
                         record
                     );
                     record.ocean["deploy"] = {
@@ -1173,39 +1173,51 @@ export async function planCiCd(
                         start_time: start_time,
                     });
                     SocketServer.getInstance().io.emit(
-                        `logPlanCiCd-${payload.id}`,
+                        `logPlanCiCd-${payload.id}-deploy`,
                         record
                     );
-                    log = await ssh.execCommand(command, {
-                        onStdout(chunk) {
-                            // Gửi log mới đến client
-                            // console.log(chunk.toString("utf8"));
-                            chunk
-                                .toString("utf8")
-                                .split("\n")
-                                .map((l) => {
-                                    record.logs["deploy"][0].log?.push(l);
-                                    SocketServer.getInstance().io.emit(
-                                        `logPlanCiCd-${payload.id}`,
-                                        record
-                                    );
-                                });
-                        },
-                        onStderr(chunk) {
-                            // Gửi log mới đến client
-                            // console.log(chunk.toString("utf8"));
-                            chunk
-                                .toString("utf8")
-                                .split("\n")
-                                .map((l) => {
-                                    record.logs["deploy"][0].log?.push(l);
-                                    SocketServer.getInstance().io.emit(
-                                        `logPlanCiCd-${payload.id}`,
-                                        record
-                                    );
-                                });
-                        },
-                    });
+                    log = await ssh.execCommand(
+                        command
+                        //      {
+                        //     onStdout(chunk) {
+                        //         // Gửi log mới đến client
+                        //         // console.log(chunk.toString("utf8"));
+                        //         const log: string[] = chunk
+                        //             .toString("utf8")
+                        //             .split("\n")
+                        //             .map((l) => {
+                        //                 return l;
+                        //             });
+                        //         record.logs["deploy"][0].log?.push(...log);
+                        //         SocketServer.getInstance().io.emit(
+                        //             `logPlanCiCd-${payload.id}`,
+                        //             record
+                        //         );
+                        //     },
+                        //     onStderr(chunk) {
+                        //         // Gửi log mới đến client
+                        //         // console.log(chunk.toString("utf8"));
+                        //         const log: string[] = chunk
+                        //             .toString("utf8")
+                        //             .split("\n")
+                        //             .map((l) => {
+                        //                 return l;
+                        //             });
+                        //         record.logs["deploy"][0].log?.push(...log);
+                        //         SocketServer.getInstance().io.emit(
+                        //             `logPlanCiCd-${payload.id}`,
+                        //             record
+                        //         );
+                        //     },
+                        // }
+                    );
+                    record.logs["deploy"][0].log?.push(
+                        ...log.stderr.split("\n")
+                    );
+                    SocketServer.getInstance().io.emit(
+                        `logPlanCiCd-${payload.id}-deploy`,
+                        record
+                    );
                     if (log.code === 0 || log.code === 255) {
                         record.ocean["deploy"] = {
                             title: "deploy",

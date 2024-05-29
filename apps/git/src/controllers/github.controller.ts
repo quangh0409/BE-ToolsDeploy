@@ -2,8 +2,6 @@ import { HttpError, HttpStatus, Result, ResultSuccess, success } from "app";
 import axios from "axios";
 import Github from "../models/git";
 import { v1 } from "uuid";
-import { createUser } from "../services/user.service";
-import { login } from "../services/auth.service";
 import { findTicketByUserId } from "../services/ticket.service";
 import { error } from "app";
 import { configs } from "../configs";
@@ -185,7 +183,10 @@ export async function GetInfoUserGit(params: {
     return success.ok(response.data);
 }
 
-export async function GetReposGitByAccessToken(params: { userId: string , name?: string }) {
+export async function GetReposGitByAccessToken(params: {
+    userId: string;
+    name?: string;
+}): Promise<ResultSuccess> {
     const ticket = await findTicketByUserId({ user_id: params.userId });
 
     const github = await Github.findOne({ git_id: ticket.body?.github_id });
@@ -213,12 +214,12 @@ export async function GetReposGitByAccessToken(params: { userId: string , name?:
 
     let result = response.data;
 
-    if(params.name){
+    if (params.name) {
         result = result.filter((res: any) => {
-            if(res.name.includes(params.name)){
+            if (res.name.includes(params.name)) {
                 return res;
             }
-        })
+        });
     }
 
     return success.ok({ data: result });
@@ -227,7 +228,7 @@ export async function GetReposGitByAccessToken(params: { userId: string , name?:
 export async function GetBranchesByAccessToken(params: {
     userId: string;
     repository: string;
-}) {
+}): Promise<ResultSuccess> {
     const ticket = await findTicketByUserId({ user_id: params.userId });
 
     const github = await Github.findOne({ git_id: ticket.body?.github_id });
@@ -263,7 +264,7 @@ export async function GetBranchesByAccessToken(params: {
 export async function GetLanguagesByAccessToken(params: {
     userId: string;
     repository: string;
-}) {
+}): Promise<ResultSuccess> {
     const ticket = await findTicketByUserId({ user_id: params.userId });
 
     const github = await Github.findOne({ git_id: ticket.body?.github_id });
@@ -303,7 +304,7 @@ export async function GetPathFileDockerByAccessToken(params: {
     userId: string;
     repository: string;
     branch: string;
-}) {
+}): Promise<ResultSuccess> {
     const ticket = await findTicketByUserId({ user_id: params.userId });
 
     const github = await Github.findOne({ git_id: ticket.body?.github_id });
@@ -328,9 +329,13 @@ export async function GetPathFileDockerByAccessToken(params: {
         }
     );
 
-    let path_Dockerfile: { path: string; name: string; content: string }[] = [];
-    let path_docker_compose: { path: string; name: string; content: string }[] =
+    const path_Dockerfile: { path: string; name: string; content: string }[] =
         [];
+    const path_docker_compose: {
+        path: string;
+        name: string;
+        content: string;
+    }[] = [];
 
     for (const t of response.data.tree) {
         if (t.path.toLowerCase().includes("dockerfile")) {
@@ -371,7 +376,7 @@ export async function GetContentsByAccessToken(params: {
     userId: string;
     repository: string;
     sha: string;
-}) {
+}): Promise<ResultSuccess> {
     const ticket = await findTicketByUserId({ user_id: params.userId });
 
     const github = await Github.findOne({ git_id: ticket.body?.github_id });
@@ -408,7 +413,7 @@ export async function GetLastCommitByAccessToken(params: {
     userId: string;
     repository: string;
     branch: string;
-}) {
+}): Promise<ResultSuccess> {
     const ticket = await findTicketByUserId({ user_id: params.userId });
 
     const github = await Github.findOne({ git_id: ticket.body?.github_id });
@@ -444,59 +449,6 @@ export async function GetLastCommitByAccessToken(params: {
         committer: result.commit.committer.name,
         url: result.html_url,
     });
-}
-
-export async function CreateReleaseByAccessToken(params: {
-    userId: string;
-    repository: string;
-    tag_name: string;
-    target_commitish: string;
-    name: string;
-    body: string;
-}) {
-    const ticket = await findTicketByUserId({ user_id: params.userId });
-
-    const github = await Github.findOne({ git_id: ticket.body?.github_id });
-
-    if (!github) {
-        throw new HttpError(
-            error.notFound({
-                location: "token",
-                param: "token",
-                message: "git_id of user_id not exits",
-            })
-        );
-    }
-
-    const response = await axios.post(
-        `https://api.github.com/repos/${github.git_user}/${params.repository}/releases`,
-        {
-            tag_name: params.tag_name,
-            target_commitish: params.target_commitish,
-            name: params.name,
-            body: params.body,
-            draft: false,
-            prerelease: false,
-            generate_release_notes: false,
-            // tag: { // Add this object to create the tag
-            //     object: params.target_commitish, // The commit SHA to tag
-            //     type: "commit",
-            //     tag: params.tag_name,
-            //     message: "Creating tag for release" // Optional message for the tag
-            // }
-        },
-        {
-            headers: {
-                Accept: "application/vnd.github+json",
-                Authorization: `Bearer ${github.access_token}`,
-                "X-GitHub-Api-Version": "2022-11-28",
-                "X-OAuth-Scopes": "admin:repo_hooks",
-                "X-Accepted-OAuth-Scopes": "admin:repo_hooks",
-            },
-        }
-    );
-
-    return success.ok({ data: response });
 }
 
 function parseAccessToken(input: string): {

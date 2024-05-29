@@ -18,6 +18,7 @@ export interface IVms {
     sockets: string;
     ram: string;
     thread: string;
+    standard: string;
     set_up: {
         docker: string;
         hadolint: string;

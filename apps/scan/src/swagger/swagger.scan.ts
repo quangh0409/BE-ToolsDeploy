@@ -1,6 +1,6 @@
 /**
  * @api /api/{version}/{service}/scan-syntax POST
- * */ 
+ * */
 
 /**
  * @swagger
@@ -38,7 +38,7 @@
  *             properties:
  *               content:
  *                 type: string
- *                 description: The content of file dockerfile 
+ *                 description: The content of file dockerfile
  *             required:
  *               - content
  *     responses:
@@ -74,7 +74,7 @@
 
 /**
  * @api /api/{version}/{service}/scan-image POST
- * */ 
+ * */
 
 /**
  * @swagger
@@ -112,7 +112,7 @@
  *             properties:
  *               image:
  *                 type: string
- *                 description: The image name of image docker 
+ *                 description: The image name of image docker
  *             required:
  *               - image
  *     responses:

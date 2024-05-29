@@ -1,6 +1,6 @@
 /**
  * @TODO /api/v1/auth/login POST
- * */ 
+ * */
 
 /**
  * @swagger
@@ -32,7 +32,7 @@
  *             properties:
  *               email:
  *                 type: string
- *                 description: Enter your email 
+ *                 description: Enter your email
  *               password:
  *                 type: string
  *                 description: Enter your password
@@ -77,12 +77,12 @@
  *                   type: array
  *                   items:
  *                     type: string
- *                     description: List of roles assigned to the user 
+ *                     description: List of roles assigned to the user
  */
 
 /**
  * @TODO /api/v1/auth/login-github POST
- * */ 
+ * */
 
 /**
  * @swagger
@@ -114,7 +114,7 @@
  *             properties:
  *               code:
  *                 type: string
- *                 description: Enter your code of Github 
+ *                 description: Enter your code of Github
  *             required:
  *               - code
  *     responses:
@@ -155,12 +155,12 @@
  *                   type: array
  *                   items:
  *                     type: string
- *                     description: List of roles assigned to the user 
+ *                     description: List of roles assigned to the user
  */
 
 /**
  * @TODO /api/v1/auth/forgot-password POST
- * */ 
+ * */
 
 /**
  * @swagger
@@ -192,7 +192,7 @@
  *             properties:
  *               email:
  *                 type: string
- *                 description: Enter your email of Github 
+ *                 description: Enter your email of Github
  *             required:
  *               - email
  *     responses:
@@ -206,5 +206,5 @@
  *                 message:
  *                   type: string
  *                   description: return success or error
- *                 
+ *
  */

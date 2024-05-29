@@ -10,11 +10,16 @@ import {
     findVmsByHost,
     getVmsById,
     getVmsByIds,
+    installDocker,
+    installHadolint,
+    installTrivy,
     updateVms,
 } from "../../controllers/vms.controller";
 import {
     compareStandard,
+    compareStandardBeforeCreate,
     createStandard,
+    deleteStandard,
     getStandards,
 } from "../../controllers/standard.controller";
 
@@ -36,6 +41,43 @@ router.get("/", async (req: Request, _: Response, next: NextFunction) => {
     });
     next(result);
 });
+
+router.get(
+    "/:vms/install-docker",
+    async (req: Request, _: Response, next: NextFunction) => {
+        const vm_id = req.params.vms;
+        const user_id = req.payload?.id as string;
+        const result = await installDocker({
+            vm_id,
+            user_id,
+        });
+        next(result);
+    }
+);
+router.get(
+    "/:vms/install-trivy",
+    async (req: Request, _: Response, next: NextFunction) => {
+        const vm_id = req.params.vms;
+        const user_id = req.payload?.id as string;
+        const result = await installTrivy({
+            vm_id,
+            user_id,
+        });
+        next(result);
+    }
+);
+router.get(
+    "/:vms/install-hadolint",
+    async (req: Request, _: Response, next: NextFunction) => {
+        const vm_id = req.params.vms;
+        const user_id = req.payload?.id as string;
+        const result = await installHadolint({
+            vm_id,
+            user_id,
+        });
+        next(result);
+    }
+);
 
 router.get(
     "/:vms/contaniners",
@@ -92,6 +134,32 @@ router.post(
 );
 
 router.post(
+    "/standards/delete",
+    async (req: Request, _: Response, next: NextFunction) => {
+        const { ticket, standard } = req.body;
+        const result = await deleteStandard({
+            ticket,
+            standard,
+        });
+        next(result);
+    }
+);
+
+router.post(
+    "/standards/compare-before-create-vms",
+    async (req: Request, _: Response, next: NextFunction) => {
+        const { standard, host, user, pass } = req.body;
+        const result = await compareStandardBeforeCreate({
+            standard,
+            host,
+            user,
+            pass,
+        });
+        next(result);
+    }
+);
+
+router.post(
     "/standards/get-all",
     async (req: Request, _: Response, next: NextFunction) => {
         const { standards } = req.body;
@@ -106,7 +174,9 @@ router.post(
     "/standards/",
     async (req: Request, _: Response, next: NextFunction) => {
         const { name, ram, cpu, core, os, architecture } = req.body;
+        const userId = req.payload?.id as string;
         const result = await createStandard({
+            userId,
             name,
             ram,
             cpu,
@@ -119,8 +189,8 @@ router.post(
 );
 
 router.post("/", async (req: Request, res: Response, next: NextFunction) => {
-    const { host, user, pass } = req.body;
-    const result = await createVms({ host, user, pass });
+    const { host, user, pass, standard } = req.body;
+    const result = await createVms({ host, user, pass, standard });
     next(result);
 });
 

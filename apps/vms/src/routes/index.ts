@@ -13,6 +13,6 @@ export const router: Router = Router();
 router.use(`${configs.app.prefix}/vms`, verifyToken, vmsRouter);
 router.use(`${configs.app.prefix}/services`, verifyToken, serviceRouter);
 router.use(`${configs.app.prefix}/webhook`, webhooksRouter);
-router.use(`${configs.app.prefix}/postman`,verifyToken, postmanRouter);
-router.use(`${configs.app.prefix}/record`,verifyToken, recordRouter);
+router.use(`${configs.app.prefix}/postman`, verifyToken, postmanRouter);
+router.use(`${configs.app.prefix}/record`, verifyToken, recordRouter);
 // router.use(`${configs.app.prefix}/in/vms`, vmsInRouter);

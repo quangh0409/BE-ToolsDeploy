@@ -6,7 +6,7 @@ import {
     getUserByEmail,
     updateUser,
 } from "../../controllers";
-import { findUserByIdsValidator, findUserValidator } from "../../validator";
+import { findUserValidator } from "../../validator";
 import {
     FindUserByEmailReqQuery,
     FindReqQuery,

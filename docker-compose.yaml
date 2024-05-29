@@ -36,6 +36,9 @@ services:
     environment:
       - CA_AUTH_TICKET_SERVICE_HOST=http://ticket
       - CA_AUTH_GIT_SERVICE_HOST=http://git
+      - CA_AUTH_MONGO_ADDRESSES=172.20.0.7:27017
+      - CA_AUTH_REDIS_HOST=172.20.0.5
+      - CA_AUTH_MAIL_SERVICE_HOST=http://mail
     image: docker.io/vutrongquang/auth
 
   git:

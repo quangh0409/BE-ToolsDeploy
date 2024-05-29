@@ -12,9 +12,7 @@ export interface IUserActivity {
     note?: string;
 }
 
-export interface IGithub {
-
-}
+export interface IGithub {}
 
 export interface IUser {
     id: string;
@@ -26,5 +24,3 @@ export interface IUser {
     created_time: Date;
     activities: IUserActivity[];
 }
-
-

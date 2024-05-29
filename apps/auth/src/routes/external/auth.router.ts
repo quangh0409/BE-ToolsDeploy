@@ -5,15 +5,9 @@ import {
     forgotPassword,
     setPassword,
     updatePassword,
-    checkAccount,
     loginByGithub,
 } from "../../controllers";
-import {
-    CheckReqBody,
-    LoginGithubReqBody,
-    LoginReqBody,
-    UpdatePasswordReqBody,
-} from "../../interfaces/request";
+import { LoginReqBody, UpdatePasswordReqBody } from "../../interfaces/request";
 import { verifyToken } from "../../middlewares";
 import {
     loginValidator,
@@ -21,10 +15,9 @@ import {
     forgotPasswordValidator,
     setPasswordValidator,
     updatePasswordValidator,
-    checkAccountValidator,
     loginGithubValidator,
 } from "../../validator";
-import { validate, matchedBody, matchedQuery } from "app";
+import { validate } from "app";
 
 export const router: Router = Router();
 

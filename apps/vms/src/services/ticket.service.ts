@@ -55,3 +55,38 @@ export async function deleteVmsOfTicketById(params: {
         }
     }
 }
+
+export async function deleteStandardOfTicketById(params: {
+    ticket: string;
+    standard: string;
+}): Promise<{ body?: IDelete; status: number }> {
+    const url = `${configs.services.ticket.getUrl()}/delete-standard`;
+    try {
+        const res = await axios.post<IDelete>(`${url}`, params);
+        return { body: res.data, status: res.status };
+    } catch (e) {
+        if (axios.isAxiosError(e) && e.response?.status) {
+            return { status: e.response?.status };
+        } else {
+            throw new HttpError(error.service(url));
+        }
+    }
+}
+
+export async function updateTicket(params: {
+    user_id: string;
+    vms_ids?: string;
+    standard_ids?: string;
+}): Promise<{ body?: ITicket; status: number }> {
+    const url = `${configs.services.ticket.getUrl()}/`;
+    try {
+        const res = await axios.put<ITicket>(`${url}`, params);
+        return { body: res.data, status: res.status };
+    } catch (e) {
+        if (axios.isAxiosError(e) && e.response?.status) {
+            return { status: e.response?.status };
+        } else {
+            throw new HttpError(error.service(url));
+        }
+    }
+}

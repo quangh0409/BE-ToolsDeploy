@@ -3,12 +3,10 @@ import { ILoginRes } from "../interfaces/response/user.body";
 import { configs } from "../configs";
 import { HttpError, error } from "app";
 
-export async function login(
-    params:  {
-        email: string;
-        password: string;
-    }
-): Promise<{ body?: ILoginRes; status?: number }> {
+export async function login(params: {
+    email: string;
+    password: string;
+}): Promise<{ body?: ILoginRes; status?: number }> {
     const url = `${configs.services.auth.getUrl()}/login`;
     try {
         const res = await axios.post<ILoginRes>(`${url}`, params);

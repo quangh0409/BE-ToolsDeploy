@@ -11,6 +11,7 @@ export async function createdTicket(params: {
     gitlab_id?: string;
     user_id: string;
     vms_ids?: string[];
+    standard_ids?: string[];
 }): Promise<ResultSuccess> {
     const check = await Ticket.findOne({ user_id: params.user_id });
 
@@ -34,6 +35,7 @@ export async function createdTicket(params: {
         gitlab_id: params.gitlab_id,
         user_id: params.user_id,
         vms_ids: params.vms_ids,
+        standard_ids: params.standard_ids,
     });
 
     await ticket.save();
@@ -44,7 +46,7 @@ export async function createdTicket(params: {
 export async function updateTicket(params: {
     user_id: string;
     vms_ids?: string;
-    standard_ids?: string
+    standard_ids?: string;
 }) {
     const set: UpdateQuery<ITicket> = {};
     if (params.vms_ids) {
@@ -52,7 +54,7 @@ export async function updateTicket(params: {
             ...set.$push,
             vms_ids: params.vms_ids,
         };
-    };
+    }
     if (params.standard_ids) {
         set.$push = {
             ...set.$push,
@@ -213,6 +215,39 @@ export async function deleteVmsOfTicketById(params: {
 
     if (vms.length === ticket.vms_ids.length - 1) {
         ticket.vms_ids = vms;
+        await ticket.save();
+        return success.ok({ isDelete: true });
+    }
+
+    return success.ok({ isDelete: false });
+}
+
+export async function deleteStandardOfTicketById(params: {
+    ticket: string;
+    standard: string;
+}): Promise<ResultSuccess> {
+    const ticket = await Ticket.findOne({ id: params.ticket });
+
+    if (!ticket) {
+        throw new HttpError({
+            status: HttpStatus.NOT_FOUND,
+            code: "TICKET_NOT_EXITS",
+            errors: [
+                {
+                    param: "ticket",
+                    location: "params",
+                    value: params.ticket,
+                },
+            ],
+        });
+    }
+
+    const standards = ticket.standard_ids.filter(
+        (id) => id !== params.standard
+    );
+
+    if (standards.length === ticket.standard_ids.length - 1) {
+        ticket.standard_ids = standards;
         await ticket.save();
         return success.ok({ isDelete: true });
     }

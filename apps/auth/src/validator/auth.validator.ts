@@ -47,13 +47,12 @@ export const forgotPasswordValidator = (): (
 
 export const loginValidator = Joi.object({
     email: Joi.string().required().exist(),
-    password: Joi.string().required().exist()
-})
+    password: Joi.string().required().exist(),
+});
 
 export const loginGithubValidator = Joi.object({
     code: Joi.string().required().exist(),
-})
-
+});
 
 export const checkAccountValidator = (): (
     | ValidationChain

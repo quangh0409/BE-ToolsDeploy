@@ -29,6 +29,7 @@ export async function createVms(params: {
     host: string;
     user: string;
     pass: string;
+    standard: string;
 }): Promise<ResultSuccess> {
     const check = await Vms.findOne({ host: params.host });
     const err: ResultError = {
@@ -56,9 +57,9 @@ export async function createVms(params: {
 
         let log;
         log = await ssh.execCommand("hostnamectl");
-        let operating_system: string = "";
-        let kernel: string = "";
-        let architecture: string = "";
+        let operating_system = "";
+        let kernel = "";
+        let architecture = "";
         log.stdout.split("\n").map((t) => {
             const ob = t.split(": ");
             if ("Operating System" === ob[0].trim()) {
@@ -74,10 +75,10 @@ export async function createVms(params: {
         log = await ssh.execCommand("uname -o");
         operating_system += ` ${log.stdout}`;
         log = await ssh.execCommand("cat /etc/os-release");
-        let home_url: string = "";
-        let support_url: string = "";
-        let bug_report_url: string = "";
-        let privacy_policy_url: string = "";
+        let home_url = "";
+        let support_url = "";
+        let bug_report_url = "";
+        let privacy_policy_url = "";
         log.stdout.split("\n").map((t) => {
             const ob = t.split("=");
             if ("HOME_URL" === ob[0]) {
@@ -91,22 +92,22 @@ export async function createVms(params: {
             }
         });
         log = await ssh.execCommand("landscape-sysinfo");
-        let obj: { [key: string]: string } = {};
+        const obj: { [key: string]: string } = {};
         const regex = /([\w\s\/]+):\s*([^\n]+?)(?=\s{2,}[\w\s\/]+:|$)/g;
         let match;
 
         while ((match = regex.exec(log.stdout)) !== null) {
-            let key = match[1].trim().replace(/\s+/g, " "); // Normalize whitespace in keys
-            let value = match[2].trim();
+            const key = match[1].trim().replace(/\s+/g, " "); // Normalize whitespace in keys
+            const value = match[2].trim();
             // Handle cases where multiple entries might be on the same line
             if (value.includes("   ")) {
-                let parts = value.split("   ").map((part) => part.trim());
+                const parts = value.split("   ").map((part) => part.trim());
                 let lastKey = key;
                 parts.forEach((part, index) => {
                     if (index === 0) {
                         obj[lastKey] = part;
                     } else {
-                        let newSplit = part.split(": ");
+                        const newSplit = part.split(": ");
                         lastKey = newSplit[0].trim().replace(/\s+/g, " ");
                         obj[lastKey] = newSplit[1]?.trim();
                     }
@@ -165,6 +166,7 @@ export async function createVms(params: {
             host: params.host,
             user: params.user,
             pass: params.pass,
+            standard: params.standard,
             status: EStatus.CONNECT,
             last_connect: new Date(),
             operating_system: operating_system,
@@ -238,22 +240,22 @@ export async function getSysinfoOfVms(params: {
 
     let log;
     log = await ssh.execCommand("landscape-sysinfo");
-    let obj: { [key: string]: string } = {};
+    const obj: { [key: string]: string } = {};
     const regex = /([\w\s\/]+):\s*([^\n]+?)(?=\s{2,}[\w\s\/]+:|$)/g;
     let match;
 
     while ((match = regex.exec(log.stdout)) !== null) {
-        let key = match[1].trim().replace(/\s+/g, " "); // Normalize whitespace in keys
-        let value = match[2].trim();
+        const key = match[1].trim().replace(/\s+/g, " "); // Normalize whitespace in keys
+        const value = match[2].trim();
         // Handle cases where multiple entries might be on the same line
         if (value.includes("   ")) {
-            let parts = value.split("   ").map((part) => part.trim());
+            const parts = value.split("   ").map((part) => part.trim());
             let lastKey = key;
             parts.forEach((part, index) => {
                 if (index === 0) {
                     obj[lastKey] = part;
                 } else {
-                    let newSplit = part.split(": ");
+                    const newSplit = part.split(": ");
                     lastKey = newSplit[0].trim().replace(/\s+/g, " ");
                     obj[lastKey] = newSplit[1]?.trim();
                 }
@@ -296,22 +298,22 @@ export async function getVmsById(params: {
 
         let log;
         log = await ssh.execCommand("landscape-sysinfo");
-        let obj: { [key: string]: string } = {};
+        const obj: { [key: string]: string } = {};
         const regex = /([\w\s\/]+):\s*([^\n]+?)(?=\s{2,}[\w\s\/]+:|$)/g;
         let match;
 
         while ((match = regex.exec(log.stdout)) !== null) {
-            let key = match[1].trim().replace(/\s+/g, " "); // Normalize whitespace in keys
-            let value = match[2].trim();
+            const key = match[1].trim().replace(/\s+/g, " "); // Normalize whitespace in keys
+            const value = match[2].trim();
             // Handle cases where multiple entries might be on the same line
             if (value.includes("   ")) {
-                let parts = value.split("   ").map((part) => part.trim());
+                const parts = value.split("   ").map((part) => part.trim());
                 let lastKey = key;
                 parts.forEach((part, index) => {
                     if (index === 0) {
                         obj[lastKey] = part;
                     } else {
-                        let newSplit = part.split(": ");
+                        const newSplit = part.split(": ");
                         lastKey = newSplit[0].trim().replace(/\s+/g, " ");
                         obj[lastKey] = newSplit[1]?.trim();
                     }
@@ -391,7 +393,7 @@ export async function findContaninersOfVmById(params: {
 
         let log;
         let containers = [];
-        let command = "docker stats --format json --no-stream";
+        const command = "docker stats --format json --no-stream";
 
         log = await ssh.execCommand(command);
         if (log.stdout !== "") {
@@ -443,13 +445,17 @@ export async function findImagesOfVmById(params: {
         });
 
         let images = [];
-        const log = await ssh.execCommand(
-            `docker images --format json | grep -v '<none>'`
-        );
+        const log = await ssh.execCommand(`docker images --format json`);
 
         if (log.stdout !== "") {
             images = log.stdout.split("\n").map((r) => JSON.parse(r));
         }
+
+        images = images.filter((image) => {
+            if (!image?.Repository?.includes("<none>")) {
+                return image;
+            }
+        });
 
         if (params.name) {
             images = images.filter((image) => {
@@ -458,7 +464,6 @@ export async function findImagesOfVmById(params: {
                 }
             });
         }
-
 
         return success.ok(images);
     } catch (error) {
@@ -470,12 +475,12 @@ export async function findImagesOfVmById(params: {
 export async function getVmsByIds(params: {
     ids: string[];
 }): Promise<ResultSuccess> {
-    let connect: {
+    const connect: {
         id: any;
         containers: string | null;
         images: string | null;
     }[] = [];
-    let disconnect: {
+    const disconnect: {
         id: any;
         containers: string | null;
         images: string | null;
@@ -512,10 +517,10 @@ export async function getVmsByIds(params: {
                 tryKeyboard: true,
             });
             let command = "docker ps -q | wc -l";
-            let log1 = await ssh.execCommand(command);
+            const log1 = await ssh.execCommand(command);
             command =
                 "docker images --format '{{.Repository}}' | grep -v '<none>' | wc -l";
-            let log2 = await ssh.execCommand(command);
+            const log2 = await ssh.execCommand(command);
             return { id: vm.id, containers: log1.stdout, images: log2.stdout }; // Return vm.id if connection is successful
         } catch (error) {
             return { id: vm.id, containers: null, images: null }; // Return null if connection fails
@@ -654,9 +659,9 @@ export async function updateVms(params: {
 
         let log;
         log = await ssh.execCommand("hostnamectl");
-        let operating_system: string = "";
-        let kernel: string = "";
-        let architecture: string = "";
+        let operating_system = "";
+        let kernel = "";
+        let architecture = "";
         log.stdout.split("\n").map((t) => {
             const ob = t.split(": ");
             if ("Operating System" === ob[0].trim()) {
@@ -672,10 +677,10 @@ export async function updateVms(params: {
         log = await ssh.execCommand("uname -o");
         operating_system += ` ${log.stdout}`;
         log = await ssh.execCommand("cat /etc/os-release");
-        let home_url: string = "";
-        let support_url: string = "";
-        let bug_report_url: string = "";
-        let privacy_policy_url: string = "";
+        let home_url = "";
+        let support_url = "";
+        let bug_report_url = "";
+        let privacy_policy_url = "";
         log.stdout.split("\n").map((t) => {
             const ob = t.split("=");
             if ("HOME_URL" === ob[0]) {
@@ -689,22 +694,22 @@ export async function updateVms(params: {
             }
         });
         log = await ssh.execCommand("landscape-sysinfo");
-        let obj: { [key: string]: string } = {};
+        const obj: { [key: string]: string } = {};
         const regex = /([\w\s\/]+):\s*([^\n]+?)(?=\s{2,}[\w\s\/]+:|$)/g;
         let match;
 
         while ((match = regex.exec(log.stdout)) !== null) {
-            let key = match[1].trim().replace(/\s+/g, " "); // Normalize whitespace in keys
-            let value = match[2].trim();
+            const key = match[1].trim().replace(/\s+/g, " "); // Normalize whitespace in keys
+            const value = match[2].trim();
             // Handle cases where multiple entries might be on the same line
             if (value.includes("   ")) {
-                let parts = value.split("   ").map((part) => part.trim());
+                const parts = value.split("   ").map((part) => part.trim());
                 let lastKey = key;
                 parts.forEach((part, index) => {
                     if (index === 0) {
                         obj[lastKey] = part;
                     } else {
-                        let newSplit = part.split(": ");
+                        const newSplit = part.split(": ");
                         lastKey = newSplit[0].trim().replace(/\s+/g, " ");
                         obj[lastKey] = newSplit[1]?.trim();
                     }
@@ -957,6 +962,91 @@ export async function sshInstallDocker(
     }
 }
 
+export async function installDocker(params: {
+    user_id: string;
+    vm_id: string;
+}): Promise<ResultSuccess> {
+    try {
+        const ticket = await findTicketByUserId({ user_id: params.user_id });
+        const path = __dirname;
+        const file_path_docker = resolve(
+            path,
+            "../../",
+            "file/win/docker-setup.sh"
+        );
+        if (ticket.body && ticket.status === 200) {
+            if (ticket.body.vms_ids) {
+                const check = ticket.body.vms_ids.find((id) => {
+                    return params.vm_id === id;
+                });
+                if (check) {
+                    const ssh = new NodeSSH();
+
+                    const vm = await Vms.findOne({
+                        id: params.vm_id,
+                    });
+
+                    if (!vm) {
+                        throw error.notFound({
+                            location: "params",
+                            param: "vm",
+                            value: params.vm_id,
+                            message: "HOST NOT EXITED",
+                        });
+                    }
+                    await ssh.connect({
+                        host: vm!.host,
+                        username: vm!.user,
+                        password: vm!.pass,
+                        port: 22,
+                        tryKeyboard: true,
+                    });
+                    let log;
+                    await ssh.execCommand(
+                        "mkdir -p docker && touch docker/docker-setup.sh"
+                    );
+                    const content = fs.readFileSync(file_path_docker);
+                    await ssh.execCommand(
+                        `echo '${content}' | tr -d '\r' > docker/docker-setup.sh`
+                    );
+                    await ssh.execCommand("chmod +x docker/docker-setup.sh");
+                    log = await ssh.execCommand(
+                        `echo "${vm!.pass}" | sudo -S ./docker/docker-setup.sh`
+                    );
+                    if (log.code === 0) {
+                        log = await ssh.execCommand(
+                            `echo "${
+                                vm!.pass
+                            }" | sudo -S usermod -aG docker $USER`
+                        );
+                    }
+                    if (log.code === 0) {
+                        log = await ssh.execCommand(
+                            `echo "${
+                                vm!.pass
+                            }" | sudo -S systemctl restart docker`
+                        );
+                    }
+                    log = await ssh.execCommand(`docker --version`);
+                    ssh.dispose();
+                    if (log.code === 0) {
+                        return success.ok({ message: "SUCCESSFULLY" });
+                    } else {
+                        return success.ok({ message: "FAILED", value: log });
+                    }
+                }
+            }
+        }
+        throw error.notFound({
+            message: "ticket not found",
+        });
+    } catch (err: any) {
+        throw error.notFound({
+            value: err,
+        });
+    }
+}
+
 export async function sshCheckConnect(
     socket: Socket,
     token: string,
@@ -1137,6 +1227,100 @@ export async function sshInstallTrivy(
     }
 }
 
+export async function installTrivy(params: { user_id: string; vm_id: string }) {
+    try {
+        const ticket = await findTicketByUserId({ user_id: params.user_id });
+        const path = __dirname;
+        const file_path = resolve(path, "../../", "file/win/id_rsa");
+        if (ticket.body && ticket.status === 200) {
+            if (ticket.body.vms_ids) {
+                const check = ticket.body.vms_ids.find((id) => {
+                    return params.vm_id === id;
+                });
+                if (check) {
+                    const ssh = new NodeSSH();
+
+                    const vm = await Vms.findOne({
+                        id: params.vm_id,
+                    });
+
+                    if (!vm) {
+                        throw error.notFound({
+                            location: "params",
+                            param: "vm",
+                            value: params.vm_id,
+                            message: "HOST NOT EXITED",
+                        });
+                    }
+
+                    // Đọc nội dung của file RSA vào biến privateKey
+                    const privateKey = fs.readFileSync(file_path).toString();
+                    await ssh.connect({
+                        host: vm!.host,
+                        username: vm!.user,
+                        password: vm!.pass,
+                        port: 22,
+                        tryKeyboard: true,
+                    });
+                    await ssh.execCommand("mkdir -p trivy");
+                    let log;
+                    log = await ssh.execCommand(
+                        `echo "${vm!.pass}" | sudo -S apt-get install -y wget`
+                    );
+
+                    if (log.code === 0) {
+                        log = await ssh.execCommand(
+                            `cd trivy && wget https://github.com/aquasecurity/trivy/releases/download/v0.50.1/trivy_0.50.1_Linux-64bit.tar.gz`
+                        );
+                    }
+                    if (log.code === 0) {
+                        log = await ssh.execCommand(
+                            `cd trivy && tar zxvf trivy_0.50.1_Linux-64bit.tar.gz`
+                        );
+                    }
+                    if (log.code === 0) {
+                        log = await ssh.execCommand(
+                            `cd trivy && echo "${
+                                vm!.pass
+                            }" | sudo -S mv trivy /usr/local/bin/`
+                        );
+                    }
+                    log = await ssh.execCommand(`trivy -v`);
+                    ssh.dispose();
+                    if (log.code === 0) {
+                        return success.ok({ message: "SUCCESSFULLY" });
+                    }
+                    if (log.code !== 0) {
+                        return success.ok({ message: "FAILED", value: log });
+                    }
+                } else {
+                    throw new HttpError(
+                        error.invalidData({
+                            message: "id vm not found",
+                        })
+                    );
+                }
+            } else {
+                throw new HttpError(
+                    error.invalidData({
+                        message: "token have problem",
+                    })
+                );
+            }
+        } else {
+            throw new HttpError(
+                error.invalidData({
+                    message: "token have problem",
+                })
+            );
+        }
+    } catch (err: any) {
+        throw error.notFound({
+            value: err,
+        });
+    }
+}
+
 export async function sshInstallHadolint(
     socket: Socket,
     token: string,
@@ -1274,6 +1458,109 @@ export async function sshInstallHadolint(
                 message: "token have problem",
             })
         );
+    }
+}
+
+export async function installHadolint(params: {
+    user_id: string;
+    vm_id: string;
+}): Promise<ResultSuccess> {
+    try {
+        const ticket = await findTicketByUserId({ user_id: params.user_id });
+        const path = __dirname;
+        const file_path = resolve(path, "../../", "file/win/id_rsa");
+        if (ticket.body && ticket.status === 200) {
+            if (ticket.body.vms_ids) {
+                const check = ticket.body.vms_ids.find((id) => {
+                    return params.vm_id === id;
+                });
+                if (check) {
+                    const ssh = new NodeSSH();
+
+                    const vm = await Vms.findOne({
+                        id: params.vm_id,
+                    });
+
+                    if (!vm) {
+                        throw error.notFound({
+                            location: "params",
+                            param: "vm",
+                            value: params.vm_id,
+                            message: "HOST NOT EXITED",
+                        });
+                    }
+
+                    // Đọc nội dung của file RSA vào biến privateKey
+                    await ssh.connect({
+                        host: vm!.host,
+                        username: vm!.user,
+                        password: vm!.pass,
+                        port: 22,
+                        tryKeyboard: true,
+                    });
+
+                    await ssh.execCommand("mkdir -p hadolint");
+                    let log;
+                    log = await ssh.execCommand(
+                        `cd hadolint && wget https://github.com/hadolint/hadolint/releases/download/v2.7.0/hadolint-Linux-x86_64`
+                    );
+
+                    if (log.code === 0) {
+                        log = await ssh.execCommand(
+                            `cd hadolint && echo "${
+                                vm!.pass
+                            }" | sudo -S mv hadolint-Linux-x86_64 hadolint`
+                        );
+                    }
+                    if (log.code === 0) {
+                        log = await ssh.execCommand(
+                            `cd hadolint && chmod +x hadolint`
+                        );
+                    }
+                    if (log.code === 0) {
+                        log = await ssh.execCommand(
+                            `cd hadolint && echo "${
+                                vm!.pass
+                            }" | sudo -S mv hadolint /usr/local/bin/`
+                        );
+                    }
+                    log = await ssh.execCommand(`hadolint --version`);
+                    ssh.dispose();
+                    if (log.code === 0) {
+                        return success.ok({ message: "SUCCESSFULLY" });
+                    } else {
+                        throw new HttpError(
+                            error.invalidData({
+                                value: log,
+                                message: "FAILED",
+                            })
+                        );
+                    }
+                } else {
+                    throw new HttpError(
+                        error.invalidData({
+                            message: "id vm not found",
+                        })
+                    );
+                }
+            } else {
+                throw new HttpError(
+                    error.invalidData({
+                        message: "token have problem",
+                    })
+                );
+            }
+        } else {
+            throw new HttpError(
+                error.invalidData({
+                    message: "ticket not found",
+                })
+            );
+        }
+    } catch (err: any) {
+        throw error.notFound({
+            value: err,
+        });
     }
 }
 

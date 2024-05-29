@@ -19,11 +19,11 @@ export const configs = {
         // password: process.env.CA_AUTH_MONGO_PASSWORD || "",
         // authSource: process.env.CA_AUTH_MONGO_AUTHOR_SOURCE || "admin",
         dbName: process.env.CA_AUTH_MONGO_DB_NAME || "auth",
-        templateUri: 
-        "mongodb://${addresses}/${dbName}" +
-        "?serverSelectionTimeoutMS=5000&connectTimeoutMS=10000" +
-        "&directConnection=true",
-        
+        templateUri:
+            "mongodb://${addresses}/${dbName}" +
+            "?serverSelectionTimeoutMS=5000&connectTimeoutMS=10000" +
+            "&directConnection=true",
+
         getUri: function (): string {
             let uri = this.templateUri;
             // const password = encodeURIComponent(this.password);
@@ -83,7 +83,9 @@ export const configs = {
             },
         },
         ticket: {
-            prefix: process.env.CA_AUTH_TICKET_SERVICE_PREFIX || "/api/v1/in/ticket",
+            prefix:
+                process.env.CA_AUTH_TICKET_SERVICE_PREFIX ||
+                "/api/v1/in/ticket",
             host: process.env.CA_AUTH_TICKET_SERVICE_HOST || "http://127.0.0.1",
             port: process.env.CA_AUTH_TICKET_SERVICE_PORT || "6803",
             getUrl: function (): string {

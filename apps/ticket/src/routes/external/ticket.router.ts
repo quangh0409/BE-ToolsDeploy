@@ -35,7 +35,7 @@ router.put("/", async (req: Request, _: Response, next: NextFunction) => {
     const result = await updateTicket({
         user_id: id,
         vms_ids: vms_ids,
-        standard_ids: standard_ids
+        standard_ids: standard_ids,
     });
     next(result);
 });

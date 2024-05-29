@@ -1,4 +1,4 @@
-import { error, HttpError, Payload } from "app";
+import { Payload } from "app";
 import { NextFunction, Request, Response, Router } from "express";
 import {
     createUser,
@@ -26,8 +26,6 @@ router.get(
         next(result);
     }
 );
-
-
 
 router.post("/", async (req: Request, _: Response, next: NextFunction) => {
     const body = req.body;

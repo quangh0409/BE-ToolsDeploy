@@ -1,11 +1,4 @@
-import {
-    error,
-    HttpStatus,
-    Result,
-    ResultError,
-    ResultSuccess,
-    success,
-} from "app";
+import { error, HttpStatus, Result, ResultError, success } from "app";
 import bcrypt from "bcrypt";
 import logger from "logger";
 import { configs } from "../configs";
@@ -13,10 +6,7 @@ import { redis } from "../database";
 import { User } from "../models";
 import Account from "../models/account";
 import { genAccessToken, genRefreshToken, getPayload } from "../token";
-import {
-    createUser,
-    getUserByEmail,
-} from "./user.controller";
+import { createUser, getUserByEmail } from "./user.controller";
 import {
     createGitHub,
     getAGithubByCode,
@@ -29,10 +19,7 @@ import {
     findTicketByGithubId,
 } from "../services/ticket.service";
 import { v1 } from "uuid";
-import {
-    sendMailGoogleForgotPassword,
-    sendMailGoogleNewAccount,
-} from "../services/mail.service";
+import { sendMailGoogleForgotPassword } from "../services/mail.service";
 
 export async function login(params: {
     email: string;
@@ -159,7 +146,7 @@ export async function loginByGithub(params: { code: string }): Promise<Result> {
         });
 
         if (checkTicket.status === 200 && !checkTicket.body!.exits) {
-            const github_temp = await createGitHub({
+            await createGitHub({
                 access_token: github.body!.access_token,
                 token_type: github.body!.token_type,
                 scope: github.body!.scope,
@@ -175,7 +162,7 @@ export async function loginByGithub(params: { code: string }): Promise<Result> {
                 avatar: infoUserGit.body.avatar_url,
             });
             if (user.status === 201) {
-                const ticket = await createdTicket({
+                await createdTicket({
                     id: v1(),
                     user_id: user.data.id,
                     github_id: infoUserGit.body.id,
@@ -209,7 +196,6 @@ export async function loginByGithub(params: { code: string }): Promise<Result> {
                     return success.ok(data);
                 }
             }
-
         }
         const ticket = await findTicketByGithubId({
             github_id: infoUserGit.body.id,
@@ -355,7 +341,7 @@ export async function forgotPassword(params: {
     );
 
     account.password = hashedPassword;
-    console.log("🚀 ~ hashedPassword:", hashedPassword)
+    console.log("🚀 ~ hashedPassword:", hashedPassword);
 
     await account.save();
 
@@ -481,10 +467,7 @@ export async function updatePassword(params: {
         await bcrypt.genSalt(sr)
     );
     account.password = hashedPassword;
-    await Promise.all([
-       
-        account.save(),
-    ]);
+    await Promise.all([account.save()]);
     return success.ok({ message: "success" });
 }
 

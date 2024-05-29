@@ -13,11 +13,11 @@ export const configs = {
         username: process.env.CA_SCAN_MONGO_USERNAME || "root",
         password: process.env.CA_SCAN_MONGO_PASSWORD || "",
         dbName: process.env.CA_SCAN_MONGO_DB_NAME || "auth",
-        templateUri: 
-        "mongodb://${addresses}/${dbName}" +
-        "?serverSelectionTimeoutMS=5000&connectTimeoutMS=10000" +
-        "&directConnection=true",
-        
+        templateUri:
+            "mongodb://${addresses}/${dbName}" +
+            "?serverSelectionTimeoutMS=5000&connectTimeoutMS=10000" +
+            "&directConnection=true",
+
         getUri: function (): string {
             let uri = this.templateUri;
             // const password = encodeURIComponent(this.password);

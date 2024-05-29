@@ -1,6 +1,5 @@
-import { NextFunction, Router } from "express";
+import { Router } from "express";
 import { configs } from "../configs";
-import { verifyToken } from "../middlewares";
 
 import { router as authRouter } from "./external/auth.router";
 import { router as inAccountRouter } from "./internal/account.router";
@@ -23,7 +22,12 @@ const options = {
         ],
     },
 
-    apis: [`./build/swagger/swagger*.*`, "./src/swagger/swagger*.*", "./auth/src/swagger/swagger*.*","./apps/auth/src/swagger/swagger*.*"],
+    apis: [
+        `./build/swagger/swagger*.*`,
+        "./src/swagger/swagger*.*",
+        "./auth/src/swagger/swagger*.*",
+        "./apps/auth/src/swagger/swagger*.*",
+    ],
 };
 
 const swaggerSpec = swaggerJSDoc(options);

@@ -1,12 +1,8 @@
 import { HttpError, ResultSuccess, success, error } from "app";
-import {
-    IRecordReqBodyCreate,
-    IRecordReqBodyUpdate,
-} from "../interfaces/request/record.body";
+import { IRecordReqBodyCreate } from "../interfaces/request/record.body";
 import Record from "../models/record";
 import { v1 } from "uuid";
-import { UpdateQuery } from "mongoose";
-import { EStatus, ILog, IOcean, IRecord } from "../interfaces/models";
+import { EStatus, ILog, IOcean } from "../interfaces/models";
 import Service from "../models/service";
 
 export async function createRecord(
