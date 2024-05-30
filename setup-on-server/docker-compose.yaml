@@ -1,0 +1,324 @@
+version: "3.8"
+
+services:
+  gateway:
+    container_name: gateway 
+    hostname: gateway
+    build:
+      context: ..
+      dockerfile: ./nginx/Dockerfile
+    restart: always
+    ports:
+      - 8080:8000
+    env_file: ../nginx/.env
+    depends_on:
+      - auth
+      - git
+      - ticket
+      - vms
+      - scan
+      - mail
+    image: docker.io/vutrongquang/gateway
+    healthcheck:
+      test: ["CMD-SHELL", "dockerize -wait tcp://172.20.0.7:27017 -timeout 30s && dockerize -wait tcp://172.20.0.5:6379 -timeout 30s && nc -z localhost 8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 1
+    networks:
+      - custom_network
+
+  auth:
+    container_name: auth 
+    hostname: auth
+    build:
+      context: ..
+      dockerfile: ./Dockerfile
+      args:
+        module: auth
+        mongo-rs0-1: 172.20.0.7
+    restart: unless-stopped
+    ports:
+      - 6801:6801
+    user: root
+    env_file: ../apps/auth/.env
+    environment:
+      - CA_AUTH_TICKET_SERVICE_HOST=http://ticket
+      - CA_AUTH_GIT_SERVICE_HOST=http://git
+      - CA_AUTH_MONGO_ADDRESSES=172.20.0.7:27017
+      - CA_AUTH_REDIS_HOST=172.20.0.5
+      - CA_AUTH_MAIL_SERVICE_HOST=http://mail
+    image: docker.io/vutrongquang/auth
+    depends_on:
+      - redis
+    healthcheck:
+      test: ["CMD-SHELL", "dockerize -wait tcp://172.20.0.7:27017 -timeout 30s && dockerize -wait tcp://172.20.0.5:6379 -timeout 30s && nc -z localhost 6801"]
+      interval: 30s
+      timeout: 10s
+      retries: 1
+    networks:
+      - custom_network
+
+  git:
+    container_name: git 
+    hostname: git
+    build:
+      context: ..
+      dockerfile: ./Dockerfile
+      args:
+        module: git
+        mongo-rs0-1: 172.20.0.7
+    restart: unless-stopped
+    ports:
+      - 6802:6802
+    user: root
+    env_file: ../apps/git/.env
+    environment:
+      - CA_GIT_USERS_SERVICE_HOST=http://auth
+      - CA_GIT_AUTH_SERVICE_HOST=http://auth
+      - CA_GIT_TICKET_SERVICE_HOST=http://ticket
+      - CA_GIT_CLIENT_ID=Ov23liAKvwqR0iILNsiC
+      - CA_GIT_CLIENT_SECRET=a370820af2811e1329ced80356511229d40590e4
+      - CA_GIT_MONGO_ADDRESSES=172.20.0.7:27017
+      - CA_GIT_REDIS_HOST=172.20.0.5
+    image: docker.io/vutrongquang/git
+    depends_on:
+      - redis
+    healthcheck:
+      test: ["CMD-SHELL", "dockerize -wait tcp://172.20.0.7:27017 -timeout 30s && dockerize -wait tcp://172.20.0.5:6379 -timeout 30s && nc -z localhost 6802"]
+      interval: 30s
+      timeout: 10s
+      retries: 1
+    networks:
+      - custom_network
+
+  ticket:
+    container_name: ticket 
+    hostname: ticket
+    build:
+      context: ..
+      dockerfile: ./Dockerfile
+      args:
+        module: ticket
+        mongo-rs0-1: 172.20.0.7
+    restart: unless-stopped
+    ports:
+      - 6803:6803
+    user: root
+    env_file: ../apps/ticket/.env
+    environment: 
+      - CA_TICKET_GIT_SERVICE_HOST=http://git
+      - CA_TICKET_USERS_SERVICE_HOST=http://auth
+      - CA_TICKET_AUTH_SERVICE_HOST=http://auth
+      - CA_TICKET_MONGO_ADDRESSES=172.20.0.7:27017
+      - CA_TICKET_REDIS_HOST=172.20.0.5
+    image: docker.io/vutrongquang/ticket
+    depends_on:
+      - redis
+    healthcheck:
+      test: ["CMD-SHELL", "dockerize -wait tcp://172.20.0.7:27017 -timeout 30s && dockerize -wait tcp://172.20.0.5:6379 -timeout 30s && nc -z localhost 6803"]
+      interval: 30s
+      timeout: 10s
+      retries: 1
+    networks:
+      - custom_network
+
+  vms:
+    container_name: vms 
+    hostname: vms
+    build:
+      context: ..
+      dockerfile: ./Dockerfile
+      args:
+        module: vms
+        mongo-rs0-1: 172.20.0.7
+    restart: unless-stopped
+    ports:
+      - 6804:6804
+    user: root
+    env_file: ../apps/vms/.env
+    environment:
+      - CA_VMS_TICKET_SERVICE_HOST=http://ticket
+      - CA_VMS_GIT_SERVICE_HOST=http://git 
+      - CA_VMS_MONGO_ADDRESSES=172.20.0.7:27017
+      - CA_VMS_REDIS_HOST=172.20.0.5
+    image: docker.io/vutrongquang/vms
+    depends_on:
+      - redis
+    healthcheck:
+      test: ["CMD-SHELL", "dockerize -wait tcp://172.20.0.7:27017 -timeout 30s && dockerize -wait tcp://172.20.0.5:6379 -timeout 30s && nc -z localhost 6804"]
+      interval: 30s
+      timeout: 10s
+      retries: 1
+    networks:
+      - custom_network
+
+  scan:
+    container_name: scan 
+    hostname: scan
+    build:
+      context: ..
+      dockerfile: ./Dockerfile.Scan
+      args:
+        module: scan
+        mongo-rs0-1: 172.20.0.7
+    restart: unless-stopped
+    ports:
+      - 6805:6805
+    user: root
+    env_file: ../apps/scan/.env
+    environment:
+      - CA_SCAN_MONGO_ADDRESSES=172.20.0.7:27017
+      - CA_SCAN_REDIS_HOST=172.20.0.5
+    image: docker.io/vutrongquang/scan
+    depends_on:
+      - mail
+    healthcheck:
+      test: ["CMD-SHELL", "dockerize -wait tcp://172.20.0.7:27017 -timeout 30s && dockerize -wait tcp://172.20.0.5:6379 -timeout 30s && nc -z localhost 6805"]
+      interval: 30s
+      timeout: 10s
+      retries: 1
+    networks:
+      - custom_network
+
+  mail:
+    container_name: mail 
+    hostname: mail
+    build:
+      context: ..
+      dockerfile: ./Dockerfile
+      args:
+        module: mail
+        mongo-rs0-1: 172.20.0.7
+    restart: unless-stopped
+    ports:
+      - 6806:6806
+    user: root
+    env_file: ../apps/mail/.env
+    environment:
+      - CA_MAIL_MONGO_ADDRESSES=172.20.0.7:27017
+      - CA_MAIL_REDIS_HOST=172.20.0.5
+    image: docker.io/vutrongquang/mail
+    depends_on:
+      - redis
+    healthcheck:
+      test: ["CMD-SHELL", "dockerize -wait tcp://172.20.0.7:27017 -timeout 30s && dockerize -wait tcp://172.20.0.5:6379 -timeout 30s && nc -z localhost 6806"]
+      interval: 30s
+      timeout: 10s
+      retries: 1
+    networks:
+      - custom_network
+
+  frontend:
+    container_name: frontend 
+    hostname: frontend
+    build:
+      context: ../..
+      dockerfile: ./FE-ToolsDeploy/Dockerfile
+    restart: always
+    user: root
+    ports:
+      - 8081:80
+    env_file: ../../FE-ToolsDeploy/.env
+    environment:
+      - REACT_APP_CA_BE_FE_HOST=http://gateway
+      - REACT_APP_CA_BE_FE_PORT=8080
+      - REACT_APP_CA_GIT_CLIENT_ID=Ov23liAKvwqR0iILNsiC
+    depends_on:
+      - gateway
+    image: docker.io/vutrongquang/frontend
+
+  mongo-rs0-1:
+    container_name: mongo-rs0-1
+    hostname: mongo-rs0-1
+    image: mongo:7.0
+    ports:
+      - 27017:27017
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+    volumes:
+      - ./mongodb-replicaset/mongo-rs0-1/data:/data/db
+      # - ./mongo-rs0-1/mongo.conf:/etc/mongo/mongo.conf:ro
+      # - ./mongo-rs0-1/replicaSet.js:/docker-entrypoint-initdb.d/replicaSet.js:ro
+      # - ./mongo-rs0-1/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro 
+    networks:
+      custom_network: 
+        ipv4_address: 172.20.0.7
+
+  mongo-rs0-2:
+    container_name: mongo-rs0-2
+    hostname: mongo-rs0-2
+    image: mongo:7.0
+    ports:
+      - 27018:27017
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+    volumes:
+      - ./mongodb-replicaset/mongo-rs0-2/data:/data/db
+    networks:
+      custom_network: 
+        ipv4_address: 172.20.0.3
+
+  mongo-rs0-3:
+    container_name: mongo-rs0-3
+    hostname: mongo-rs0-3
+    image: mongo:7.0
+    ports:
+      - 27019:27017
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+    volumes:
+      - ./mongodb-replicaset/mongo-rs0-3/data:/data/db
+    networks:
+      custom_network: 
+        ipv4_address: 172.20.0.4
+
+  redis:
+    container_name: redis_ToolsDeploy
+    image: redis
+    ports:
+      - '6379:6379'
+    command: >
+      redis-server
+      --requirepass VgE5tSroz7n8AiiY 
+      --aclfile /usr/local/etc/redis/users.acl
+    volumes:
+      - ./redis/users.acl:/usr/local/etc/redis/users.acl
+    depends_on:
+      - setup-rs
+    networks:
+      custom_network: 
+        ipv4_address: 172.20.0.5
+
+  setup-rs:
+    container_name: setup-rs
+    image: mongodb/mongodb-community-server:latest
+    networks:
+      custom_network: 
+        ipv4_address: 172.20.0.6
+    environment:
+      - mongo1=172.20.0.7
+      - mongo2=172.20.0.3
+      - mongo3=172.20.0.4
+    restart: on-failure
+    depends_on:
+      - mongo-rs0-1
+      - mongo-rs0-2
+      - mongo-rs0-3
+    volumes:
+      - ./mongodb-replicaset/setup:/docker-entrypoint-initdb.d
+    entrypoint: ["/bin/bash", "-c", "sleep 20 && mongosh mongodb://172.20.0.7:27017 /docker-entrypoint-initdb.d/replicaSet.js"]
+
+  autoheal:
+    image: willfarrell/autoheal
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - AUTOHEAL_CONTAINER_LABEL=all
+    networks:
+      - custom_network
+
+networks:
+  custom_network:
+    name: custom_network
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

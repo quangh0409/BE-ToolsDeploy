@@ -1,0 +1,92 @@
+version: "3.8"
+services:
+  mongo-rs0-1:
+    container_name: mongo-rs0-1
+    hostname: mongo-rs0-1
+    build: 
+      context: .
+    image: mongo:7.0
+    ports:
+      - 27017:27017
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+    volumes:
+      - ./mongo-rs0-1/data:/data/db
+      # - ./mongo-rs0-1/mongo.conf:/etc/mongo/mongo.conf:ro
+      # - ./mongo-rs0-1/replicaSet.js:/docker-entrypoint-initdb.d/replicaSet.js:ro
+      # - ./mongo-rs0-1/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro 
+    networks:
+      custom_network: 
+        ipv4_address: 172.20.0.7
+
+  mongo-rs0-2:
+    container_name: mongo-rs0-2
+    hostname: mongo-rs0-2
+    build: 
+      context: .
+    image: mongo:7.0
+    ports:
+      - 27018:27017
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+    volumes:
+      - ./mongo-rs0-2/data:/data/db
+    networks:
+      custom_network: 
+        ipv4_address: 172.20.0.3
+
+  mongo-rs0-3:
+    container_name: mongo-rs0-3
+    hostname: mongo-rs0-3
+    build: 
+      context: .
+    image: mongo:7.0
+    ports:
+      - 27019:27017
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+    volumes:
+      - ./mongo-rs0-3/data:/data/db
+    networks:
+      custom_network: 
+        ipv4_address: 172.20.0.4
+
+  redis:
+    container_name: redis_ToolsDeploy
+    image: redis
+    ports:
+      - '6379:6379'
+    command: >
+      redis-server
+      --requirepass VgE5tSroz7n8AiiY 
+      --aclfile /usr/local/etc/redis/users.acl
+    volumes:
+      - ../redis/users.acl:/usr/local/etc/redis/users.acl
+    networks:
+      custom_network: 
+        ipv4_address: 172.20.0.5
+
+  setup-rs:
+    container_name: setup-rs
+    image: mongodb/mongodb-community-server:latest
+    networks:
+      custom_network: 
+        ipv4_address: 172.20.0.6
+    environment:
+      - mongo1=172.20.0.7
+      - mongo2=172.20.0.3
+      - mongo3=172.20.0.4
+    restart: on-failure
+    depends_on:
+      - mongo-rs0-1
+      - mongo-rs0-2
+      - mongo-rs0-3
+    volumes:
+      - ./setup:/docker-entrypoint-initdb.d
+    entrypoint: ["/bin/bash", "-c", "sleep 20 && mongosh mongodb://172.20.0.7:27017 /docker-entrypoint-initdb.d/replicaSet.js"]
+
+networks:
+  custom_network:
+    name: custom_network
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+

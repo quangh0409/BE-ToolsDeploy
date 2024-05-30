@@ -19,9 +19,7 @@ import { EStatus } from "../interfaces/models";
 import { GetLastCommitByAccessToken } from "../services/git.service";
 import { SocketServer } from "../utils";
 
-export async function createService(
-    params: IServiceBody
-): Promise<ResultSuccess> {
+export async function createService( params: IServiceBody): Promise<ResultSuccess> {
     const service = new Service({
         id: v1(),
         name: params.name,
@@ -54,11 +52,7 @@ export async function createService(
     return success.ok(service);
 }
 
-export async function updateService(
-    params: IServiceBody & {
-        id: string;
-    }
-): Promise<ResultSuccess> {
+export async function updateService(params: IServiceBody & {id: string;}): Promise<ResultSuccess> {
     const service = await Service.findOneAndUpdate(
         {
             id: params.id,
@@ -108,10 +102,7 @@ export async function updateService(
     return success.ok(service);
 }
 
-export async function deleteService(params: {
-    id: string;
-    vm: string;
-}): Promise<ResultSuccess> {
+export async function deleteService(params: {id: string;vm: string;}): Promise<ResultSuccess> {
     const vm = await Vms.findOne({ id: params.vm });
 
     if (!vm) {
@@ -141,9 +132,7 @@ export async function deleteService(params: {
     return success.ok({ message: "successfully deleted" });
 }
 
-export async function getAllService(params: {
-    vm: string;
-}): Promise<ResultSuccess> {
+export async function getAllService(params: {vm: string;}): Promise<ResultSuccess> {
     const vm = await Vms.findOne({ id: params.vm });
     const err: ResultError = {
         status: HttpStatus.BAD_REQUEST,
@@ -173,9 +162,7 @@ export async function getAllService(params: {
     return success.ok(services);
 }
 
-export async function getServiceById(params: {
-    id: string;
-}): Promise<ResultSuccess> {
+export async function getServiceById(params: {id: string;}): Promise<ResultSuccess> {
     const service = await Service.findOne({ id: params.id }, { _id: 0 });
     const err: ResultError = {
         status: HttpStatus.BAD_REQUEST,
@@ -209,10 +196,7 @@ export async function getServiceById(params: {
     return success.ok(result);
 }
 
-export async function findServiceInVmsByName(params: {
-    vm: string;
-    service: string;
-}): Promise<ResultSuccess> {
+export async function findServiceInVmsByName(params: {vm: string;service: string;}): Promise<ResultSuccess> {
     const vm = await Vms.findOne({ id: params.vm });
     const err: ResultError = {
         status: HttpStatus.BAD_REQUEST,
@@ -246,11 +230,7 @@ export async function findServiceInVmsByName(params: {
     return success.ok(services);
 }
 
-export async function UpdateStatusServiceById(params: {
-    id: string;
-    status: string;
-    env: string;
-}): Promise<ResultSuccess> {
+export async function UpdateStatusServiceById(params: {id: string;status: string; env: string;}): Promise<ResultSuccess> {
     const service = await Service.findOne({ id: params.id });
 
     if (!service) {
@@ -272,10 +252,7 @@ export async function UpdateStatusServiceById(params: {
     return success.ok({ ...service, _id: undefined });
 }
 
-export async function getImagesOfServiceById(params: {
-    service: string;
-    env: string;
-}): Promise<ResultSuccess> {
+export async function getImagesOfServiceById(params: { service: string; env: string;}): Promise<ResultSuccess> {
     const service = await Service.findOne({ id: params.service });
     const ssh = new NodeSSH();
 
@@ -323,11 +300,7 @@ export async function getImagesOfServiceById(params: {
     );
 }
 
-export async function scanImageOfService(params: {
-    service: string;
-    env: string;
-    image: string;
-}): Promise<ResultSuccess> {
+export async function scanImageOfService(params: { service: string;env: string; image: string;}): Promise<ResultSuccess> {
     const service = await Service.findOne({ id: params.service });
     const ssh = new NodeSSH();
 
@@ -362,11 +335,7 @@ export async function scanImageOfService(params: {
     );
 }
 
-export async function logOfDockerCompose(
-    service: string,
-    env: string,
-    socket: Socket
-): Promise<boolean> {
+export async function logOfDockerCompose(service: string,env: string, socket: Socket): Promise<boolean> {
     const ser = await Service.findOne({ id: service });
     const ssh = new NodeSSH();
     console.log(service, env);
@@ -413,13 +382,7 @@ export async function logOfDockerCompose(
     );
 }
 
-export async function planCiCd(
-    socket: Socket,
-    token: string,
-    vm_id: string,
-    service_id: string,
-    env_name: string
-): Promise<boolean> {
+export async function planCiCd(socket: Socket, token: string,vm_id: string,service_id: string, env_name: string): Promise<boolean> {
     const payload = await verifyToken(token);
     const ticket = await findTicketByUserId({ user_id: payload.id });
 

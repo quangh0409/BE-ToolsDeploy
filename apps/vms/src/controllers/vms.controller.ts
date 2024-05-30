@@ -268,9 +268,7 @@ export async function getSysinfoOfVms(params: {
     return success.ok(obj);
 }
 
-export async function getVmsById(params: {
-    vms: string;
-}): Promise<ResultSuccess> {
+export async function getVmsById(params: { vms: string;}): Promise<ResultSuccess> {
     const check = await Vms.findOne({ id: params.vms });
     const err: ResultError = {
         status: HttpStatus.BAD_REQUEST,
@@ -362,10 +360,7 @@ export async function getVmsById(params: {
     }
 }
 
-export async function findContaninersOfVmById(params: {
-    vms: string;
-    name?: string;
-}): Promise<ResultSuccess> {
+export async function findContaninersOfVmById(params: {vms: string;name?: string;}): Promise<ResultSuccess> {
     const check = await Vms.findOne({ id: params.vms });
     const err: ResultError = {
         status: HttpStatus.BAD_REQUEST,
@@ -415,10 +410,7 @@ export async function findContaninersOfVmById(params: {
     }
 }
 
-export async function findImagesOfVmById(params: {
-    vms: string;
-    name?: string;
-}): Promise<ResultSuccess> {
+export async function findImagesOfVmById(params: {vms: string;name?: string;}): Promise<ResultSuccess> {
     const check = await Vms.findOne({ id: params.vms });
     const err: ResultError = {
         status: HttpStatus.BAD_REQUEST,
@@ -602,9 +594,7 @@ export async function getVmsByIds(params: {
     return success.ok(result);
 }
 
-export async function findVmsByHost(params: {
-    host: string;
-}): Promise<ResultSuccess> {
+export async function findVmsByHost(params: {host: string;}): Promise<ResultSuccess> {
     const hosts = await Vms.find(
         {
             host: {
@@ -620,11 +610,7 @@ export async function findVmsByHost(params: {
     return success.ok(hosts);
 }
 
-export async function updateVms(params: {
-    id: string;
-    user: string;
-    pass: string;
-}): Promise<ResultSuccess> {
+export async function updateVms(params: {id: string;user: string;pass: string;}): Promise<ResultSuccess> {
     const vm = await Vms.findOneAndUpdate(
         { id: params.id },
         {
@@ -1227,7 +1213,10 @@ export async function sshInstallTrivy(
     }
 }
 
-export async function installTrivy(params: { user_id: string; vm_id: string }) {
+export async function installTrivy(params: {
+    user_id: string;
+    vm_id: string;
+}): Promise<ResultSuccess> {
     try {
         const ticket = await findTicketByUserId({ user_id: params.user_id });
         const path = __dirname;
@@ -1293,13 +1282,12 @@ export async function installTrivy(params: { user_id: string; vm_id: string }) {
                     if (log.code !== 0) {
                         return success.ok({ message: "FAILED", value: log });
                     }
-                } else {
-                    throw new HttpError(
-                        error.invalidData({
-                            message: "id vm not found",
-                        })
-                    );
                 }
+                throw new HttpError(
+                    error.invalidData({
+                        message: "id vm not found",
+                    })
+                );
             } else {
                 throw new HttpError(
                     error.invalidData({

@@ -309,9 +309,7 @@ export async function newToken(refreshToken: string): Promise<Result> {
     }
 }
 
-export async function forgotPassword(params: {
-    email: string;
-}): Promise<Result> {
+export async function forgotPassword(params: { email: string; }): Promise<Result> {
     const account = await Account.findOne(
         {
             email: { $regex: `^${params.email}$`, $options: "i" },
@@ -418,10 +416,10 @@ export async function setPassword(params: {
 }
 
 export async function updatePassword(params: {
-    userId: string;
-    old_password: string;
-    new_password: string;
-}): Promise<Result> {
+                                            userId: string;
+                                            old_password: string;
+                                            new_password: string;
+                                            }): Promise<Result> {
     const account = await Account.findOne({ id: params.userId });
     if (!account) {
         return error.invalidData({

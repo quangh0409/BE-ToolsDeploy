@@ -5,12 +5,7 @@ import { v1 } from "uuid";
 import { EStatus, ILog, IOcean } from "../interfaces/models";
 import Service from "../models/service";
 
-export async function createRecord(
-    params: IRecordReqBodyCreate & {
-        service: string;
-        env: string;
-    }
-): Promise<ResultSuccess> {
+export async function createRecord( params: IRecordReqBodyCreate & {service: string; env: string;}): Promise<ResultSuccess> {
     const service = await Service.findOne({ id: params.service });
 
     if (!service) {
@@ -59,12 +54,7 @@ export async function createRecord(
     return success.ok(record);
 }
 
-export async function updateRecord(params: {
-    record: string;
-    status?: EStatus;
-    ocean?: IOcean;
-    logs?: ILog;
-}): Promise<ResultSuccess> {
+export async function updateRecord(params: {record: string;status?: EStatus;ocean?: IOcean;logs?: ILog;}): Promise<ResultSuccess> {
     const record = await Record.findOne({ id: params.record });
 
     if (!record) {
@@ -102,10 +92,7 @@ export async function updateRecord(params: {
     return success.ok(record);
 }
 
-export async function getRecordsOfService(params: {
-    service: string;
-    env: string;
-}): Promise<ResultSuccess> {
+export async function getRecordsOfService(params:{service: string; env: string;}): Promise<ResultSuccess> {
     const service = await Service.findOne({ id: params.service });
 
     if (!service) {
@@ -146,9 +133,7 @@ export async function getRecordsOfService(params: {
     return success.ok(records);
 }
 
-export async function getRecordById(params: {
-    record: string;
-}): Promise<ResultSuccess> {
+export async function getRecordById(params: {record: string;}): Promise<ResultSuccess> {
     const record = await Record.findOne({ id: params.record }, { _id: 0 });
 
     return success.ok(record);

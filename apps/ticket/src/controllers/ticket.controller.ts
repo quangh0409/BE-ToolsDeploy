@@ -6,13 +6,7 @@ import { getGithubById } from "../services/git.service";
 import { UpdateQuery } from "mongoose";
 import { v1 } from "uuid";
 
-export async function createdTicket(params: {
-    github_id?: string;
-    gitlab_id?: string;
-    user_id: string;
-    vms_ids?: string[];
-    standard_ids?: string[];
-}): Promise<ResultSuccess> {
+export async function createdTicket(params: {github_id?: string; gitlab_id?: string; user_id: string;vms_ids?: string[]; standard_ids?: string[];}): Promise<ResultSuccess> {
     const check = await Ticket.findOne({ user_id: params.user_id });
 
     if (check) {
@@ -43,11 +37,7 @@ export async function createdTicket(params: {
     return success.ok(ticket);
 }
 
-export async function updateTicket(params: {
-    user_id: string;
-    vms_ids?: string;
-    standard_ids?: string;
-}) {
+export async function updateTicket(params: {user_id: string;vms_ids?: string;standard_ids?: string;}) {
     const set: UpdateQuery<ITicket> = {};
     if (params.vms_ids) {
         set.$push = {
@@ -87,9 +77,7 @@ export async function updateTicket(params: {
     return success.ok(check);
 }
 
-export async function findTicketByUserId(params: {
-    user_id: string;
-}): Promise<ResultSuccess> {
+export async function findTicketByUserId(params: { user_id: string;}): Promise<ResultSuccess> {
     const ticket = await Ticket.findOne({ user_id: params.user_id });
 
     if (!ticket) {
@@ -108,9 +96,7 @@ export async function findTicketByUserId(params: {
     return success.ok(ticket);
 }
 
-export async function findTicketDetailByUserId(params: {
-    user_id: string;
-}): Promise<ResultSuccess> {
+export async function findTicketDetailByUserId(params: {user_id: string;}): Promise<ResultSuccess> {
     const ticket = await Ticket.findOne(
         { user_id: params.user_id },
         { _id: 0, __v: 0 }
@@ -148,9 +134,7 @@ export async function findTicketDetailByUserId(params: {
     return success.ok(result);
 }
 
-export async function findTicketByGithubId(params: {
-    github_id: string;
-}): Promise<ResultSuccess> {
+export async function findTicketByGithubId(params: {github_id: string;}): Promise<ResultSuccess> {
     const ticket = await Ticket.findOne({ github_id: params.github_id });
 
     if (!ticket) {
@@ -169,9 +153,7 @@ export async function findTicketByGithubId(params: {
     return success.ok(ticket);
 }
 
-export async function checkTicketExitsByUserId(params: {
-    user_id: string;
-}): Promise<ResultSuccess> {
+export async function checkTicketExitsByUserId(params: {user_id: string;}): Promise<ResultSuccess> {
     const ticket = await Ticket.findOne({ user_id: params.user_id });
 
     if (ticket) {
@@ -180,9 +162,7 @@ export async function checkTicketExitsByUserId(params: {
     return success.ok({ exits: false });
 }
 
-export async function checkTicketExitsByGithubId(params: {
-    github_id: string;
-}): Promise<ResultSuccess> {
+export async function checkTicketExitsByGithubId(params: {github_id: string;}): Promise<ResultSuccess> {
     const ticket = await Ticket.findOne({ github_id: params.github_id });
 
     if (ticket) {
@@ -191,10 +171,7 @@ export async function checkTicketExitsByGithubId(params: {
     return success.ok({ exits: false });
 }
 
-export async function deleteVmsOfTicketById(params: {
-    ticket: string;
-    vm: string;
-}): Promise<ResultSuccess> {
+export async function deleteVmsOfTicketById(params: { ticket: string;vm: string;}): Promise<ResultSuccess> {
     const ticket = await Ticket.findOne({ id: params.ticket });
 
     if (!ticket) {
@@ -222,10 +199,7 @@ export async function deleteVmsOfTicketById(params: {
     return success.ok({ isDelete: false });
 }
 
-export async function deleteStandardOfTicketById(params: {
-    ticket: string;
-    standard: string;
-}): Promise<ResultSuccess> {
+export async function deleteStandardOfTicketById(params: {ticket: string; standard: string;}): Promise<ResultSuccess> {
     const ticket = await Ticket.findOne({ id: params.ticket });
 
     if (!ticket) {
