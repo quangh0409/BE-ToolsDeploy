@@ -1,3 +1,4 @@
+![background](https://via.placeholder.com/1200x200/000000/FFFFFF?text=BE-ToolsDeploy)
 # BE-ToolsDeploy
   
 Đây là mã nguồn code hệ thống Back-end, được thiết kế theo kiến trức microservices, kiển trúc thư mục theo monoreppo, sử dụng ngôn ngữ Typescrit, sử dụng pnpm để quản lí package.
@@ -83,7 +84,7 @@ BE-ToolsDeploy được thiết kế với 6 microservices, 3 cluser mongodb (th
   
 Tất cả được đều được chạy với docker với mạng subnet 192.168.100.0/24
   
-![alt text](image.png )
+![alt text](image.png)
   
 ## Contact
 <a href="https://github.com/quangh0409" style="display: flex; align-items: center; text-decoration: none;">
