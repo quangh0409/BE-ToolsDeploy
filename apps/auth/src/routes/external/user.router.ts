@@ -3,6 +3,7 @@ import { NextFunction, Request, Response, Router } from "express";
 import {
     createUser,
     createUserByGithub,
+    createUserNoGit,
     findUser,
     getUserById,
     updateUser,
@@ -37,11 +38,11 @@ router.post("/", async (req: Request, _: Response, next: NextFunction) => {
 });
 
 router.post(
-    "/github",
+    "/no-github",
     async (req: Request, _: Response, next: NextFunction) => {
-        const code = req.query.code as string;
-        const result = await createUserByGithub({
-            code,
+        const body = req.body;
+        const result = await createUserNoGit({
+            ...body,
         });
         next(result);
     }

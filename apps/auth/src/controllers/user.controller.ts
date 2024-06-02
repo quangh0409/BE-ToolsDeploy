@@ -175,6 +175,65 @@ export async function createUserByGithub(params: {
     });
 }
 
+export async function createUserNoGit(params: {
+    email: string;
+    password: string;
+    fullname: string;
+}): Promise<ResultSuccess> {
+    const user = await createUser({
+        email: params.email,
+        password: params.password,
+        fullname: params.fullname,
+        roles: ["U"],
+    });
+    if (user.status === 201) {
+        await createdTicket({
+            id: v1(),
+            user_id: user.data.id,
+        });
+
+        const account = await Account.findOne({ id: user.data.id });
+
+        if (account) {
+            const accessToken = genAccessToken({
+                id: account.id,
+                roles: account.roles,
+                email: account.email,
+            });
+            const refreshToken = genRefreshToken(account.id);
+            const data = {
+                ...{
+                    ...user.data,
+                    _id: undefined,
+                },
+                accessToken: accessToken.token,
+                refreshToken: refreshToken.token,
+                roles: account.roles,
+                activities: undefined,
+            };
+
+            await saveTokenSignature({
+                userId: user.data.id,
+                token: accessToken.token,
+                expireAt: accessToken.expireAt,
+            });
+            return success.created(data);
+        }
+    }
+
+    throw new HttpError({
+        status: HttpStatus.BAD_REQUEST,
+        code: "ERROR_CREATE_ACCOUNT",
+        errors: [
+            {
+                param: "github",
+                location: "param",
+                message: `Have some error`,
+            },
+        ],
+    });
+}
+
 export async function registerGithubWithAccount(params: {
     code: string;
     userId: string;
