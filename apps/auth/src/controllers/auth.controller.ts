@@ -1,4 +1,11 @@
-import { error, HttpStatus, Result, ResultError, success } from "app";
+import {
+    error,
+    HttpError,
+    HttpStatus,
+    Result,
+    ResultError,
+    success,
+} from "app";
 import bcrypt from "bcrypt";
 import logger from "logger";
 import { configs } from "../configs";
@@ -146,57 +153,33 @@ export async function loginByGithub(params: { code: string }): Promise<Result> {
         });
 
         if (checkTicket.status === 200 && !checkTicket.body!.exits) {
-            await createGitHub({
-                access_token: github.body!.access_token,
-                token_type: github.body!.token_type,
-                scope: github.body!.scope,
-                git_id: infoUserGit.body.id,
-                git_user: infoUserGit.body.login,
-            });
-
-            const user = await createUser({
-                email: infoUserGit.body.email,
-                password: github.body!.access_token,
-                fullname: infoUserGit.body.name,
-                roles: ["U"],
-                avatar: infoUserGit.body.avatar_url,
-            });
-            if (user.status === 201) {
-                await createdTicket({
-                    id: v1(),
-                    user_id: user.data.id,
-                    github_id: infoUserGit.body.id,
-                });
-
-                const account = await Account.findOne({ id: user.data.id });
-
-                if (account) {
-                    const accessToken = genAccessToken({
-                        id: account.id,
-                        roles: account.roles,
-                        email: account.email,
-                    });
-                    const refreshToken = genRefreshToken(account.id);
-                    const data = {
-                        ...{
-                            ...user.data,
-                            _id: undefined,
+            if (infoUserGit.body.email === null) {
+                throw new HttpError({
+                    status: HttpStatus.BAD_REQUEST,
+                    code: "GIT_LOCK_EMAIL",
+                    errors: [
+                        {
+                            param: "github",
+                            location: "param",
+                            message: `The Github account is currently set to private email, please change it to public.`,
                         },
-                        accessToken: accessToken.token,
-                        refreshToken: refreshToken.token,
-                        roles: account.roles,
-                        activities: undefined,
-                    };
-
-                    await saveTokenSignature({
-                        userId: user.data.id,
-                        token: accessToken.token,
-                        expireAt: accessToken.expireAt,
-                    });
-                    return success.ok(data);
-                }
+                    ],
+                });
             }
+
+            throw new HttpError({
+                status: HttpStatus.NOT_FOUND,
+                code: "GIT_NOT_FOUND",
+                errors: [
+                    {
+                        param: "github",
+                        location: "param",
+                        message: `The Github account is not exist`,
+                    },
+                ],
+            });
         }
+
         const ticket = await findTicketByGithubId({
             github_id: infoUserGit.body.id,
         });
@@ -309,7 +292,9 @@ export async function newToken(refreshToken: string): Promise<Result> {
     }
 }
 
-export async function forgotPassword(params: { email: string; }): Promise<Result> {
+export async function forgotPassword(params: {
+    email: string;
+}): Promise<Result> {
     const account = await Account.findOne(
         {
             email: { $regex: `^${params.email}$`, $options: "i" },
@@ -416,10 +401,10 @@ export async function setPassword(params: {
 }
 
 export async function updatePassword(params: {
-                                            userId: string;
-                                            old_password: string;
-                                            new_password: string;
-                                            }): Promise<Result> {
+    userId: string;
+    old_password: string;
+    new_password: string;
+}): Promise<Result> {
     const account = await Account.findOne({ id: params.userId });
     if (!account) {
         return error.invalidData({
@@ -469,7 +454,7 @@ export async function updatePassword(params: {
     return success.ok({ message: "success" });
 }
 
-async function saveTokenSignature(params: {
+export async function saveTokenSignature(params: {
     userId: string;
     token: string;
     expireAt: number;
