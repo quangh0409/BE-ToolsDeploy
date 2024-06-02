@@ -13,6 +13,17 @@ import { createAccount } from "./account.controller";
 import { parseQuery, parseSort, ParseSyntaxError } from "mquery";
 import { Account, User } from "../models";
 import { sendMailGoogleNewAccount } from "../services/mail.service";
+import {
+    createGitHub,
+    getAGithubByCode,
+    GetInfoUserGitByAccesToken,
+} from "../services/git.service";
+import {
+    checkTicketExitsByGithubId,
+    createdTicket,
+} from "../services/ticket.service";
+import { genAccessToken, genRefreshToken } from "../token";
+import { saveTokenSignature } from "./auth.controller";
 
 export async function createUser(params: {
     email: string;
@@ -57,6 +68,185 @@ export async function createUser(params: {
         activities: undefined,
     };
     return success.created(data);
+}
+
+export async function createUserByGithub(params: {
+    code: string;
+}): Promise<ResultSuccess> {
+    const github = await getAGithubByCode({ code: params.code });
+
+    if (!github || github.status !== 200) {
+        throw new HttpError({
+            code: "GIT_CODE_ERROR",
+            status: HttpStatus.UNAUTHORIZED,
+            errors: [
+                {
+                    location: "query",
+                    param: "code",
+                    value: params.code,
+                },
+            ],
+        });
+    }
+
+    const infoUserGit = await GetInfoUserGitByAccesToken({
+        token: github.body?.access_token,
+    });
+    const checkTicket = await checkTicketExitsByGithubId({
+        github_id: infoUserGit.body.id,
+    });
+
+    if (infoUserGit.body.email === null) {
+        throw new HttpError({
+            status: HttpStatus.BAD_REQUEST,
+            code: "GIT_LOCK_EMAIL",
+            errors: [
+                {
+                    param: "github",
+                    location: "param",
+                    message: `The Github account is currently set to private email, please change it to public.`,
+                },
+            ],
+        });
+    }
+
+    if (checkTicket.status === 200 && !checkTicket.body!.exits) {
+        await createGitHub({
+            access_token: github.body!.access_token,
+            token_type: github.body!.token_type,
+            scope: github.body!.scope,
+            git_id: infoUserGit.body.id,
+            git_user: infoUserGit.body.login,
+        });
+
+        const user = await createUser({
+            email: infoUserGit.body.email,
+            password: github.body!.access_token,
+            fullname: infoUserGit.body.name,
+            roles: ["U"],
+            avatar: infoUserGit.body.avatar_url,
+        });
+        if (user.status === 201) {
+            await createdTicket({
+                id: v1(),
+                user_id: user.data.id,
+                github_id: infoUserGit.body.id,
+            });
+
+            const account = await Account.findOne({ id: user.data.id });
+
+            if (account) {
+                const accessToken = genAccessToken({
+                    id: account.id,
+                    roles: account.roles,
+                    email: account.email,
+                });
+                const refreshToken = genRefreshToken(account.id);
+                const data = {
+                    ...{
+                        ...user.data,
+                        _id: undefined,
+                    },
+                    accessToken: accessToken.token,
+                    refreshToken: refreshToken.token,
+                    roles: account.roles,
+                    activities: undefined,
+                };
+
+                await saveTokenSignature({
+                    userId: user.data.id,
+                    token: accessToken.token,
+                    expireAt: accessToken.expireAt,
+                });
+                return success.created(data);
+            }
+        }
+    }
+    throw new HttpError({
+        status: HttpStatus.BAD_REQUEST,
+        code: "GIT_EXISTED",
+        errors: [
+            {
+                param: "github",
+                location: "param",
+                message: `tài khoản Github ${infoUserGit.body.name} (${infoUserGit.body.email})`,
+            },
+        ],
+    });
+}
+
+export async function registerGithubWithAccount(params: {
+    code: string;
+    userId: string;
+}): Promise<ResultSuccess> {
+    const github = await getAGithubByCode({ code: params.code });
+
+    if (!github || github.status !== 200) {
+        throw new HttpError({
+            code: "GIT_CODE_ERROR",
+            status: HttpStatus.UNAUTHORIZED,
+            errors: [
+                {
+                    location: "query",
+                    param: "code",
+                    value: params.code,
+                },
+            ],
+        });
+    }
+
+    const infoUserGit = await GetInfoUserGitByAccesToken({
+        token: github.body?.access_token,
+    });
+    const checkTicket = await checkTicketExitsByGithubId({
+        github_id: infoUserGit.body.id,
+    });
+
+    if (infoUserGit.body.email === null) {
+        throw new HttpError({
+            status: HttpStatus.BAD_REQUEST,
+            code: "GIT_LOCK_EMAIL",
+            errors: [
+                {
+                    param: "github",
+                    location: "param",
+                    message: `The Github account is currently set to private email, please change it to public.`,
+                },
+            ],
+        });
+    }
+
+    if (checkTicket.status === 200 && !checkTicket.body!.exits) {
+        await Promise.all([
+            createGitHub({
+                access_token: github.body!.access_token,
+                token_type: github.body!.token_type,
+                scope: github.body!.scope,
+                git_id: infoUserGit.body.id,
+                git_user: infoUserGit.body.login,
+            }),
+            createdTicket({
+                id: v1(),
+                user_id: params.userId,
+                github_id: infoUserGit.body.id,
+            }),
+        ]);
+
+        return success.ok({
+            message: "Connect Github successfully",
+        });
+    }
+    throw new HttpError({
+        status: HttpStatus.BAD_REQUEST,
+        code: "GIT_EXISTED",
+        errors: [
+            {
+                param: "github",
+                location: "param",
+                message: `tài khoản Github ${infoUserGit.body.name} (${infoUserGit.body.email})`,
+            },
+        ],
+    });
 }
 
 export async function updateUser(params: {

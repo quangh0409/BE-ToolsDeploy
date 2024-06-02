@@ -2,6 +2,7 @@ import { Payload } from "app";
 import { NextFunction, Request, Response, Router } from "express";
 import {
     createUser,
+    createUserByGithub,
     findUser,
     getUserById,
     updateUser,
@@ -34,6 +35,17 @@ router.post("/", async (req: Request, _: Response, next: NextFunction) => {
     });
     next(result);
 });
+
+router.post(
+    "/github",
+    async (req: Request, _: Response, next: NextFunction) => {
+        const code = req.query.code as string;
+        const result = await createUserByGithub({
+            code,
+        });
+        next(result);
+    }
+);
 
 router.get(
     "/:userId",
