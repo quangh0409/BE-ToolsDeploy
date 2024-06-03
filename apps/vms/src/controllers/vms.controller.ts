@@ -392,7 +392,7 @@ export async function findContaninersOfVmById(params: {
         });
 
         let log;
-        let containers = [];
+        let containers: any[] = [];
         let command = "docker stats --format json --no-stream";
 
         log = await ssh.execCommand(command);
@@ -402,22 +402,30 @@ export async function findContaninersOfVmById(params: {
 
         command = "docker ps -a --format json";
         log = await ssh.execCommand(command);
-
+        let containers_: any[] = [];
         if (log.stdout !== "") {
-            const containers_ = log.stdout
-                .split("\n")
-                .map((r) => JSON.parse(r));
+            containers_ = log.stdout.split("\n").map((r) => JSON.parse(r));
 
-            containers = containers.map((container, idx) => {
-                const container_ = containers_.find((container_) => {
+            containers_ = containers_.map((container_, idx) => {
+                const container = containers.find((container) => {
                     return container?.ID === container_?.ID;
                 });
-                return {
-                    ...container,
-                    Ports: container_?.Ports,
-                    Image: container_?.Image,
-                    Status: container_?.Status,
-                };
+                if (container) {
+                    return {
+                        ...container,
+                        Ports: container_?.Ports,
+                        Image: container_?.Image,
+                        Status: container_?.Status,
+                    };
+                } else {
+                    return {
+                        Container: container_?.ID,
+                        ID: container_?.ID,
+                        Ports: container_?.Ports,
+                        Image: container_?.Image,
+                        Status: container_?.Status,
+                    };
+                }
             });
         }
 
@@ -429,7 +437,7 @@ export async function findContaninersOfVmById(params: {
             });
         }
 
-        return success.ok(containers);
+        return success.ok(containers_);
     } catch (error) {
         console.log("🚀 ~ error:", error);
         return success.ok([]);
@@ -467,7 +475,7 @@ export async function actionsContainerByByVmsIdAndContainerId(params: {
         });
 
         let log;
-        let containers = [];
+        let containers: any[] = [];
 
         let command = "";
 
@@ -490,26 +498,34 @@ export async function actionsContainerByByVmsIdAndContainerId(params: {
 
         command = "docker ps -a --format json";
         log = await ssh.execCommand(command);
-
+        let containers_: any[] = [];
         if (log.stdout !== "") {
-            const containers_ = log.stdout
-                .split("\n")
-                .map((r) => JSON.parse(r));
+            containers_ = log.stdout.split("\n").map((r) => JSON.parse(r));
 
-            containers = containers.map((container, idx) => {
-                const container_ = containers_.find((container_) => {
+            containers_ = containers_.map((container_, idx) => {
+                const container = containers.find((container) => {
                     return container?.ID === container_?.ID;
                 });
-                return {
-                    ...container,
-                    Ports: container_?.Ports,
-                    Image: container_?.Image,
-                    Status: container_?.Status,
-                };
+                if (container) {
+                    return {
+                        ...container,
+                        Ports: container_?.Ports,
+                        Image: container_?.Image,
+                        Status: container_?.Status,
+                    };
+                } else {
+                    return {
+                        Container: container_?.ID,
+                        ID: container_?.ID,
+                        Ports: container_?.Ports,
+                        Image: container_?.Image,
+                        Status: container_?.Status,
+                    };
+                }
             });
         }
 
-        return success.ok(containers);
+        return success.ok(containers_);
     } catch (error) {
         console.log("🚀 ~ error:", error);
         return success.ok([]);
