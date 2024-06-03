@@ -643,7 +643,7 @@ export async function actionsImagesOfVmById(params: {
 
 export async function getVmsByIds(params: {
     ids: string[];
-    host: string;
+    host?: string;
 }): Promise<ResultSuccess> {
     const connect: {
         id: any;
