@@ -431,7 +431,7 @@ export async function findContaninersOfVmById(params: {
         }
 
         if (params.name) {
-            containers = containers.filter((container) => {
+            containers_ = containers_.filter((container) => {
                 if (container?.Name?.includes(params.name)) {
                     return container;
                 }
