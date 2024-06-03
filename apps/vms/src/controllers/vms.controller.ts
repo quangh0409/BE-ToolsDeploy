@@ -268,7 +268,9 @@ export async function getSysinfoOfVms(params: {
     return success.ok(obj);
 }
 
-export async function getVmsById(params: { vms: string;}): Promise<ResultSuccess> {
+export async function getVmsById(params: {
+    vms: string;
+}): Promise<ResultSuccess> {
     const check = await Vms.findOne({ id: params.vms });
     const err: ResultError = {
         status: HttpStatus.BAD_REQUEST,
@@ -360,7 +362,10 @@ export async function getVmsById(params: { vms: string;}): Promise<ResultSuccess
     }
 }
 
-export async function findContaninersOfVmById(params: {vms: string;name?: string;}): Promise<ResultSuccess> {
+export async function findContaninersOfVmById(params: {
+    vms: string;
+    name?: string;
+}): Promise<ResultSuccess> {
     const check = await Vms.findOne({ id: params.vms });
     const err: ResultError = {
         status: HttpStatus.BAD_REQUEST,
@@ -388,11 +393,32 @@ export async function findContaninersOfVmById(params: {vms: string;name?: string
 
         let log;
         let containers = [];
-        const command = "docker stats --format json --no-stream";
+        let command = "docker stats --format json --no-stream";
 
         log = await ssh.execCommand(command);
         if (log.stdout !== "") {
             containers = log.stdout.split("\n").map((r) => JSON.parse(r));
+        }
+
+        command = "docker ps -a --format json";
+        log = await ssh.execCommand(command);
+
+        if (log.stdout !== "") {
+            const containers_ = log.stdout
+                .split("\n")
+                .map((r) => JSON.parse(r));
+
+            containers = containers.map((container, idx) => {
+                const container_ = containers_.find((container_) => {
+                    return container?.ID === container_?.ID;
+                });
+                return {
+                    ...container,
+                    Ports: container_?.Ports,
+                    Image: container_?.Image,
+                    Status: container_?.Status,
+                };
+            });
         }
 
         if (params.name) {
@@ -410,7 +436,90 @@ export async function findContaninersOfVmById(params: {vms: string;name?: string
     }
 }
 
-export async function findImagesOfVmById(params: {vms: string;name?: string;}): Promise<ResultSuccess> {
+export async function actionsContainerByByVmsIdAndContainerId(params: {
+    vms: string;
+    containerId: string;
+    action: string;
+}): Promise<ResultSuccess> {
+    const check = await Vms.findOne({ id: params.vms });
+    const err: ResultError = {
+        status: HttpStatus.BAD_REQUEST,
+        errors: [
+            {
+                location: "params",
+                value: params.vms,
+                message: "Vms not exit",
+            },
+        ],
+    };
+    if (!check) {
+        throw new HttpError(err);
+    }
+
+    const ssh = new NodeSSH();
+    try {
+        await ssh.connect({
+            host: check.host,
+            username: check.user,
+            password: check.pass,
+            port: 22,
+            tryKeyboard: true,
+        });
+
+        let log;
+        let containers = [];
+
+        let command = "";
+
+        if (params.action === "stop") {
+            command = `docker stop ${params.containerId}`;
+        } else if (params.action === "restart") {
+            command = `docker restart ${params.containerId}`;
+        } else if (params.action === "delete") {
+            command = `docker rm -f ${params.containerId}`;
+        }
+
+        log = await ssh.execCommand(command);
+
+        command = "docker stats --format json --no-stream";
+
+        log = await ssh.execCommand(command);
+        if (log.stdout !== "") {
+            containers = log.stdout.split("\n").map((r) => JSON.parse(r));
+        }
+
+        command = "docker ps -a --format json";
+        log = await ssh.execCommand(command);
+
+        if (log.stdout !== "") {
+            const containers_ = log.stdout
+                .split("\n")
+                .map((r) => JSON.parse(r));
+
+            containers = containers.map((container, idx) => {
+                const container_ = containers_.find((container_) => {
+                    return container?.ID === container_?.ID;
+                });
+                return {
+                    ...container,
+                    Ports: container_?.Ports,
+                    Image: container_?.Image,
+                    Status: container_?.Status,
+                };
+            });
+        }
+
+        return success.ok(containers);
+    } catch (error) {
+        console.log("🚀 ~ error:", error);
+        return success.ok([]);
+    }
+}
+
+export async function findImagesOfVmById(params: {
+    vms: string;
+    name?: string;
+}): Promise<ResultSuccess> {
     const check = await Vms.findOne({ id: params.vms });
     const err: ResultError = {
         status: HttpStatus.BAD_REQUEST,
@@ -464,8 +573,77 @@ export async function findImagesOfVmById(params: {vms: string;name?: string;}): 
     }
 }
 
+export async function actionsImagesOfVmById(params: {
+    vms: string;
+    imnageId: string;
+}): Promise<ResultSuccess> {
+    const check = await Vms.findOne({ id: params.vms });
+    const err: ResultError = {
+        status: HttpStatus.BAD_REQUEST,
+        errors: [
+            {
+                location: "params",
+                value: params.vms,
+                message: "Vms not exit",
+            },
+        ],
+    };
+    if (!check) {
+        throw new HttpError(err);
+    }
+
+    const ssh = new NodeSSH();
+    try {
+        await ssh.connect({
+            host: check.host,
+            username: check.user,
+            password: check.pass,
+            port: 22,
+            tryKeyboard: true,
+        });
+
+        let images = [];
+        let command = "";
+        let log;
+        let message;
+        let code;
+        command = `docker rmi -f ${params.imnageId}`;
+        log = await ssh.execCommand(command);
+
+        console.log("🚀 ~ log:", log);
+        if (log.code == 0) {
+            message = log.stdout;
+        } else {
+            message = log.stderr;
+        }
+        code = log.code;
+
+        log = await ssh.execCommand(`docker images --format json`);
+
+        if (log.stdout !== "") {
+            images = log.stdout.split("\n").map((r) => JSON.parse(r));
+        }
+
+        images = images.filter((image) => {
+            if (!image?.Repository?.includes("<none>")) {
+                return image;
+            }
+        });
+
+        return success.ok({
+            message: message,
+            code: code,
+            images: images,
+        });
+    } catch (error) {
+        console.log("🚀 ~ error:", error);
+        return success.ok([]);
+    }
+}
+
 export async function getVmsByIds(params: {
     ids: string[];
+    host: string;
 }): Promise<ResultSuccess> {
     const connect: {
         id: any;
@@ -567,6 +745,10 @@ export async function getVmsByIds(params: {
                 id: {
                     $in: [...params.ids],
                 },
+                host: {
+                    $regex: `${params.host}`,
+                    $options: "i",
+                },
             },
         },
         {
@@ -594,7 +776,9 @@ export async function getVmsByIds(params: {
     return success.ok(result);
 }
 
-export async function findVmsByHost(params: {host: string;}): Promise<ResultSuccess> {
+export async function findVmsByHost(params: {
+    host: string;
+}): Promise<ResultSuccess> {
     const hosts = await Vms.find(
         {
             host: {
@@ -610,7 +794,11 @@ export async function findVmsByHost(params: {host: string;}): Promise<ResultSucc
     return success.ok(hosts);
 }
 
-export async function updateVms(params: {id: string;user: string;pass: string;}): Promise<ResultSuccess> {
+export async function updateVms(params: {
+    id: string;
+    user: string;
+    pass: string;
+}): Promise<ResultSuccess> {
     const vm = await Vms.findOneAndUpdate(
         { id: params.id },
         {

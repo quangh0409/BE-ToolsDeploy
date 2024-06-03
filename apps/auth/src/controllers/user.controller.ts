@@ -169,7 +169,7 @@ export async function createUserByGithub(params: {
             {
                 param: "github",
                 location: "param",
-                message: `tài khoản Github ${infoUserGit.body.name} (${infoUserGit.body.email})`,
+                message: `The Github account ${infoUserGit.body.name} (${infoUserGit.body.email}) have existed`,
             },
         ],
     });
@@ -302,7 +302,7 @@ export async function registerGithubWithAccount(params: {
             {
                 param: "github",
                 location: "param",
-                message: `tài khoản Github ${infoUserGit.body.name} (${infoUserGit.body.email})`,
+                message: `The Github account ${infoUserGit.body.name} (${infoUserGit.body.email}) have existed `,
             },
         ],
     });

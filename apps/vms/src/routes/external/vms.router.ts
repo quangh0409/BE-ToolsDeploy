@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response, Router } from "express";
 import { resolve } from "path";
-import fs from "fs";
-import { HttpStatus } from "app";
 import {
+    actionsContainerByByVmsIdAndContainerId,
+    actionsImagesOfVmById,
     createVms,
     deleteVmsById,
     findContaninersOfVmById,
@@ -25,7 +25,9 @@ import {
 
 export const router: Router = Router();
 
-router.get("/download/key/pub", async (req: Request, res: Response, next: NextFunction) => {
+router.get(
+    "/download/key/pub",
+    async (req: Request, res: Response, next: NextFunction) => {
         const path = __dirname;
         const file_name = resolve(path, "../../../", "file/id_rsa.pub");
         res.download(file_name, "id_rsa.pub");
@@ -40,7 +42,9 @@ router.get("/", async (req: Request, _: Response, next: NextFunction) => {
     next(result);
 });
 
-router.get("/:vms/install-docker",async (req: Request, _: Response, next: NextFunction) => {
+router.get(
+    "/:vms/install-docker",
+    async (req: Request, _: Response, next: NextFunction) => {
         const vm_id = req.params.vms;
         const user_id = req.payload?.id as string;
         const result = await installDocker({
@@ -50,7 +54,9 @@ router.get("/:vms/install-docker",async (req: Request, _: Response, next: NextFu
         next(result);
     }
 );
-router.get("/:vms/install-trivy",async (req: Request, _: Response, next: NextFunction) => {
+router.get(
+    "/:vms/install-trivy",
+    async (req: Request, _: Response, next: NextFunction) => {
         const vm_id = req.params.vms;
         const user_id = req.payload?.id as string;
         const result = await installTrivy({
@@ -60,7 +66,9 @@ router.get("/:vms/install-trivy",async (req: Request, _: Response, next: NextFun
         next(result);
     }
 );
-router.get("/:vms/install-hadolint",async (req: Request, _: Response, next: NextFunction) => {
+router.get(
+    "/:vms/install-hadolint",
+    async (req: Request, _: Response, next: NextFunction) => {
         const vm_id = req.params.vms;
         const user_id = req.payload?.id as string;
         const result = await installHadolint({
@@ -71,7 +79,9 @@ router.get("/:vms/install-hadolint",async (req: Request, _: Response, next: Next
     }
 );
 
-router.get("/:vms/contaniners",async (req: Request, _: Response, next: NextFunction) => {
+router.get(
+    "/:vms/contaniners",
+    async (req: Request, _: Response, next: NextFunction) => {
         const vms = req.params.vms;
         const name = req.query.name as string;
         const result = await findContaninersOfVmById({
@@ -82,7 +92,37 @@ router.get("/:vms/contaniners",async (req: Request, _: Response, next: NextFunct
     }
 );
 
-router.get("/:vms/images",async (req: Request, _: Response, next: NextFunction) => {
+router.get(
+    "/:vms/contaniners/:container",
+    async (req: Request, _: Response, next: NextFunction) => {
+        const vms = req.params.vms;
+        const container = req.params.container;
+        const action = req.query.action as string;
+        const result = await actionsContainerByByVmsIdAndContainerId({
+            vms,
+            containerId: container,
+            action: action,
+        });
+        next(result);
+    }
+);
+
+router.delete(
+    "/:vms/images/:image",
+    async (req: Request, _: Response, next: NextFunction) => {
+        const vms = req.params.vms;
+        const image = req.params.image;
+        const result = await actionsImagesOfVmById({
+            vms,
+            imnageId: image,
+        });
+        next(result);
+    }
+);
+
+router.get(
+    "/:vms/images",
+    async (req: Request, _: Response, next: NextFunction) => {
         const vms = req.params.vms;
         const name = req.query.name as string;
         const result = await findImagesOfVmById({
@@ -103,13 +143,17 @@ router.get("/:vms", async (req: Request, _: Response, next: NextFunction) => {
 
 router.post("/ids", async (req: Request, _: Response, next: NextFunction) => {
     const ids = req.body.ids;
+    const host = req.query.host as string;
     const result = await getVmsByIds({
         ids,
+        host,
     });
     next(result);
 });
 
-router.post( "/standards/compare", async (req: Request, _: Response, next: NextFunction) => {
+router.post(
+    "/standards/compare",
+    async (req: Request, _: Response, next: NextFunction) => {
         const { standard, vms } = req.body;
         const result = await compareStandard({
             standard,
@@ -119,7 +163,9 @@ router.post( "/standards/compare", async (req: Request, _: Response, next: NextF
     }
 );
 
-router.post( "/standards/delete", async (req: Request, _: Response, next: NextFunction) => {
+router.post(
+    "/standards/delete",
+    async (req: Request, _: Response, next: NextFunction) => {
         const { ticket, standard } = req.body;
         const result = await deleteStandard({
             ticket,
@@ -129,7 +175,9 @@ router.post( "/standards/delete", async (req: Request, _: Response, next: NextFu
     }
 );
 
-router.post("/standards/compare-before-create-vms", async (req: Request, _: Response, next: NextFunction) => {
+router.post(
+    "/standards/compare-before-create-vms",
+    async (req: Request, _: Response, next: NextFunction) => {
         const { standard, host, user, pass } = req.body;
         const result = await compareStandardBeforeCreate({
             standard,
@@ -141,7 +189,9 @@ router.post("/standards/compare-before-create-vms", async (req: Request, _: Resp
     }
 );
 
-router.post("/standards/get-all",async (req: Request, _: Response, next: NextFunction) => {
+router.post(
+    "/standards/get-all",
+    async (req: Request, _: Response, next: NextFunction) => {
         const { standards } = req.body;
         const result = await getStandards({
             standards,
@@ -150,7 +200,9 @@ router.post("/standards/get-all",async (req: Request, _: Response, next: NextFun
     }
 );
 
-router.post("/standards/", async (req: Request, _: Response, next: NextFunction) => {
+router.post(
+    "/standards/",
+    async (req: Request, _: Response, next: NextFunction) => {
         const { name, ram, cpu, core, os, architecture } = req.body;
         const userId = req.payload?.id as string;
         const result = await createStandard({
@@ -179,7 +231,9 @@ router.put("/:vms", async (req: Request, res: Response, next: NextFunction) => {
     next(result);
 });
 
-router.delete( "/:vms/ticket/:ticket", async (req: Request, res: Response, next: NextFunction) => {
+router.delete(
+    "/:vms/ticket/:ticket",
+    async (req: Request, res: Response, next: NextFunction) => {
         const vms = req.params.vms;
         const ticket = req.params.ticket;
         const result = await deleteVmsById({ vms, ticket });
