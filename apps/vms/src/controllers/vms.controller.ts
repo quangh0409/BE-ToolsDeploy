@@ -421,6 +421,7 @@ export async function findContaninersOfVmById(params: {
                     return {
                         Container: container_?.ID,
                         ID: container_?.ID,
+                        Name: container_?.Names,
                         Ports: container_?.Ports,
                         Image: container_?.Image,
                         Status: container_?.Status,
@@ -503,6 +504,7 @@ export async function actionsContainerByByVmsIdAndContainerId(params: {
             containers_ = log.stdout.split("\n").map((r) => JSON.parse(r));
 
             containers_ = containers_.map((container_, idx) => {
+                console.log("🚀 ~ containers_=containers_.map ~ container_:", container_)
                 const container = containers.find((container) => {
                     return container?.ID === container_?.ID;
                 });
