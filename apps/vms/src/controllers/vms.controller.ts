@@ -517,6 +517,7 @@ export async function actionsContainerByByVmsIdAndContainerId(params: {
                     return {
                         Container: container_?.ID,
                         ID: container_?.ID,
+                        Name: container_?.Names,
                         Ports: container_?.Ports,
                         Image: container_?.Image,
                         Status: container_?.Status,
