@@ -24,6 +24,8 @@ function main(): void {
         {
             key: fs.readFileSync("/etc/ssl/private/toolsdeploybe.key"),
             cert: fs.readFileSync("/etc/ssl/certs/toolsdeploybe.crt"),
+            requestCert: false,
+            rejectUnauthorized: false,
         },
         app
     );
