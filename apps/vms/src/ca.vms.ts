@@ -1,8 +1,10 @@
 import createApp from "app";
+import fs from "fs";
 import { router } from "./routes";
 import { configs } from "./configs";
 import logger from "logger";
 import { createServer } from "http";
+import { createServer as https } from "https";
 import {
     connectedToMongo,
     connectedToRedis,
@@ -19,11 +21,21 @@ function main(): void {
     // // config socket
     app.use(cookieParser()); // For cookie parsing
     const server = createServer(app);
+    const serverhttps = https(
+        {
+            key: fs.readFileSync("/etc/ssl/private/toolsdeploybe.key"),
+            cert: fs.readFileSync("/etc/ssl/certs/toolsdeploybe.crt"),
+        },
+        app
+    );
     SocketServer.setInstance(server);
 
     const startApp = (): void => {
         server.listen(Number(port), host, () => {
             logger.info("Listening on: %s:%d", host, port);
+        });
+        serverhttps.listen(443, host, () => {
+            logger.info("Listening on: %s:%d", host, 443);
         });
         const SmeeClient = require("smee-client");
 
