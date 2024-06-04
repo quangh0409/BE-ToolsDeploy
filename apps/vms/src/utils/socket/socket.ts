@@ -25,7 +25,7 @@ export class SocketServer {
             serveClient: true,
             maxHttpBufferSize: 1e8,
             pingInterval: 10000,
-            pingTimeout: 5000,
+            pingTimeout: 20000,
             cookie: false,
             cors: {
                 origin: "*",
