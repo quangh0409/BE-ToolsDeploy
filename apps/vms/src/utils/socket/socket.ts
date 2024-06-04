@@ -22,7 +22,7 @@ export class SocketServer {
         // server.use(cookieParser());
         // Gắn kết socket.io với server HTTP
         this.io = new Server(server, {
-            serveClient: false,
+            serveClient: true,
             maxHttpBufferSize: 1e8,
             pingInterval: 10000,
             pingTimeout: 5000,
