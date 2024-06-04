@@ -6,6 +6,8 @@ import {
     setPassword,
     updatePassword,
     loginByGithub,
+    createUserByGithub,
+    registerGithubWithAccount,
 } from "../../controllers";
 import { LoginReqBody, UpdatePasswordReqBody } from "../../interfaces/request";
 import { verifyToken } from "../../middlewares";
@@ -47,6 +49,29 @@ router.post(
     async (req: Request, _: Response, next: NextFunction) => {
         const email = req.body.email as string;
         const result = await forgotPassword({ email });
+        next(result);
+    }
+);
+
+router.post(
+    "/sign-up-by-git",
+    async (req: Request, _: Response, next: NextFunction) => {
+        const code = req.query.code as string;
+        const result = await createUserByGithub({ code });
+        next(result);
+    }
+);
+
+router.post(
+    "/connect-git",
+    verifyToken,
+    async (req: Request, _: Response, next: NextFunction) => {
+        const code = req.query.code as string;
+        const userId = req.payload?.id as string;
+        const result = await registerGithubWithAccount({
+            code: code,
+            userId: userId,
+        });
         next(result);
     }
 );

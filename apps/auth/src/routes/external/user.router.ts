@@ -2,6 +2,8 @@ import { Payload } from "app";
 import { NextFunction, Request, Response, Router } from "express";
 import {
     createUser,
+    createUserByGithub,
+    createUserNoGit,
     findUser,
     getUserById,
     updateUser,
@@ -34,6 +36,17 @@ router.post("/", async (req: Request, _: Response, next: NextFunction) => {
     });
     next(result);
 });
+
+router.post(
+    "/no-github",
+    async (req: Request, _: Response, next: NextFunction) => {
+        const body = req.body;
+        const result = await createUserNoGit({
+            ...body,
+        });
+        next(result);
+    }
+);
 
 router.get(
     "/:userId",

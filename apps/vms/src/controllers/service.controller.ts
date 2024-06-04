@@ -1069,6 +1069,7 @@ export async function planCiCd(socket: Socket, token: string,vm_id: string,servi
                                 title: "scanImages",
                                 status: EStatus.ERROR,
                             };
+                            record.logs["scanImages"][i].log?.push(log.stderr);
                             record.logs["scanImages"][i].end_time = new Date();
                             record.logs["scanImages"][i].status = EStatus.ERROR;
                             SocketServer.getInstance().io.emit(
