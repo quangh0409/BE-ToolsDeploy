@@ -32,9 +32,14 @@ function main(): void {
     SocketServer.setInstance(server);
 
     const startApp = (): void => {
-        server.listen(Number(port), host, () => {
+        server.listen(Number(443), host, () => {
             logger.info("Listening on: %s:%d", host, port);
         });
+
+        app.listen(Number(port), host, () => {
+            logger.info("Listening on: %s:%d", host, port);
+        });
+
         const SmeeClient = require("smee-client");
 
         const smee = new SmeeClient({
