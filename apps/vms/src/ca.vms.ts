@@ -28,7 +28,8 @@ function main(): void {
         },
         app
     );
-    SocketServer.setInstance(server);
+    SocketServer.setInstance(serverhttps)
+    // SocketServer.setInstance(server);
 
     const startApp = (): void => {
         server.listen(Number(port), host, () => {
