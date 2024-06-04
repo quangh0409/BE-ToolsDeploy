@@ -3,8 +3,8 @@ import { router } from "./routes";
 import { configs } from "./configs";
 import logger from "logger";
 import fs from "fs";
-// import { createServer } from "http";
-import { createServer } from "https";
+import { createServer } from "http";
+import { createServer as createServerHttps } from "https";
 import {
     connectedToMongo,
     connectedToRedis,
@@ -18,25 +18,43 @@ function main(): void {
     const host = configs.app.host;
     const port = configs.app.port;
 
+    // Define the file paths
+    const keyPath = "/etc/ssl/private/toolsdeploysocket.key";
+    const certPath = "/etc/ssl/certs/toolsdeploysocket.crt";
+
+    // Check if the key file exists
+    if (fs.existsSync(keyPath)) {
+        console.log(`Key file exists: ${keyPath}`);
+    } else {
+        console.log(`Key file does not exist: ${keyPath}`);
+    }
+
+    // Check if the certificate file exists
+    if (fs.existsSync(certPath)) {
+        console.log(`Certificate file exists: ${certPath}`);
+    } else {
+        console.log(`Certificate file does not exist: ${certPath}`);
+    }
+
     // // config socket
     app.use(cookieParser()); // For cookie parsing
-    const server = createServer(
+    const server = createServer(app);
+    SocketServer.setInstance(server);
+    const serverhttps = createServerHttps(
         {
-            key: fs.readFileSync("/etc/ssl/private/toolsdeploybe.key"),
-            cert: fs.readFileSync("/etc/ssl/certs/toolsdeploybe.crt"),
+            key: fs.readFileSync(keyPath),
+            cert: fs.readFileSync(certPath),
             requestCert: false,
             rejectUnauthorized: false,
         },
         app
     );
-    SocketServer.setInstance(server);
-
     const startApp = (): void => {
-        server.listen(Number(443), host, () => {
+        server.listen(Number(port), host, () => {
             logger.info("Listening on: %s:%d", host, port);
         });
 
-        app.listen(Number(port), host, () => {
+        serverhttps.listen(Number(443), host, () => {
             logger.info("Listening on: %s:%d", host, port);
         });
 
