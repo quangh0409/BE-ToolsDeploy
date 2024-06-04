@@ -23,13 +23,14 @@ export class SocketServer {
         // Gắn kết socket.io với server HTTP
         this.io = new Server(server, {
             serveClient: false,
-            maxHttpBufferSize: 1e7,
+            maxHttpBufferSize: 1e8,
             pingInterval: 10000,
             pingTimeout: 5000,
             cookie: false,
             cors: {
                 origin: "*",
             },
+            path: "/socket.io"
         });
 
         this.io.on("connect", this.onConnection);
