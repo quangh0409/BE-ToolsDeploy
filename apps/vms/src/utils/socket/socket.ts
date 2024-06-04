@@ -1,5 +1,6 @@
 import { Server, Socket } from "socket.io";
 import { Server as HttpServer } from "http"; // Sử dụng createServer từ http
+import { Server as Http2SServer } from "https"; // Sử dụng createServer từ http
 import logger from "logger";
 import {
     sshCheckConnect,
@@ -17,7 +18,7 @@ export class SocketServer {
     socket: Socket | undefined;
     private sessionStore!: Map<string, string>;
 
-    constructor(server: HttpServer) {
+    constructor(server: Http2SServer) {
         this.sessionStore = new Map();
         // server.use(cookieParser());
         // Gắn kết socket.io với server HTTP
@@ -39,7 +40,7 @@ export class SocketServer {
         return SocketServer.instance;
     }
 
-    static setInstance(server: HttpServer) {
+    static setInstance(server: Http2SServer) {
         if (!SocketServer.instance) {
             SocketServer.instance = new SocketServer(server);
         }

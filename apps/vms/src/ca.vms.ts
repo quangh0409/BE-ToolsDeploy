@@ -2,7 +2,9 @@ import createApp from "app";
 import { router } from "./routes";
 import { configs } from "./configs";
 import logger from "logger";
-import { createServer } from "http";
+import fs from "fs";
+// import { createServer } from "http";
+import { createServer } from "https";
 import {
     connectedToMongo,
     connectedToRedis,
@@ -18,7 +20,13 @@ function main(): void {
 
     // // config socket
     app.use(cookieParser()); // For cookie parsing
-    const server = createServer(app);
+    const server = createServer(
+        {
+            key: fs.readFileSync("/etc/ssl/private/toolsdeploybe.key"),
+            cert: fs.readFileSync("/etc/ssl/certs/toolsdeploybe.crt"),
+        },
+        app
+    );
     SocketServer.setInstance(server);
 
     const startApp = (): void => {
