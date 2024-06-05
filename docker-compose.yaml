@@ -8,8 +8,10 @@ services:
       context: .
       dockerfile: ./nginx/Dockerfile
     restart: always
+    # volumes:
+    #   - ./nginx/entrypoint.sh:/entrypoint.sh
     ports:
-      - 8080:8000
+      - 8080:80
     env_file: ./nginx/.env
     depends_on:
       - auth
@@ -36,7 +38,7 @@ services:
     environment:
       - CA_AUTH_TICKET_SERVICE_HOST=http://ticket
       - CA_AUTH_GIT_SERVICE_HOST=http://git
-      - CA_AUTH_MONGO_ADDRESSES=103.166.185.48:6807
+      - CA_AUTH_MONGO_ADDRESSES=103.166.185.48:6808
       - CA_AUTH_REDIS_HOST=103.166.185.48
       - CA_AUTH_MAIL_SERVICE_HOST=http://mail
     image: docker.io/vutrongquang/auth
@@ -60,7 +62,7 @@ services:
       - CA_GIT_TICKET_SERVICE_HOST=http://ticket
       - CA_GIT_CLIENT_ID=Ov23liAKvwqR0iILNsiC
       - CA_GIT_CLIENT_SECRET=a370820af2811e1329ced80356511229d40590e4
-      - CA_GIT_MONGO_ADDRESSES=103.166.185.48:6807
+      - CA_GIT_MONGO_ADDRESSES=103.166.185.48:6808
       - CA_GIT_REDIS_HOST=103.166.185.48
     image: docker.io/vutrongquang/git
 
@@ -81,7 +83,7 @@ services:
       - CA_TICKET_GIT_SERVICE_HOST=http://git
       - CA_TICKET_USERS_SERVICE_HOST=http://auth
       - CA_TICKET_AUTH_SERVICE_HOST=http://auth
-      - CA_TICKET_MONGO_ADDRESSES=103.166.185.48:6807
+      - CA_TICKET_MONGO_ADDRESSES=103.166.185.48:6808
       - CA_TICKET_REDIS_HOST=103.166.185.48
     image: docker.io/vutrongquang/ticket
 
@@ -101,7 +103,7 @@ services:
     environment:
       - CA_VMS_TICKET_SERVICE_HOST=http://ticket
       - CA_VMS_GIT_SERVICE_HOST=http://git 
-      - CA_VMS_MONGO_ADDRESSES=103.166.185.48:6807
+      - CA_VMS_MONGO_ADDRESSES=103.166.185.48:6808
       - CA_VMS_REDIS_HOST=103.166.185.48    
     image: docker.io/vutrongquang/vms
 
@@ -119,7 +121,7 @@ services:
     user: root
     env_file: ./apps/scan/.env
     environment:
-      - CA_SCAN_MONGO_ADDRESSES=103.166.185.48:6807
+      - CA_SCAN_MONGO_ADDRESSES=103.166.185.48:6808
       - CA_SCAN_REDIS_HOST=103.166.185.48
     image: docker.io/vutrongquang/scan
 
@@ -136,7 +138,7 @@ services:
       - 6806:6806
     user: root
     environment:
-      - CA_MAIL_MONGO_ADDRESSES=103.166.185.48:6807
+      - CA_MAIL_MONGO_ADDRESSES=103.166.185.48:6808
       - CA_MAIL_REDIS_HOST=103.166.185.48
     env_file: ./apps/mail/.env
     image: docker.io/vutrongquang/mail
