@@ -131,25 +131,24 @@ export async function compareStandardBeforeCreate(params: {
         });
 
         let log;
-        log = await ssh.execCommand("hostnamectl");
+        log = await ssh.execCommand("cat /etc/os-release");
         let operating_system = "";
         let kernel = "";
         architecture = "";
         log.stdout.split("\n").map((t) => {
-            const ob = t.split(": ");
-            if ("Operating System" === ob[0].trim()) {
-                operating_system = ob[1];
-            }
-            if ("Kernel" === ob[0].trim()) {
-                kernel = ob[1];
-            }
-            if ("Architecture" === ob[0].trim()) {
-                architecture = ob[1];
+            const ob = t.split("=");
+            if ("PRETTY_NAME" === ob[0]) {
+                operating_system = `${ob[1].replace(/"/g, "")}`;
             }
         });
         log = await ssh.execCommand("uname -o");
-
         operating_system += ` ${log.stdout}`;
+        log = await ssh.execCommand("uname -r");
+        kernel = ` ${log.stdout}`;
+        log = await ssh.execCommand("uname -m");
+        architecture = ` ${log.stdout}`;
+
+
 
         log = await ssh.execCommand(`free --giga | awk '/Mem/{print $2}'`);
         ram = `${log.stdout}GB`;

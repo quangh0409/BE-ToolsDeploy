@@ -57,24 +57,13 @@ export async function createVms(params: {
         });
 
         let log;
-        log = await ssh.execCommand("hostnamectl");
         let operating_system = "";
         let kernel = "";
         let architecture = "";
-        log.stdout.split("\n").map((t) => {
-            const ob = t.split(": ");
-            if ("Operating System" === ob[0].trim()) {
-                operating_system = ob[1];
-            }
-            if ("Kernel" === ob[0].trim()) {
-                kernel = ob[1];
-            }
-            if ("Architecture" === ob[0].trim()) {
-                architecture = ob[1];
-            }
-        });
-        log = await ssh.execCommand("uname -o");
-        operating_system += ` ${log.stdout}`;
+        log = await ssh.execCommand("uname -r");
+        kernel = ` ${log.stdout}`;
+        log = await ssh.execCommand("uname -m");
+        architecture = ` ${log.stdout}`;
         log = await ssh.execCommand("cat /etc/os-release");
         let home_url = "";
         let support_url = "";
@@ -90,8 +79,12 @@ export async function createVms(params: {
                 bug_report_url = `${ob[1].replace(/"/g, "")}`;
             } else if ("PRIVACY_POLICY_URL" === ob[0]) {
                 privacy_policy_url = `${ob[1].replace(/"/g, "")}`;
+            } else if("PRETTY_NAME" === ob[0]){
+                operating_system = `${ob[1].replace(/"/g, "")}`;
             }
         });
+        log = await ssh.execCommand("uname -o");
+        operating_system += ` ${log.stdout}`;
         log = await ssh.execCommand("landscape-sysinfo");
         const obj: { [key: string]: string } = {};
         const regex = /([\w\s\/]+):\s*([^\n]+?)(?=\s{2,}[\w\s\/]+:|$)/g;
@@ -857,20 +850,10 @@ export async function updateVms(params: {
         let operating_system = "";
         let kernel = "";
         let architecture = "";
-        log.stdout.split("\n").map((t) => {
-            const ob = t.split(": ");
-            if ("Operating System" === ob[0].trim()) {
-                operating_system = ob[1];
-            }
-            if ("Kernel" === ob[0].trim()) {
-                kernel = ob[1];
-            }
-            if ("Architecture" === ob[0].trim()) {
-                architecture = ob[1];
-            }
-        });
-        log = await ssh.execCommand("uname -o");
-        operating_system += ` ${log.stdout}`;
+        log = await ssh.execCommand("uname -r");
+        kernel = ` ${log.stdout}`;
+        log = await ssh.execCommand("uname -m");
+        architecture = ` ${log.stdout}`;
         log = await ssh.execCommand("cat /etc/os-release");
         let home_url = "";
         let support_url = "";
@@ -886,8 +869,12 @@ export async function updateVms(params: {
                 bug_report_url = `${ob[1].replace(/"/g, "")}`;
             } else if ("PRIVACY_POLICY_URL" === ob[0]) {
                 privacy_policy_url = `${ob[1].replace(/"/g, "")}`;
+            } else if("PRETTY_NAME" === ob[0]){
+                operating_system = `${ob[1].replace(/"/g, "")}`;
             }
         });
+        log = await ssh.execCommand("uname -o");
+        operating_system += ` ${log.stdout}`;
         log = await ssh.execCommand("landscape-sysinfo");
         const obj: { [key: string]: string } = {};
         const regex = /([\w\s\/]+):\s*([^\n]+?)(?=\s{2,}[\w\s\/]+:|$)/g;
