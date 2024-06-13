@@ -161,6 +161,7 @@ export async function createVms(params: {
             host: params.host,
             user: params.user,
             pass: params.pass,
+            port: params.port,
             standard: params.standard,
             status: EStatus.CONNECT,
             last_connect: new Date(),
@@ -353,7 +354,7 @@ export async function getVmsById(params: {
             ...check.toJSON(),
             _id: undefined,
             landscape_sysinfo: obj,
-            standard: standard?.toJSON(),
+            standard_info: standard?.toJSON(),
         });
     } catch (error) {
         return success.ok({
