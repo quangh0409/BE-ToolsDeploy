@@ -178,12 +178,13 @@ router.post(
 router.post(
     "/standards/compare-before-create-vms",
     async (req: Request, _: Response, next: NextFunction) => {
-        const { standard, host, user, pass } = req.body;
+        const { standard, host, user, pass, port } = req.body;
         const result = await compareStandardBeforeCreate({
             standard,
             host,
             user,
             pass,
+            port: port,
         });
         next(result);
     }
@@ -219,8 +220,14 @@ router.post(
 );
 
 router.post("/", async (req: Request, res: Response, next: NextFunction) => {
-    const { host, user, pass, standard } = req.body;
-    const result = await createVms({ host, user, pass, standard });
+    const { host, user, pass, standard, port } = req.body;
+    const result = await createVms({
+        host,
+        user,
+        pass,
+        standard,
+        port: port,
+    });
     next(result);
 });
 

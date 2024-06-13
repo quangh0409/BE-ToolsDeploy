@@ -20,6 +20,10 @@ const vmsSchema = new mongoose.Schema(
             type: String,
             require: true,
         },
+        port: {
+            type: String,
+            require: true,
+        },
         status: {
             type: String,
             enum: EStatus,

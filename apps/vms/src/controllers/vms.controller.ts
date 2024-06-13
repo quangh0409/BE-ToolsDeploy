@@ -29,6 +29,7 @@ export async function createVms(params: {
     host: string;
     user: string;
     pass: string;
+    port: string;
     standard: string;
 }): Promise<ResultSuccess> {
     const check = await Vms.findOne({ host: params.host });
@@ -51,7 +52,7 @@ export async function createVms(params: {
             host: params.host,
             username: params.user,
             password: params.pass,
-            port: 22,
+            port: Number.parseInt(params.port),
             tryKeyboard: true,
         });
 
@@ -234,7 +235,7 @@ export async function getSysinfoOfVms(params: {
         host: check.host,
         username: check.user,
         password: check.pass,
-        port: 22,
+        port: Number.parseInt(check.port),
         tryKeyboard: true,
     });
 
@@ -292,7 +293,7 @@ export async function getVmsById(params: {
             host: check.host,
             username: check.user,
             password: check.pass,
-            port: 22,
+            port: Number.parseInt(check.port),
             tryKeyboard: true,
         });
 
@@ -387,7 +388,7 @@ export async function findContaninersOfVmById(params: {
             host: check.host,
             username: check.user,
             password: check.pass,
-            port: 22,
+            port: Number.parseInt(check.port),
             tryKeyboard: true,
         });
 
@@ -471,7 +472,7 @@ export async function actionsContainerByByVmsIdAndContainerId(params: {
             host: check.host,
             username: check.user,
             password: check.pass,
-            port: 22,
+            port: Number.parseInt(check.port),
             tryKeyboard: true,
         });
 
@@ -560,7 +561,7 @@ export async function findImagesOfVmById(params: {
             host: check.host,
             username: check.user,
             password: check.pass,
-            port: 22,
+            port: Number.parseInt(check.port),
             tryKeyboard: true,
         });
 
@@ -617,7 +618,7 @@ export async function actionsImagesOfVmById(params: {
             host: check.host,
             username: check.user,
             password: check.pass,
-            port: 22,
+            port: Number.parseInt(check.port),
             tryKeyboard: true,
         });
 
@@ -694,6 +695,7 @@ export async function getVmsByIds(params: {
         host: any;
         user: any;
         pass: any;
+        port: any;
         id: any;
     }) {
         const ssh = new NodeSSH();
@@ -702,7 +704,7 @@ export async function getVmsByIds(params: {
                 host: vm.host,
                 username: vm.user,
                 password: vm.pass,
-                port: 22,
+                port: Number.parseInt(vm.port),
                 tryKeyboard: true,
             });
             let command = "docker ps -q | wc -l";
@@ -846,7 +848,7 @@ export async function updateVms(params: {
             host: vm.host,
             username: params.user,
             password: params.pass,
-            port: 22,
+            port: Number.parseInt(vm.port),
             tryKeyboard: true,
         });
 
@@ -1075,7 +1077,7 @@ export async function sshInstallDocker(
                         host: vm!.host,
                         username: vm!.user,
                         password: vm!.pass,
-                        port: 22,
+                        port: Number.parseInt(vm!.port),
                         tryKeyboard: true,
                     });
                     socket.emit("logInstallDocker", {
@@ -1191,7 +1193,7 @@ export async function installDocker(params: {
                         host: vm!.host,
                         username: vm!.user,
                         password: vm!.pass,
-                        port: 22,
+                        port: Number.parseInt(vm!.port),
                         tryKeyboard: true,
                     });
                     let log;
@@ -1279,7 +1281,7 @@ export async function sshCheckConnect(
                         host: vm!.host,
                         username: vm!.user,
                         password: vm!.pass,
-                        port: 22,
+                        port: Number.parseInt(vm!.port),
                         tryKeyboard: true,
                     });
 
@@ -1344,7 +1346,7 @@ export async function sshInstallTrivy(
                         host: vm!.host,
                         username: vm!.user,
                         password: vm!.pass,
-                        port: 22,
+                        port: Number.parseInt(vm!.port),
                         tryKeyboard: true,
                     });
 
@@ -1455,7 +1457,7 @@ export async function installTrivy(params: {
                         host: vm!.host,
                         username: vm!.user,
                         password: vm!.pass,
-                        port: 22,
+                        port: Number.parseInt(vm!.port),
                         tryKeyboard: true,
                     });
                     await ssh.execCommand("mkdir -p trivy");
@@ -1554,7 +1556,7 @@ export async function sshInstallHadolint(
                         host: vm!.host,
                         username: vm!.user,
                         password: vm!.pass,
-                        port: 22,
+                        port: Number.parseInt(vm!.port),
                         tryKeyboard: true,
                     });
 
@@ -1690,7 +1692,7 @@ export async function installHadolint(params: {
                         host: vm!.host,
                         username: vm!.user,
                         password: vm!.pass,
-                        port: 22,
+                        port: Number.parseInt(vm!.port),
                         tryKeyboard: true,
                     });
 

@@ -3,6 +3,7 @@ export interface IVms {
     host: string;
     user: string;
     pass: string;
+    port: string;
     status: EStatus;
     last_connect: Date;
     services?: string[];

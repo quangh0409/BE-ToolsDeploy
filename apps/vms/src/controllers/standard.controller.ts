@@ -107,6 +107,7 @@ export async function compareStandardBeforeCreate(params: {
     host: string;
     user: string;
     pass: string;
+    port: string;
 }): Promise<ResultSuccess> {
     try {
         const standard = await Standard.findOne({ id: params.standard });
@@ -125,7 +126,7 @@ export async function compareStandardBeforeCreate(params: {
             host: params.host,
             username: params.user,
             password: params.pass,
-            port: 22,
+            port: Number.parseInt(params.port),
             tryKeyboard: true,
         });
 

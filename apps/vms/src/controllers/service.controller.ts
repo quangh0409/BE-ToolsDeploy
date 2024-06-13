@@ -267,7 +267,7 @@ export async function getImagesOfServiceById(params: { service: string; env: str
             host: vm!.host,
             username: vm!.user,
             password: vm!.pass,
-            port: 22,
+            port: Number.parseInt(vm!.port),
             tryKeyboard: true,
         });
 
@@ -315,7 +315,7 @@ export async function scanImageOfService(params: { service: string;env: string; 
             host: vm!.host,
             username: vm!.user,
             password: vm!.pass,
-            port: 22,
+            port: Number.parseInt(vm!.port),
             tryKeyboard: true,
         });
 
@@ -350,7 +350,7 @@ export async function logOfDockerCompose(service: string,env: string, socket: So
             host: vm!.host,
             username: vm!.user,
             password: vm!.pass,
-            port: 22,
+            port: Number.parseInt(vm!.port),
             tryKeyboard: true,
         });
 
@@ -478,7 +478,7 @@ export async function planCiCd(socket: Socket, token: string,vm_id: string,servi
                         host: vm!.host,
                         username: vm!.user,
                         password: vm!.pass,
-                        port: 22,
+                        port: Number.parseInt(vm!.port),
                         tryKeyboard: true,
                     });
                     record.ocean["ssh"] = {
@@ -533,7 +533,7 @@ export async function planCiCd(socket: Socket, token: string,vm_id: string,servi
                 let log;
                 let command;
                 /** handle stage clone  */
-
+                /**@TODO thêm chức năng viết lại file diockerfile, docker-compose khi chỉnh sửa */
                 if (record.ocean["ssh"].status === EStatus.DONE) {
                     record.ocean["clone"] = {
                         title: "clone",
@@ -595,6 +595,53 @@ export async function planCiCd(socket: Socket, token: string,vm_id: string,servi
                             command = `cat > ${service.repo}/${docker_file.location}`;
                             log = await ssh.execCommand(command, {
                                 stdin: docker_file.content,
+                            });
+                            if (log.code !== 0) {
+                                record.ocean["clone"] = {
+                                    title: "clone",
+                                    status: EStatus.ERROR,
+                                };
+                                record.logs["clone"].push({
+                                    log: [log.stdout],
+                                    title: "clone",
+                                    sub_title: `${command}`,
+                                    mess: undefined,
+                                    status: EStatus.ERROR,
+                                    start_time: start_time,
+                                    end_time: new Date(),
+                                });
+                                SocketServer.getInstance().io.emit(
+                                    `logPlanCiCd-${payload.id}`,
+                                    record
+                                );
+                                service.environment[env_index].record.push(
+                                    record.id
+                                );
+                                record.end_time = new Date();
+                                record.status = EStatus.ERROR;
+                                await record.save();
+                                await service.save();
+                                return false;
+                            }
+                            record.logs["clone"].push({
+                                log: [log.stdout],
+                                title: "clone",
+                                sub_title: `${command}`,
+                                mess: undefined,
+                                status: EStatus.SUCCESSFULLY,
+                                start_time: start_time,
+                                end_time: new Date(),
+                            });
+                            SocketServer.getInstance().io.emit(
+                                `logPlanCiCd-${payload.id}`,
+                                record
+                            );
+                        }
+                        for (const docker_compose of env!.docker_compose) {
+                            start_time = new Date();
+                            command = `cat > ${service.repo}/${docker_compose.location}`;
+                            log = await ssh.execCommand(command, {
+                                stdin: docker_compose.content,
                             });
                             if (log.code !== 0) {
                                 record.ocean["clone"] = {
