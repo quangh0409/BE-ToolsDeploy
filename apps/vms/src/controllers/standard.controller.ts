@@ -144,9 +144,9 @@ export async function compareStandardBeforeCreate(params: {
         log = await ssh.execCommand("uname -o");
         operating_system += ` ${log.stdout}`;
         log = await ssh.execCommand("uname -r");
-        kernel = ` ${log.stdout}`;
+        kernel = `${log.stdout}`;
         log = await ssh.execCommand("uname -m");
-        architecture = ` ${log.stdout}`;
+        architecture = `${log.stdout}`;
 
 
 

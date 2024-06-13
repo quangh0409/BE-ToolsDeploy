@@ -24,6 +24,7 @@ import {
 } from "../services/ticket.service";
 import { EStatus } from "../interfaces/models/vms";
 import Service from "../models/service";
+import Standard from "../models/standard";
 
 export async function createVms(params: {
     host: string;
@@ -79,7 +80,7 @@ export async function createVms(params: {
                 bug_report_url = `${ob[1].replace(/"/g, "")}`;
             } else if ("PRIVACY_POLICY_URL" === ob[0]) {
                 privacy_policy_url = `${ob[1].replace(/"/g, "")}`;
-            } else if("PRETTY_NAME" === ob[0]){
+            } else if ("PRETTY_NAME" === ob[0]) {
                 operating_system = `${ob[1].replace(/"/g, "")}`;
             }
         });
@@ -341,12 +342,18 @@ export async function getVmsById(params: {
 
         check.set_up = set_up;
 
+        const standard = await Standard.findOne(
+            { id: check.standard },
+            { _id: 0 }
+        );
+
         await check.save();
 
         return success.ok({
             ...check.toJSON(),
             _id: undefined,
             landscape_sysinfo: obj,
+            standard: standard?.toJSON(),
         });
     } catch (error) {
         return success.ok({
@@ -498,7 +505,10 @@ export async function actionsContainerByByVmsIdAndContainerId(params: {
             containers_ = log.stdout.split("\n").map((r) => JSON.parse(r));
 
             containers_ = containers_.map((container_, idx) => {
-                console.log("🚀 ~ containers_=containers_.map ~ container_:", container_)
+                console.log(
+                    "🚀 ~ containers_=containers_.map ~ container_:",
+                    container_
+                );
                 const container = containers.find((container) => {
                     return container?.ID === container_?.ID;
                 });
@@ -869,7 +879,7 @@ export async function updateVms(params: {
                 bug_report_url = `${ob[1].replace(/"/g, "")}`;
             } else if ("PRIVACY_POLICY_URL" === ob[0]) {
                 privacy_policy_url = `${ob[1].replace(/"/g, "")}`;
-            } else if("PRETTY_NAME" === ob[0]){
+            } else if ("PRETTY_NAME" === ob[0]) {
                 operating_system = `${ob[1].replace(/"/g, "")}`;
             }
         });
