@@ -8,7 +8,7 @@ export async function webhookHandle(params: {
     githubEvent: string | string[] | undefined;
     data: any;
 }): Promise<void> {
-    if (params.githubEvent === "push") {
+    if (params.githubEvent === "push" || params.githubEvent === "status" ) {
         const { id: github_id, login: github_user } =
             params.data.repository.owner;
 
