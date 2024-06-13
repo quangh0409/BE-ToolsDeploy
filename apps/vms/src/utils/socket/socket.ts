@@ -74,7 +74,7 @@ export class SocketServer {
 
         socket.on("planCiCd", async (token, vm_id, service_id, env_name) => {
             logger.info(
-                "🚀 ~ SocketServer ~ socket.on ~ token, vm_id, service_id, env_name:",
+                "🚀 ~ SocketServer ~ socket.on ~ token: %s, vm_id: %s, service_id: %s, env_name:: %s",
                 token,
                 vm_id,
                 service_id,
