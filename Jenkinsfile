@@ -1,11 +1,11 @@
 node {
-  stage("ssh"){
-     withCredentials([file(credentialsId: 'ssh_key_remote', variable: 'ssh_key_remote')]) {
-        sh "cat $ssh_key_remote > ssh_id_rsa"
-        sh "chmod 400 ssh_id_rsa"
-        sh "ssh -o StrictHostKeyChecking=no -i ssh_id_rsa -p 2222 quangvt@103.166.185.48 'whoami'"
-    }
-  }
+  // stage("ssh"){
+  //    withCredentials([file(credentialsId: 'ssh_key_remote', variable: 'ssh_key_remote')]) {
+  //       sh "cat $ssh_key_remote > ssh_id_rsa"
+  //       sh "chmod 400 ssh_id_rsa"
+  //       sh "ssh -o StrictHostKeyChecking=no -i ssh_id_rsa -p 2222 quangvt@103.166.185.48 'whoami'"
+  //   }
+  // }
   stage("Clone"){
    withCredentials([file(credentialsId: 'ssh_key_remote', variable: 'ssh_key_remote')]) {
         sh "cat $ssh_key_remote > ssh_id_rsa"
@@ -22,15 +22,15 @@ node {
   //       sh "ssh -o StrictHostKeyChecking=no -i ssh_id_rsa -p 2222 quangvt@103.166.185.48 'cat ScanDockerCompose.json && cat ScanDockerImage.json '"
   //   }
   // }
-  stage("Clear"){
-    withCredentials([file(credentialsId: 'ssh_key_remote', variable: 'ssh_key_remote')]) {
-        sh "cat $ssh_key_remote > ssh_id_rsa"
-        sh "chmod 400 ssh_id_rsa"
-        // sh "ssh -o StrictHostKeyChecking=no -i ssh_id_rsa -p 2222 quangvt@103.166.185.48 '(docker stop \$(docker ps -aq)  || echo no container) &&  (docker rmi -f \$(docker images -q) || echo no image) && docker builder prune -f'"
-        sh "ssh -o StrictHostKeyChecking=no -i ssh_id_rsa -p 2222 quangvt@103.166.185.48 'docker builder prune -f'"
-    }
-  }
-  stage("Build"){
+  // stage("Clear"){
+  //   withCredentials([file(credentialsId: 'ssh_key_remote', variable: 'ssh_key_remote')]) {
+  //       sh "cat $ssh_key_remote > ssh_id_rsa"
+  //       sh "chmod 400 ssh_id_rsa"
+  //       // sh "ssh -o StrictHostKeyChecking=no -i ssh_id_rsa -p 2222 quangvt@103.166.185.48 '(docker stop \$(docker ps -aq)  || echo no container) &&  (docker rmi -f \$(docker images -q) || echo no image) && docker builder prune -f'"
+  //       sh "ssh -o StrictHostKeyChecking=no -i ssh_id_rsa -p 2222 quangvt@103.166.185.48 'docker builder prune -f'"
+  //   }
+  // }
+  stage("Build & Deploy"){
     withCredentials([file(credentialsId: 'ssh_key_remote', variable: 'ssh_key_remote')]) {
         sh "cat $ssh_key_remote > ssh_id_rsa"
         sh "chmod 400 ssh_id_rsa"
