@@ -1019,14 +1019,15 @@ export async function deleteVmsById(params: {
         throw new HttpError(err);
     }
 
-    const services = await Service.updateMany({
+    await Service.updateMany({
         $pull: {
             environment: {
                 vm: params.vms,
             },
         },
     });
-    console.log("🚀 ~ services:", services)
+
+    await Service.deleteMany({ environment: { $exists: true, $size: 0 } });
 
     const result = await Vms.deleteOne({ id: params.vms });
 

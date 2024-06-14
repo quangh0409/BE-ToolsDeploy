@@ -148,8 +148,6 @@ export async function compareStandardBeforeCreate(params: {
         log = await ssh.execCommand("uname -m");
         architecture = `${log.stdout}`;
 
-
-
         log = await ssh.execCommand(`free --giga | awk '/Mem/{print $2}'`);
         ram = `${log.stdout}GB`;
         log = await ssh.execCommand(`lscpu | grep '^CPU(s):'`);
@@ -188,6 +186,14 @@ export async function compareStandardBeforeCreate(params: {
             rate_core: rate_core,
             rate_os: rate_os,
             rate_architecture: rate_architecture,
+            standard: standard.toJSON(),
+            vms: {
+                os: operating_system,
+                ram: ram,
+                cpu: cpu,
+                core: core,
+                architecture: architecture,
+            },
         });
     } catch (error) {
         throw new HttpError({
