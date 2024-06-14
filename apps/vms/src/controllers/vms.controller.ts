@@ -1019,6 +1019,15 @@ export async function deleteVmsById(params: {
         throw new HttpError(err);
     }
 
+    const services = await Service.updateMany({
+        $pull: {
+            environment: {
+                vm: params.vms,
+            },
+        },
+    });
+    console.log("🚀 ~ services:", services)
+
     const result = await Vms.deleteOne({ id: params.vms });
 
     const isDelete = await deleteVmsOfTicketById({
