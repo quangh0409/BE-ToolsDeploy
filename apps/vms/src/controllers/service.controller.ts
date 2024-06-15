@@ -92,7 +92,7 @@ export async function updateService(params: IServiceBody & {id: string;}): Promi
             },
         },
         {
-            $push: {
+            $addToSet: {
                 services: service.id,
             },
         }
