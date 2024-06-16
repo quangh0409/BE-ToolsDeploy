@@ -22,6 +22,10 @@ import {
     deleteStandard,
     getStandards,
 } from "../../controllers/standard.controller";
+import {
+    createTemplate,
+    findTemplate,
+} from "../../controllers/template.controller";
 
 export const router: Router = Router();
 
@@ -31,6 +35,21 @@ router.get(
         const path = __dirname;
         const file_name = resolve(path, "../../../", "file/id_rsa.pub");
         res.download(file_name, "id_rsa.pub");
+    }
+);
+
+router.get(
+    "/templates",
+    async (req: Request, _: Response, next: NextFunction) => {
+        const language = req.query.language as string;
+        const architecture = req.query.architecture as string;
+        const type = req.query.type as string;
+        const result = await findTemplate({
+            language,
+            architecture,
+            type,
+        });
+        next(result);
     }
 );
 
@@ -150,6 +169,21 @@ router.post("/ids", async (req: Request, _: Response, next: NextFunction) => {
     });
     next(result);
 });
+
+router.post(
+    "/templates",
+    async (req: Request, _: Response, next: NextFunction) => {
+        const { name, language, architecture, content, type } = req.body;
+        const result = await createTemplate({
+            name,
+            language,
+            architecture,
+            content,
+            type,
+        });
+        next(result);
+    }
+);
 
 router.post(
     "/standards/compare",
