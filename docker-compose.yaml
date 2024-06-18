@@ -60,8 +60,8 @@ services:
       - CA_GIT_USERS_SERVICE_HOST=http://auth
       - CA_GIT_AUTH_SERVICE_HOST=http://auth
       - CA_GIT_TICKET_SERVICE_HOST=http://ticket
-      - CA_GIT_CLIENT_ID=Ov23liAKvwqR0iILNsiC
-      - CA_GIT_CLIENT_SECRET=a370820af2811e1329ced80356511229d40590e4
+      - CA_GIT_CLIENT_ID=Iv23liUoncWuIkYud15L
+      - CA_GIT_CLIENT_SECRET=e585ecac2942a8e94ef2306307d7c1b002c87e80
       - CA_GIT_MONGO_ADDRESSES=103.166.185.48:6808
       - CA_GIT_REDIS_HOST=103.166.185.48
     image: docker.io/vutrongquang/git
