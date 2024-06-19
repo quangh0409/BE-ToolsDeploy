@@ -2,6 +2,7 @@ import { NextFunction, Request, Response, Router } from "express";
 import {
     GetInfoUserGitByAccesToken,
     GetLastCommitByAccessToken,
+    GetReposGitByAccessToken,
     createGitHub,
     getAGithubByCode,
     getGitHubById,
@@ -26,6 +27,14 @@ router.get(
         next(result);
     }
 );
+
+router.post("/repos", async (req: Request, _: Response, next: NextFunction) => {
+    const { userId, name } = req.body;
+
+    const result = await GetReposGitByAccessToken({ userId, name });
+
+    next(result);
+});
 
 router.post(
     "/user-git-token",

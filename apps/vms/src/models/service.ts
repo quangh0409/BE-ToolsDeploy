@@ -129,6 +129,30 @@ const serviceSchema = new mongoose.Schema(
             required: true,
             _id: false,
         },
+        activities: {
+            type: [
+                {
+                    name_env: {
+                        type: String,
+                        required: true,
+                    },
+                    modify_time: {
+                        type: Date,
+                        required: true,
+                    },
+                    record_id: {
+                        type: String,
+                        required: true,
+                    },
+                    vm: {
+                        type: String,
+                        required: true,
+                    },
+                },
+            ],
+            required: false,
+            _id: false,
+        },
     },
     {
         versionKey: false,

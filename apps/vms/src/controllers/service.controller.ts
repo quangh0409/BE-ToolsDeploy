@@ -16,10 +16,15 @@ import Service from "../models/service";
 import { v1 } from "uuid";
 import Record from "../models/record";
 import { EStatus } from "../interfaces/models";
-import { GetLastCommitByAccessToken } from "../services/git.service";
+import {
+    GetLastCommitByAccessToken,
+    GetReposGitByAccessToken,
+} from "../services/git.service";
 import { SocketServer } from "../utils";
 
-export async function createService( params: IServiceBody): Promise<ResultSuccess> {
+export async function createService(
+    params: IServiceBody
+): Promise<ResultSuccess> {
     const service = new Service({
         id: v1(),
         name: params.name,
@@ -29,6 +34,7 @@ export async function createService( params: IServiceBody): Promise<ResultSucces
         source: params.source,
         user: params.user,
         environment: [...params.environments],
+        activities: []
     });
 
     const vms_ids = params.environments.map((env) => {
@@ -52,7 +58,9 @@ export async function createService( params: IServiceBody): Promise<ResultSucces
     return success.ok(service);
 }
 
-export async function updateService(params: IServiceBody & {id: string;}): Promise<ResultSuccess> {
+export async function updateService(
+    params: IServiceBody & { id: string }
+): Promise<ResultSuccess> {
     const service = await Service.findOneAndUpdate(
         {
             id: params.id,
@@ -102,7 +110,10 @@ export async function updateService(params: IServiceBody & {id: string;}): Promi
     return success.ok(service);
 }
 
-export async function deleteService(params: {id: string;vm: string;}): Promise<ResultSuccess> {
+export async function deleteService(params: {
+    id: string;
+    vm: string;
+}): Promise<ResultSuccess> {
     const vm = await Vms.findOne({ id: params.vm });
 
     if (!vm) {
@@ -132,7 +143,9 @@ export async function deleteService(params: {id: string;vm: string;}): Promise<R
     return success.ok({ message: "successfully deleted" });
 }
 
-export async function getAllService(params: {vm: string;}): Promise<ResultSuccess> {
+export async function getAllService(params: {
+    vm: string;
+}): Promise<ResultSuccess> {
     const vm = await Vms.findOne({ id: params.vm });
     const err: ResultError = {
         status: HttpStatus.BAD_REQUEST,
@@ -162,7 +175,9 @@ export async function getAllService(params: {vm: string;}): Promise<ResultSucces
     return success.ok(services);
 }
 
-export async function getServiceById(params: {id: string;}): Promise<ResultSuccess> {
+export async function getServiceById(params: {
+    id: string;
+}): Promise<ResultSuccess> {
     const service = await Service.findOne({ id: params.id }, { _id: 0 });
     const err: ResultError = {
         status: HttpStatus.BAD_REQUEST,
@@ -196,7 +211,10 @@ export async function getServiceById(params: {id: string;}): Promise<ResultSucce
     return success.ok(result);
 }
 
-export async function findServiceInVmsByName(params: {vm: string;service: string;}): Promise<ResultSuccess> {
+export async function findServiceInVmsByName(params: {
+    vm: string;
+    service: string;
+}): Promise<ResultSuccess> {
     const vm = await Vms.findOne({ id: params.vm });
     const err: ResultError = {
         status: HttpStatus.BAD_REQUEST,
@@ -230,7 +248,11 @@ export async function findServiceInVmsByName(params: {vm: string;service: string
     return success.ok(services);
 }
 
-export async function UpdateStatusServiceById(params: {id: string;status: string; env: string;}): Promise<ResultSuccess> {
+export async function UpdateStatusServiceById(params: {
+    id: string;
+    status: string;
+    env: string;
+}): Promise<ResultSuccess> {
     const service = await Service.findOne({ id: params.id });
 
     if (!service) {
@@ -252,7 +274,10 @@ export async function UpdateStatusServiceById(params: {id: string;status: string
     return success.ok({ ...service, _id: undefined });
 }
 
-export async function getImagesOfServiceById(params: { service: string; env: string;}): Promise<ResultSuccess> {
+export async function getImagesOfServiceById(params: {
+    service: string;
+    env: string;
+}): Promise<ResultSuccess> {
     const service = await Service.findOne({ id: params.service });
     const ssh = new NodeSSH();
 
@@ -300,7 +325,11 @@ export async function getImagesOfServiceById(params: { service: string; env: str
     );
 }
 
-export async function scanImageOfService(params: { service: string;env: string; image: string;}): Promise<ResultSuccess> {
+export async function scanImageOfService(params: {
+    service: string;
+    env: string;
+    image: string;
+}): Promise<ResultSuccess> {
     const service = await Service.findOne({ id: params.service });
     const ssh = new NodeSSH();
 
@@ -335,7 +364,11 @@ export async function scanImageOfService(params: { service: string;env: string; 
     );
 }
 
-export async function logOfDockerCompose(service: string,env: string, socket: Socket): Promise<boolean> {
+export async function logOfDockerCompose(
+    service: string,
+    env: string,
+    socket: Socket
+): Promise<boolean> {
     const ser = await Service.findOne({ id: service });
     const ssh = new NodeSSH();
     console.log(service, env);
@@ -382,7 +415,13 @@ export async function logOfDockerCompose(service: string,env: string, socket: So
     );
 }
 
-export async function planCiCd(socket: Socket, token: string,vm_id: string,service_id: string, env_name: string): Promise<boolean> {
+export async function planCiCd(
+    socket: Socket,
+    token: string,
+    vm_id: string,
+    service_id: string,
+    env_name: string
+): Promise<boolean> {
     const payload = await verifyToken(token);
     const ticket = await findTicketByUserId({ user_id: payload.id });
 
@@ -523,6 +562,23 @@ export async function planCiCd(socket: Socket, token: string,vm_id: string,servi
                         record
                     );
                     service.environment[env_index].record.push(record.id);
+                    if (service.activities) {
+                        service.activities.push({
+                            name_env: env!.name,
+                            modify_time: new Date(),
+                            record_id: record.id,
+                            vm: env!.vm,
+                        });
+                    } else {
+                        service.activities = [
+                            {
+                                name_env: env!.name,
+                                modify_time: new Date(),
+                                record_id: record.id,
+                                vm: env!.vm,
+                            },
+                        ];
+                    }
                     record.end_time = new Date();
                     record.status = EStatus.ERROR;
                     await record.save();
@@ -617,6 +673,23 @@ export async function planCiCd(socket: Socket, token: string,vm_id: string,servi
                                 service.environment[env_index].record.push(
                                     record.id
                                 );
+                                if (service.activities) {
+                                    service.activities.push({
+                                        name_env: env!.name,
+                                        modify_time: new Date(),
+                                        record_id: record.id,
+                                        vm: env!.vm,
+                                    });
+                                } else {
+                                    service.activities = [
+                                        {
+                                            name_env: env!.name,
+                                            modify_time: new Date(),
+                                            record_id: record.id,
+                                            vm: env!.vm,
+                                        },
+                                    ];
+                                }
                                 record.end_time = new Date();
                                 record.status = EStatus.ERROR;
                                 await record.save();
@@ -664,6 +737,23 @@ export async function planCiCd(socket: Socket, token: string,vm_id: string,servi
                                 service.environment[env_index].record.push(
                                     record.id
                                 );
+                                if (service.activities) {
+                                    service.activities.push({
+                                        name_env: env!.name,
+                                        modify_time: new Date(),
+                                        record_id: record.id,
+                                        vm: env!.vm,
+                                    });
+                                } else {
+                                    service.activities = [
+                                        {
+                                            name_env: env!.name,
+                                            modify_time: new Date(),
+                                            record_id: record.id,
+                                            vm: env!.vm,
+                                        },
+                                    ];
+                                }
                                 record.end_time = new Date();
                                 record.status = EStatus.ERROR;
                                 await record.save();
@@ -715,6 +805,23 @@ export async function planCiCd(socket: Socket, token: string,vm_id: string,servi
                             record
                         );
                         service.environment[env_index].record.push(record.id);
+                        if (service.activities) {
+                            service.activities.push({
+                                name_env: env!.name,
+                                modify_time: new Date(),
+                                record_id: record.id,
+                                vm: env!.vm,
+                            });
+                        } else {
+                            service.activities = [
+                                {
+                                    name_env: env!.name,
+                                    modify_time: new Date(),
+                                    record_id: record.id,
+                                    vm: env!.vm,
+                                },
+                            ];
+                        }
                         record.end_time = new Date();
                         record.status = EStatus.ERROR;
                         await record.save();
@@ -773,6 +880,23 @@ export async function planCiCd(socket: Socket, token: string,vm_id: string,servi
                                 service.environment[env_index].record.push(
                                     record.id
                                 );
+                                if (service.activities) {
+                                    service.activities.push({
+                                        name_env: env!.name,
+                                        modify_time: new Date(),
+                                        record_id: record.id,
+                                        vm: env!.vm,
+                                    });
+                                } else {
+                                    service.activities = [
+                                        {
+                                            name_env: env!.name,
+                                            modify_time: new Date(),
+                                            record_id: record.id,
+                                            vm: env!.vm,
+                                        },
+                                    ];
+                                }
                                 record.end_time = new Date();
                                 record.status = EStatus.ERROR;
                                 await record.save();
@@ -826,6 +950,23 @@ export async function planCiCd(socket: Socket, token: string,vm_id: string,servi
                                 service.environment[env_index].record.push(
                                     record.id
                                 );
+                                if (service.activities) {
+                                    service.activities.push({
+                                        name_env: env!.name,
+                                        modify_time: new Date(),
+                                        record_id: record.id,
+                                        vm: env!.vm,
+                                    });
+                                } else {
+                                    service.activities = [
+                                        {
+                                            name_env: env!.name,
+                                            modify_time: new Date(),
+                                            record_id: record.id,
+                                            vm: env!.vm,
+                                        },
+                                    ];
+                                }
                                 record.end_time = new Date();
                                 record.status = EStatus.ERROR;
                                 await record.save();
@@ -877,6 +1018,23 @@ export async function planCiCd(socket: Socket, token: string,vm_id: string,servi
                             record
                         );
                         service.environment[env_index].record.push(record.id);
+                        if (service.activities) {
+                            service.activities.push({
+                                name_env: env!.name,
+                                modify_time: new Date(),
+                                record_id: record.id,
+                                vm: env!.vm,
+                            });
+                        } else {
+                            service.activities = [
+                                {
+                                    name_env: env!.name,
+                                    modify_time: new Date(),
+                                    record_id: record.id,
+                                    vm: env!.vm,
+                                },
+                            ];
+                        }
                         record.end_time = new Date();
                         record.status = EStatus.ERROR;
                         await record.save();
@@ -960,6 +1118,23 @@ export async function planCiCd(socket: Socket, token: string,vm_id: string,servi
                             record
                         );
                         service.environment[env_index].record.push(record.id);
+                        if (service.activities) {
+                            service.activities.push({
+                                name_env: env!.name,
+                                modify_time: new Date(),
+                                record_id: record.id,
+                                vm: env!.vm,
+                            });
+                        } else {
+                            service.activities = [
+                                {
+                                    name_env: env!.name,
+                                    modify_time: new Date(),
+                                    record_id: record.id,
+                                    vm: env!.vm,
+                                },
+                            ];
+                        }
                         record.end_time = new Date();
                         record.status = EStatus.ERROR;
                         await record.save();
@@ -1055,6 +1230,23 @@ export async function planCiCd(socket: Socket, token: string,vm_id: string,servi
                             record
                         );
                         service.environment[env_index].record.push(record.id);
+                        if (service.activities) {
+                            service.activities.push({
+                                name_env: env!.name,
+                                modify_time: new Date(),
+                                record_id: record.id,
+                                vm: env!.vm,
+                            });
+                        } else {
+                            service.activities = [
+                                {
+                                    name_env: env!.name,
+                                    modify_time: new Date(),
+                                    record_id: record.id,
+                                    vm: env!.vm,
+                                },
+                            ];
+                        }
                         record.end_time = new Date();
                         record.status = EStatus.ERROR;
                         await record.save();
@@ -1126,6 +1318,23 @@ export async function planCiCd(socket: Socket, token: string,vm_id: string,servi
                             service.environment[env_index].record.push(
                                 record.id
                             );
+                            if (service.activities) {
+                                service.activities.push({
+                                    name_env: env!.name,
+                                    modify_time: new Date(),
+                                    record_id: record.id,
+                                    vm: env!.vm,
+                                });
+                            } else {
+                                service.activities = [
+                                    {
+                                        name_env: env!.name,
+                                        modify_time: new Date(),
+                                        record_id: record.id,
+                                        vm: env!.vm,
+                                    },
+                                ];
+                            }
                             record.end_time = new Date();
                             record.status = EStatus.ERROR;
                             await record.save();
@@ -1256,6 +1465,23 @@ export async function planCiCd(socket: Socket, token: string,vm_id: string,servi
                         );
 
                         service.environment[env_index].record.push(record.id);
+                        if (service.activities) {
+                            service.activities.push({
+                                name_env: env!.name,
+                                modify_time: new Date(),
+                                record_id: record.id,
+                                vm: env!.vm,
+                            });
+                        } else {
+                            service.activities = [
+                                {
+                                    name_env: env!.name,
+                                    modify_time: new Date(),
+                                    record_id: record.id,
+                                    vm: env!.vm,
+                                },
+                            ];
+                        }
                         record.end_time = new Date();
                         record.status = EStatus.ERROR;
                         await record.save();
@@ -1265,6 +1491,23 @@ export async function planCiCd(socket: Socket, token: string,vm_id: string,servi
                 }
                 if (record.ocean["deploy"].status === EStatus.SUCCESSFULLY) {
                     service.environment[env_index].record.push(record.id);
+                    if (service.activities) {
+                        service.activities.push({
+                            name_env: env!.name,
+                            modify_time: new Date(),
+                            record_id: record.id,
+                            vm: env!.vm,
+                        });
+                    } else {
+                        service.activities = [
+                            {
+                                name_env: env!.name,
+                                modify_time: new Date(),
+                                record_id: record.id,
+                                vm: env!.vm,
+                            },
+                        ];
+                    }
                     record.end_time = new Date();
                     record.status = EStatus.SUCCESSFULLY;
                     await record.save();
@@ -1276,4 +1519,38 @@ export async function planCiCd(socket: Socket, token: string,vm_id: string,servi
         }
     }
     return false;
+}
+
+export async function getAllInfoOfRepos(params: {
+    userId: string;
+    name?: string;
+}): Promise<ResultSuccess> {
+    const repos = await GetReposGitByAccessToken(params);
+
+    if (repos.status !== 200 && !repos?.body) {
+        throw new HttpError({
+            status: HttpStatus.INTERNAL_SERVER,
+            errors: [
+                {
+                    message: "Error call api internal of service git",
+                },
+            ],
+        });
+    }
+
+    const repositorys: {
+        name: string;
+        full_name: string;
+        html_url: string;
+        language: string;
+    }[] = repos.body.data.map((repo: any) => {
+        return {
+            name: repo.name,
+            full_name: repo.full_name,
+            html_url: repo.html_url,
+            language: repo.language,
+        };
+    });
+
+    return success.ok(repos);
 }

@@ -9,9 +9,11 @@ import {
     scanImageOfService,
     findServiceInVmsByName,
     updateService,
+    getAllInfoOfRepos,
 } from "../../controllers/service.controller";
 import { IRecordReqBodyCreate } from "../../interfaces/request/record.body";
 import { createRecord } from "../../controllers/record.controller";
+import { Payload } from "app";
 
 export const router: Router = Router();
 
@@ -43,6 +45,19 @@ router.post(
             service,
             env,
             ...body,
+        });
+        next(result);
+    }
+);
+
+router.get(
+    "/infos-repo",
+    async (req: Request, _: Response, next: NextFunction) => {
+        const name = req.query.name as string;
+        const { id: userId } = req.payload as Payload;
+        const result = await getAllInfoOfRepos({
+            userId,
+            name,
         });
         next(result);
     }

@@ -37,4 +37,10 @@ export interface IService {
         };
         record: string[];
     }[];
+    activities: {
+        name_env: string;
+        modify_time: Date;
+        record_id: string;
+        vm: string;
+    }[];
 }
