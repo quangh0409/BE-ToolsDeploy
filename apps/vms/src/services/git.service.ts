@@ -37,3 +37,20 @@ export async function GetReposGitByAccessToken(params: {
         }
     }
 }
+
+export async function GetBranchesByAccessToken(params: {
+    userId: string;
+    repository: string;
+}): Promise<{ body?: any; status: number }> {
+    const url = `${configs.services.git.getUrl()}/branchs`;
+    try {
+        const res = await axios.post<any>(`${url}`, params);
+        return { body: res.data, status: res.status };
+    } catch (e) {
+        if (axios.isAxiosError(e) && e.response?.status) {
+            return { status: e.response?.status };
+        } else {
+            throw new HttpError(error.service(url));
+        }
+    }
+}

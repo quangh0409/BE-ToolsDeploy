@@ -17,6 +17,7 @@ import { v1 } from "uuid";
 import Record from "../models/record";
 import { EStatus } from "../interfaces/models";
 import {
+    GetBranchesByAccessToken,
     GetLastCommitByAccessToken,
     GetReposGitByAccessToken,
 } from "../services/git.service";
@@ -34,7 +35,7 @@ export async function createService(
         source: params.source,
         user: params.user,
         environment: [...params.environments],
-        activities: []
+        activities: [],
     });
 
     const vms_ids = params.environments.map((env) => {
@@ -1552,5 +1553,130 @@ export async function getAllInfoOfRepos(params: {
         };
     });
 
-    return success.ok(repos);
+    let result: any[] = [];
+
+    for (const repo of repositorys) {
+        const [service, branchs] = await Promise.all([
+            await Service.findOne({ repo: repo.name }),
+            await GetBranchesByAccessToken({
+                userId: params.userId,
+                repository: repo.name,
+            }),
+        ]);
+        let last:
+            | {
+                  branch?: string;
+                  vm?: { host: string; id: string };
+                  status?: EStatus;
+                  created_time?: Date;
+                  commit_id?: string;
+                  commit_message?: string;
+                  commit_html_url?: string;
+                  index?: number;
+                  end_time?: Date;
+              }
+            | undefined;
+
+        const activity = service?.activities.at(-1);
+        const environments = service?.environment;
+
+        if (activity) {
+            const [record, vm] = await Promise.all([
+                Record.findOne({ id: activity.record_id }),
+                Vms.findOne({ id: activity.vm }),
+            ]);
+
+            if (!record || !vm) {
+                throw new HttpError(
+                    error.notFound({
+                        message: "record or vm not found",
+                    })
+                );
+            }
+
+            last = {
+                branch: record.branch,
+                vm: { host: vm.host, id: vm.id },
+                status: record.status,
+                created_time: record.created_time,
+                commit_id: record.commit_id,
+                commit_message: record.commit_message,
+                commit_html_url: record.commit_html_url,
+                index: record.index,
+                end_time: record.end_time,
+            };
+        }
+        const branchs_custom: any[] = [];
+
+        for (const { branch: b } of branchs.body.data) {
+            const env = environments?.find((env) => {
+                return env.branch === b;
+            });
+            if (env) {
+                const [record_success, record_error, last_record, vm_env] =
+                    await Promise.all([
+                        Record.find({
+                            id: {
+                                $in: env.record,
+                            },
+                            status: EStatus.SUCCESSFULLY,
+                        }).count(),
+                        Record.find({
+                            id: {
+                                $in: env.record,
+                            },
+                            status: EStatus.ERROR,
+                        }).count(),
+                        Record.findOne({
+                            id: env.record.at(-1),
+                        }),
+                        Vms.findOne({ id: env.vm }),
+                    ]);
+
+                branchs_custom.push({
+                    name: env.name,
+                    branch: env.branch,
+                    vm: { host: vm_env!.host, id: vm_env!.id },
+                    record_success: record_success,
+                    record_error: record_error,
+                    last_record: {
+                        branch: last_record!.branch,
+                        vm: { host: vm_env!.host, id: vm_env!.id },
+                        status: last_record!.status,
+                        created_time: last_record!.created_time,
+                        commit_id: last_record!.commit_id,
+                        commit_message: last_record!.commit_message,
+                        commit_html_url: last_record!.commit_html_url,
+                        index: last_record!.index,
+                        end_time: last_record!.end_time,
+                    },
+                });
+            } else {
+                const last_commit = await GetLastCommitByAccessToken({
+                    userId: params.userId,
+                    repository: repo.name,
+                    branch: b,
+                });
+                if (!last_commit.body) {
+                    throw new HttpError(
+                        error.notFound({
+                            message: "last commit not found",
+                        })
+                    );
+                }
+                branchs_custom.push({
+                    branch: b,
+                    last_commit: last_commit.body,
+                });
+            }
+        }
+
+        result.push({
+            ...repo,
+            last: last,
+            branchs: branchs_custom,
+        });
+    }
+
+    return success.ok(result);
 }

@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response, Router } from "express";
 import {
+    GetBranchesByAccessToken,
     GetInfoUserGitByAccesToken,
     GetLastCommitByAccessToken,
     GetReposGitByAccessToken,
@@ -35,6 +36,17 @@ router.post("/repos", async (req: Request, _: Response, next: NextFunction) => {
 
     next(result);
 });
+
+router.post(
+    "/branchs",
+    async (req: Request, _: Response, next: NextFunction) => {
+        const { userId, repository } = req.body;
+
+        const result = await GetBranchesByAccessToken({ userId, repository });
+
+        next(result);
+    }
+);
 
 router.post(
     "/user-git-token",
