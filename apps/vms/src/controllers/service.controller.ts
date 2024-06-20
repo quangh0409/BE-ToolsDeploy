@@ -1565,6 +1565,8 @@ export async function getAllInfoOfRepos(params: {
         ]);
         let last:
             | {
+                  id?: string;
+                  env_name?: string;
                   branch?: string;
                   vm?: { host: string; id: string };
                   status?: EStatus;
@@ -1595,6 +1597,8 @@ export async function getAllInfoOfRepos(params: {
             }
 
             last = {
+                id: record.id,
+                env_name: activity.name_env,
                 branch: record.branch,
                 vm: { host: vm.host, id: vm.id },
                 status: record.status,
@@ -1640,6 +1644,7 @@ export async function getAllInfoOfRepos(params: {
                     record_success: record_success,
                     record_error: record_error,
                     last_record: {
+                        id: last_record!.id,
                         branch: last_record!.branch,
                         vm: { host: vm_env!.host, id: vm_env!.id },
                         status: last_record!.status,
@@ -1672,6 +1677,7 @@ export async function getAllInfoOfRepos(params: {
         }
 
         result.push({
+            service_id: service?.id,
             ...repo,
             last: last,
             branchs: branchs_custom,
