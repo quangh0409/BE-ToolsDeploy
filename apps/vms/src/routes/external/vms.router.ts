@@ -3,6 +3,7 @@ import { resolve } from "path";
 import {
     actionsContainerByByVmsIdAndContainerId,
     actionsImagesOfVmById,
+    checkConnect,
     createVms,
     deleteVmsById,
     findContaninersOfVmById,
@@ -93,6 +94,17 @@ router.get(
         const result = await installHadolint({
             vm_id,
             user_id,
+        });
+        next(result);
+    }
+);
+
+router.get(
+    "/:vms/check-connect",
+    async (req: Request, _: Response, next: NextFunction) => {
+        const vm_id = req.params.vms;
+        const result = await checkConnect({
+            vm_id,
         });
         next(result);
     }

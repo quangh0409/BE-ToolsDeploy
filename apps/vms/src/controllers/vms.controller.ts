@@ -1317,6 +1317,38 @@ export async function sshCheckConnect(
     }
 }
 
+export async function checkConnect(params: {
+    vm_id: string;
+}): Promise<ResultSuccess> {
+    const ssh = new NodeSSH();
+
+    const vm = await Vms.findOne({
+        id: params.vm_id,
+    });
+
+    if (!vm) {
+        throw new HttpError(
+            error.notFound({
+                message: `vm not found`,
+            })
+        );
+    }
+
+    try {
+        await ssh.connect({
+            host: vm!.host,
+            username: vm!.user,
+            password: vm!.pass,
+            port: Number.parseInt(vm!.port),
+            tryKeyboard: true,
+        });
+        ssh.dispose();
+        return success.ok({ status: EStatus.CONNECT });
+    } catch (error: any) {
+        return success.ok({ status: EStatus.DISCONNECT });
+    }
+}
+
 export async function sshInstallTrivy(
     socket: Socket,
     token: string,
@@ -1820,4 +1852,3 @@ export async function verifyToken(token: string): Promise<Payload> {
         }
     }
 }
-
