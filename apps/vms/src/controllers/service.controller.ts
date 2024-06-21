@@ -580,6 +580,20 @@ export async function planCiCd(
                             },
                         ];
                     }
+                    if (vm.activities) {
+                        vm.activities.push({
+                            service_id: service.id,
+                            modify_time: new Date(),
+                        });
+                    } else {
+                        vm.activities = [
+                            {
+                                service_id: service.id,
+                                modify_time: new Date(),
+                            },
+                        ];
+                    }
+                    await vm.save();
                     record.end_time = new Date();
                     record.status = EStatus.ERROR;
                     await record.save();
@@ -690,7 +704,20 @@ export async function planCiCd(
                                             vm: env!.vm,
                                         },
                                     ];
+                                }if (vm.activities) {
+                                    vm.activities.push({
+                                        service_id: service.id,
+                                        modify_time: new Date(),
+                                    });
+                                } else {
+                                    vm.activities = [
+                                        {
+                                            service_id: service.id,
+                                            modify_time: new Date(),
+                                        },
+                                    ];
                                 }
+                                await vm.save();
                                 record.end_time = new Date();
                                 record.status = EStatus.ERROR;
                                 await record.save();
@@ -755,6 +782,20 @@ export async function planCiCd(
                                         },
                                     ];
                                 }
+                                if (vm.activities) {
+                                    vm.activities.push({
+                                        service_id: service.id,
+                                        modify_time: new Date(),
+                                    });
+                                } else {
+                                    vm.activities = [
+                                        {
+                                            service_id: service.id,
+                                            modify_time: new Date(),
+                                        },
+                                    ];
+                                }
+                                await vm.save();
                                 record.end_time = new Date();
                                 record.status = EStatus.ERROR;
                                 await record.save();
@@ -823,6 +864,20 @@ export async function planCiCd(
                                 },
                             ];
                         }
+                        if (vm.activities) {
+                            vm.activities.push({
+                                service_id: service.id,
+                                modify_time: new Date(),
+                            });
+                        } else {
+                            vm.activities = [
+                                {
+                                    service_id: service.id,
+                                    modify_time: new Date(),
+                                },
+                            ];
+                        }
+                        await vm.save();
                         record.end_time = new Date();
                         record.status = EStatus.ERROR;
                         await record.save();
@@ -898,6 +953,20 @@ export async function planCiCd(
                                         },
                                     ];
                                 }
+                                if (vm.activities) {
+                                    vm.activities.push({
+                                        service_id: service.id,
+                                        modify_time: new Date(),
+                                    });
+                                } else {
+                                    vm.activities = [
+                                        {
+                                            service_id: service.id,
+                                            modify_time: new Date(),
+                                        },
+                                    ];
+                                }
+                                await vm.save();
                                 record.end_time = new Date();
                                 record.status = EStatus.ERROR;
                                 await record.save();
@@ -968,6 +1037,20 @@ export async function planCiCd(
                                         },
                                     ];
                                 }
+                                if (vm.activities) {
+                                    vm.activities.push({
+                                        service_id: service.id,
+                                        modify_time: new Date(),
+                                    });
+                                } else {
+                                    vm.activities = [
+                                        {
+                                            service_id: service.id,
+                                            modify_time: new Date(),
+                                        },
+                                    ];
+                                }
+                                await vm.save();
                                 record.end_time = new Date();
                                 record.status = EStatus.ERROR;
                                 await record.save();
@@ -1036,6 +1119,20 @@ export async function planCiCd(
                                 },
                             ];
                         }
+                        if (vm.activities) {
+                            vm.activities.push({
+                                service_id: service.id,
+                                modify_time: new Date(),
+                            });
+                        } else {
+                            vm.activities = [
+                                {
+                                    service_id: service.id,
+                                    modify_time: new Date(),
+                                },
+                            ];
+                        }
+                        await vm.save();
                         record.end_time = new Date();
                         record.status = EStatus.ERROR;
                         await record.save();
@@ -1136,6 +1233,20 @@ export async function planCiCd(
                                 },
                             ];
                         }
+                        if (vm.activities) {
+                            vm.activities.push({
+                                service_id: service.id,
+                                modify_time: new Date(),
+                            });
+                        } else {
+                            vm.activities = [
+                                {
+                                    service_id: service.id,
+                                    modify_time: new Date(),
+                                },
+                            ];
+                        }
+                        await vm.save();
                         record.end_time = new Date();
                         record.status = EStatus.ERROR;
                         await record.save();
@@ -1248,6 +1359,20 @@ export async function planCiCd(
                                 },
                             ];
                         }
+                        if (vm.activities) {
+                            vm.activities.push({
+                                service_id: service.id,
+                                modify_time: new Date(),
+                            });
+                        } else {
+                            vm.activities = [
+                                {
+                                    service_id: service.id,
+                                    modify_time: new Date(),
+                                },
+                            ];
+                        }
+                        await vm.save();
                         record.end_time = new Date();
                         record.status = EStatus.ERROR;
                         await record.save();
@@ -1336,6 +1461,20 @@ export async function planCiCd(
                                     },
                                 ];
                             }
+                            if (vm.activities) {
+                                vm.activities.push({
+                                    service_id: service.id,
+                                    modify_time: new Date(),
+                                });
+                            } else {
+                                vm.activities = [
+                                    {
+                                        service_id: service.id,
+                                        modify_time: new Date(),
+                                    },
+                                ];
+                            }
+                            await vm.save();
                             record.end_time = new Date();
                             record.status = EStatus.ERROR;
                             await record.save();
@@ -1483,6 +1622,20 @@ export async function planCiCd(
                                 },
                             ];
                         }
+                        if (vm.activities) {
+                            vm.activities.push({
+                                service_id: service.id,
+                                modify_time: new Date(),
+                            });
+                        } else {
+                            vm.activities = [
+                                {
+                                    service_id: service.id,
+                                    modify_time: new Date(),
+                                },
+                            ];
+                        }
+                        await vm.save();
                         record.end_time = new Date();
                         record.status = EStatus.ERROR;
                         await record.save();
@@ -1509,6 +1662,20 @@ export async function planCiCd(
                             },
                         ];
                     }
+                    if (vm.activities) {
+                        vm.activities.push({
+                            service_id: service.id,
+                            modify_time: new Date(),
+                        });
+                    } else {
+                        vm.activities = [
+                            {
+                                service_id: service.id,
+                                modify_time: new Date(),
+                            },
+                        ];
+                    }
+                    await vm.save();
                     record.end_time = new Date();
                     record.status = EStatus.SUCCESSFULLY;
                     await record.save();

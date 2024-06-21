@@ -109,6 +109,22 @@ const vmsSchema = new mongoose.Schema(
             _id: false,
             require: false,
         },
+        activities: {
+            type: [
+                {
+                    service_id: {
+                        type: String,
+                        required: true,
+                    },
+                    modify_time: {
+                        type: Date,
+                        required: true,
+                    },
+                },
+            ],
+            required: false,
+            _id: false,
+        },
     },
     {
         versionKey: false,

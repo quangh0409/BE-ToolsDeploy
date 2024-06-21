@@ -25,6 +25,10 @@ export interface IVms {
         hadolint: string;
         trivy: string;
     };
+    activities: {
+        service_id: string;
+        modify_time: Date;
+    }[];
 }
 export enum EStatus {
     CONNECT = "CONNECTED",

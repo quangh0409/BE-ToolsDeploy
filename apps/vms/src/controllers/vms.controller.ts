@@ -179,6 +179,7 @@ export async function createVms(params: {
             ram: ram,
             thread: thread,
             set_up: set_up,
+            activities: []
         });
         await result.save();
 
@@ -197,6 +198,7 @@ export async function createVms(params: {
             pass: params.pass,
             status: EStatus.DISCONNECT,
             last_connect: new Date(),
+            activities: []
         });
         await result.save();
 
@@ -674,11 +676,17 @@ export async function getVmsByIds(params: {
         id: any;
         containers: string | null;
         images: string | null;
+        storage: any;
+        ram_info: any;
+        cpu_info: any;
     }[] = [];
     const disconnect: {
         id: any;
         containers: string | null;
         images: string | null;
+        storage: any;
+        ram_info: any;
+        cpu_info: any;
     }[] = [];
 
     const vms = await Vms.aggregate([
@@ -717,9 +725,83 @@ export async function getVmsByIds(params: {
             command =
                 "docker images --format '{{.Repository}}' | grep -v '<none>' | wc -l";
             const log2 = await ssh.execCommand(command);
-            return { id: vm.id, containers: log1.stdout, images: log2.stdout }; // Return vm.id if connection is successful
+            let log = await ssh.execCommand("landscape-sysinfo");
+            const obj: { [key: string]: string } = {};
+            const regex = /([\w\s\/]+):\s*([^\n]+?)(?=\s{2,}[\w\s\/]+:|$)/g;
+            let match;
+
+            while ((match = regex.exec(log.stdout)) !== null) {
+                const key = match[1].trim().replace(/\s+/g, " "); // Normalize whitespace in keys
+                const value = match[2].trim();
+                // Handle cases where multiple entries might be on the same line
+                if (value.includes("   ")) {
+                    const parts = value.split("   ").map((part) => part.trim());
+                    let lastKey = key;
+                    parts.forEach((part, index) => {
+                        if (index === 0) {
+                            obj[lastKey] = part;
+                        } else {
+                            const newSplit = part.split(": ");
+                            lastKey = newSplit[0].trim().replace(/\s+/g, " ");
+                            obj[lastKey] = newSplit[1]?.trim();
+                        }
+                    });
+                } else {
+                    obj[key] = value;
+                }
+            }
+            let percentUsed: number = 0;
+            let totalSize: number = 0;
+            let remainingSize: number = 0;
+            Object.entries(obj).forEach(([key, value]) => {
+                if (key.includes("Usage of")) {
+                    // Trích xuất phần trăm sử dụng
+                    const percentMatch = value.match(/(\d+(\.\d+)?)%/);
+
+                    if (percentMatch) {
+                        percentUsed = parseFloat(percentMatch[1]);
+                    }
+
+                    // Trích xuất tổng dung lượng
+                    const totalSizeMatch = value.match(/of (\d+(\.\d+)?)GB/);
+
+                    if (totalSizeMatch) {
+                        totalSize = parseFloat(totalSizeMatch[1]);
+                    }
+
+                    let usedSize = totalSize * (percentUsed / 100);
+
+                    // Tính dung lượng còn lại
+                    remainingSize = totalSize - usedSize;
+                }
+            });
+            command = `free -h | grep "^Mem:" | awk '{print "{\\"total\\":\\"" $2 "\\", \\"free\\":\\"" $4 "\\"}"}'`;
+            log = await ssh.execCommand(command);
+            const ram = JSON.parse(log.stdout);
+            command = `top -bn1 | grep "Cpu(s)" | awk '{print "{\\"totalCPU\\":\\"100%\\", \\"freeCPU\\":\\"" 100 - $8 "%\\"}"}'`;
+            log = await ssh.execCommand(command);
+            const cpu = JSON.parse(log.stdout);
+            return {
+                id: vm.id,
+                containers: log1.stdout,
+                images: log2.stdout,
+                storage: {
+                    percentUsed: percentUsed.toFixed(0),
+                    totalSize: totalSize.toFixed(0),
+                    remainingSize: remainingSize.toFixed(0),
+                },
+                ram_info: ram,
+                cpu_info: cpu,
+            }; // Return vm.id if connection is successful
         } catch (error) {
-            return { id: vm.id, containers: null, images: null }; // Return null if connection fails
+            return {
+                id: vm.id,
+                containers: null,
+                images: null,
+                storage: undefined,
+                ram_info: undefined,
+                cpu_info: undefined,
+            }; // Return null if connection fails
         } finally {
             ssh.dispose(); // Close the SSH connection
         }
@@ -792,6 +874,9 @@ export async function getVmsByIds(params: {
                 Object.assign(data[i], {
                     containers: check.containers,
                     images: check.images,
+                    storage: check.storage,
+                    ram_info: check.ram_info,
+                    cpu_info: check.cpu_info,
                 });
             }
         }
