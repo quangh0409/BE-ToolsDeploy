@@ -28,6 +28,7 @@ import Standard from "../models/standard";
 import { GetReposGitByAccessToken } from "../services/git.service";
 import { IService } from "../interfaces/models";
 import Record from "../models/record";
+import axios from "axios";
 
 export async function createVms(params: {
     host: string;
@@ -65,9 +66,9 @@ export async function createVms(params: {
         let kernel = "";
         let architecture = "";
         log = await ssh.execCommand("uname -r");
-        kernel = ` ${log.stdout}`;
+        kernel = `${log.stdout}`;
         log = await ssh.execCommand("uname -m");
-        architecture = ` ${log.stdout}`;
+        architecture = `${log.stdout}`;
         log = await ssh.execCommand("cat /etc/os-release");
         let home_url = "";
         let support_url = "";
@@ -934,12 +935,15 @@ export async function getVmsByIds(params: {
                                 },
                             },
                         ];
-                        console.log("🚀 ~ ]).then ~ result:", result);
                     }
 
                     return result;
                 });
             }
+
+            const checkip = await axios.get(
+                `https://ipinfo.io/${data[i].host}?token=c065c6dd2047b8`
+            );
 
             if (check) {
                 Object.assign(data[i], {
@@ -950,6 +954,7 @@ export async function getVmsByIds(params: {
                     cpu_info: check.cpu_info,
                     last_service: last_service,
                     service_info: service_info,
+                    checkip: checkip.data.company,
                 });
             }
         }
