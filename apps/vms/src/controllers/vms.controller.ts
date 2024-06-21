@@ -22,10 +22,12 @@ import {
     deleteVmsOfTicketById,
     findTicketByUserId,
 } from "../services/ticket.service";
-import { EStatus } from "../interfaces/models/vms";
+import { EStatus, IVms } from "../interfaces/models/vms";
 import Service from "../models/service";
 import Standard from "../models/standard";
 import { GetReposGitByAccessToken } from "../services/git.service";
+import { IService } from "../interfaces/models";
+import Record from "../models/record";
 
 export async function createVms(params: {
     host: string;
@@ -179,7 +181,7 @@ export async function createVms(params: {
             ram: ram,
             thread: thread,
             set_up: set_up,
-            activities: []
+            activities: [],
         });
         await result.save();
 
@@ -198,7 +200,7 @@ export async function createVms(params: {
             pass: params.pass,
             status: EStatus.DISCONNECT,
             last_connect: new Date(),
-            activities: []
+            activities: [],
         });
         await result.save();
 
@@ -865,11 +867,80 @@ export async function getVmsByIds(params: {
                 pass: 0,
             },
         },
-    ]).then((res) => {
+    ]).then(async (res: IVms[]) => {
         const data = res;
 
         for (let i = 0; i < data.length; i++) {
             const check = connect.find((v) => v.id === data[i].id);
+
+            let last_service: any | undefined;
+            let service: IService | undefined | null;
+            let service_info: any[] | undefined | null = [];
+            if (data[i]?.activities) {
+                service = await Service.findOne({
+                    id: data[i].activities.at(-1)?.service_id,
+                });
+
+                const record = await Record.findOne({
+                    id: service!.activities.at(-1)!.record_id,
+                });
+
+                last_service = {
+                    service_id: service!.id,
+                    service_name: service!.name,
+                    repo: service!.repo,
+                    source: service!.source,
+                    last_record: {
+                        env_name: service!.activities.at(-1)!.name_env,
+                        ...record!.toJSON(),
+                        ocean: undefined,
+                        logs: undefined,
+                        _id: undefined,
+                    },
+                };
+            }
+
+            if (data[i].services!.length > 0) {
+                service_info = await Service.find({
+                    id: { $in: data[i].services },
+                }).then(async (res: IService[]) => {
+                    const d = res;
+                    let result: any[] = [];
+
+                    for (let idx = 0; idx < d.length; idx++) {
+                        const record = await Record.findOne({
+                            id: d[idx].activities.at(-1)!.record_id,
+                        });
+
+                        result = [
+                            ...result,
+                            {
+                                name: d[idx].name,
+                                architecture: d[idx].architectura,
+                                language: d[idx].language,
+                                repo: d[idx].repo,
+                                source: d[idx].source,
+                                env_name: d[idx].activities.at(-1)!.name_env,
+                                last_record: {
+                                    id: record!.id,
+                                    status: record!.status,
+                                    created_time: record!.created_time,
+                                    commit_id: record!.commit_id,
+                                    commit_message: record!.commit_message,
+                                    commit_html_url: record!.commit_html_url,
+                                    index: record!.index,
+                                    branch: record!.branch,
+                                    end_time: record!.end_time,
+                                },
+                            },
+                        ];
+                        console.log("🚀 ~ ]).then ~ result:", result);
+                    }
+
+                    return result;
+                });
+            }
+
             if (check) {
                 Object.assign(data[i], {
                     containers: check.containers,
@@ -877,6 +948,8 @@ export async function getVmsByIds(params: {
                     storage: check.storage,
                     ram_info: check.ram_info,
                     cpu_info: check.cpu_info,
+                    last_service: last_service,
+                    service_info: service_info,
                 });
             }
         }
