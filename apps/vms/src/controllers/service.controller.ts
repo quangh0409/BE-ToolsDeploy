@@ -1735,6 +1735,7 @@ export async function getAllInfoOfRepos(params: {
                   id?: string;
                   service_name?: string;
                   service_id?: string;
+                  serivce_architecture?: string;
                   env_name?: string;
                   branch?: string;
                   vm?: { host: string; id: string };
@@ -1768,6 +1769,7 @@ export async function getAllInfoOfRepos(params: {
             last = {
                 id: record.id,
                 service_name: service?.name,
+                serivce_architecture: service?.architectura,
                 service_id: service?.id,
                 env_name: activity.name_env,
                 branch: record.branch,
@@ -1849,6 +1851,7 @@ export async function getAllInfoOfRepos(params: {
 
         result.push({
             service_id: service?.id,
+            serivce_architecture: service?.architectura,
             ...repo,
             last: last,
             branchs: branchs_custom,
