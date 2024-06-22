@@ -1,5 +1,8 @@
 import { Request, Router, Response, NextFunction } from "express";
-import { IServiceBody } from "../../interfaces/request/service.body";
+import {
+    IEnvironment,
+    IServiceBody,
+} from "../../interfaces/request/service.body";
 import {
     getAllService,
     createService,
@@ -10,6 +13,8 @@ import {
     findServiceInVmsByName,
     updateService,
     getAllInfoOfRepos,
+    updateEnvService,
+    addEnvService,
 } from "../../controllers/service.controller";
 import { IRecordReqBodyCreate } from "../../interfaces/request/record.body";
 import { createRecord } from "../../controllers/record.controller";
@@ -112,6 +117,35 @@ router.delete(
         const result = await deleteService({
             id: service,
             vm: vm,
+        });
+        next(result);
+    }
+);
+
+router.put(
+    "/:service/environment",
+    async (req: Request, _: Response, next: NextFunction) => {
+        const service = req.params.service as string;
+        const name = req.query.name as string;
+        const body = req.body as IEnvironment;
+        const result = await updateEnvService({
+            ...body,
+            name: name,
+            id: service,
+        });
+        next(result);
+    }
+);
+
+router.put(
+    "/:service/add-environment",
+    async (req: Request, _: Response, next: NextFunction) => {
+        const service = req.params.service as string;
+        const body = req.body as IEnvironment;
+        console.log("🚀 ~ body:", body)
+        const result = await addEnvService({
+            ...body,
+            id: service,
         });
         next(result);
     }

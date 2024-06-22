@@ -3,7 +3,7 @@ import { verifyToken } from "./vms.controller";
 import { findTicketByUserId } from "../services/ticket.service";
 import { NodeSSH } from "node-ssh";
 import Vms from "../models/vms";
-import { IServiceBody } from "../interfaces/request/service.body";
+import { IEnvironment, IServiceBody } from "../interfaces/request/service.body";
 import {
     HttpError,
     HttpStatus,
@@ -108,6 +108,73 @@ export async function updateService(
     );
 
     await service.save();
+    return success.ok(service);
+}
+
+export async function updateEnvService(
+    params: IEnvironment & { id: string }
+): Promise<ResultSuccess> {
+    const service = await Service.findOneAndUpdate(
+        {
+            id: params.id,
+            "environment.name": params.name,
+        },
+        {
+            $set: {
+                "environment.$.vm": params.vm,
+                "environment.$.docker_file": params.docker_file,
+                "environment.$.docker_compose": params.docker_compose,
+                "environment.$.postman": params.postman,
+                "environment.$.branch": params.branch,
+            },
+        },
+        {
+            new: true,
+        }
+    );
+
+    if (!service) {
+        throw new HttpError(
+            error.notFound({
+                location: "params",
+                param: "service",
+                message: `service not exit`,
+                value: params.id,
+            })
+        );
+    }
+
+    await service.save();
+    return success.ok(service);
+}
+
+export async function addEnvService(
+    params: IEnvironment & { id: string }
+): Promise<ResultSuccess> {
+    const service = await Service.findOneAndUpdate(
+        {
+            id: params.id,
+        },
+        {
+            $push: {
+                environment: { ...params, id: undefined },
+            },
+        },
+        {
+            new: true,
+        }
+    );
+
+    if (!service) {
+        throw new HttpError(
+            error.notFound({
+                location: "params",
+                param: "service",
+                message: `service not exit`,
+                value: params.id,
+            })
+        );
+    }
     return success.ok(service);
 }
 
@@ -704,7 +771,8 @@ export async function planCiCd(
                                             vm: env!.vm,
                                         },
                                     ];
-                                }if (vm.activities) {
+                                }
+                                if (vm.activities) {
                                     vm.activities.push({
                                         service_id: service.id,
                                         modify_time: new Date(),

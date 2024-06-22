@@ -9,21 +9,31 @@ export interface IServiceBody {
 }
 
 export interface IEnvironment {
-    name: string;
-    vm: string;
-    branch: string;
-    docker_file: [
+    name?: string;
+    vm?: string;
+    branch?: string;
+    docker_file?: [
         {
             location: string;
             content: string;
             name: string;
         }
     ];
-    docker_compose: [
+    docker_compose?: [
         {
             location: string;
             content: string;
             name: string;
         }
     ];
+    postman?: {
+        collection: {
+            content: string;
+            name: string;
+        };
+        environment: {
+            content: string;
+            name: string;
+        };
+    };
 }
