@@ -916,6 +916,7 @@ export async function getVmsByIds(params: {
                         result = [
                             ...result,
                             {
+                                id: d[idx].id,
                                 name: d[idx].name,
                                 architecture: d[idx].architectura,
                                 language: d[idx].language,
