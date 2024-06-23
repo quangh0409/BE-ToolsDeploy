@@ -42,7 +42,7 @@ export async function createService(
         return env.vm;
     });
 
-    await Vms.updateMany(
+    const vms = await Vms.updateMany(
         {
             id: {
                 $in: vms_ids,
@@ -54,6 +54,7 @@ export async function createService(
             },
         }
     );
+    console.log("🚀 ~ vms:", vms)
 
     await service.save();
     return success.ok(service);
@@ -151,7 +152,27 @@ export async function updateEnvService(
 export async function addEnvService(
     params: IEnvironment & { id: string }
 ): Promise<ResultSuccess> {
-    console.log("🚀 ~ params:", params);
+    const vm = await Vms.findOneAndUpdate(
+        {
+            id: params.vm,
+        },
+        {
+            $push: {
+                services: params.id,
+            },
+        }
+    );
+
+    if (!vm) {
+        throw new HttpError(
+            error.notFound({
+                location: "params",
+                param: "vm",
+                message: `VM-instance not exit`,
+                value: params.vm,
+            })
+        );
+    }
     const service = await Service.findOneAndUpdate(
         {
             id: params.id,
@@ -191,6 +212,7 @@ export async function deleteEnvService(params: {
     id: string;
     name: string;
 }): Promise<ResultSuccess> {
+
     const service = await Service.findOneAndUpdate(
         {
             id: params.id,
