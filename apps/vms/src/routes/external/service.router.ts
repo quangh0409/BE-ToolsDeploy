@@ -16,6 +16,7 @@ import {
     updateEnvService,
     addEnvService,
     deleteEnvService,
+    deleteServiceInAllVm,
 } from "../../controllers/service.controller";
 import { IRecordReqBodyCreate } from "../../interfaces/request/record.body";
 import { createRecord } from "../../controllers/record.controller";
@@ -131,6 +132,17 @@ router.delete(
         const result = await deleteEnvService({
             id: service,
             name: name,
+        });
+        next(result);
+    }
+);
+
+router.delete(
+    "/:service",
+    async (req: Request, _: Response, next: NextFunction) => {
+        const service = req.params.service as string;
+        const result = await deleteServiceInAllVm({
+            id: service,
         });
         next(result);
     }

@@ -54,7 +54,7 @@ export async function createService(
             },
         }
     );
-    console.log("🚀 ~ vms:", vms)
+    console.log("🚀 ~ vms:", vms);
 
     await service.save();
     return success.ok(service);
@@ -212,7 +212,6 @@ export async function deleteEnvService(params: {
     id: string;
     name: string;
 }): Promise<ResultSuccess> {
-
     const service = await Service.findOneAndUpdate(
         {
             id: params.id,
@@ -283,6 +282,31 @@ export async function deleteService(params: {
 
     vm.services = services;
     await vm.save();
+
+    return success.ok({ message: "successfully deleted" });
+}
+
+export async function deleteServiceInAllVm(params: {
+    id: string;
+}): Promise<ResultSuccess> {
+    const check = await Service.deleteOne({ id: params.id });
+    if (check.deletedCount !== 1) {
+        throw new HttpError(
+            error.notFound({
+                message: `service not exited, failed delete`,
+                value: params.id,
+            })
+        );
+    }
+
+    await Vms.updateMany(
+        { services: params.id },
+        {
+            $pull: {
+                services: params.id,
+            },
+        }
+    );
 
     return success.ok({ message: "successfully deleted" });
 }
@@ -1957,20 +1981,20 @@ export async function getAllInfoOfRepos(params: {
                 branchs_custom.push({
                     name: env.name,
                     branch: env.branch,
-                    vm: { host: vm_env!.host, id: vm_env!.id },
+                    vm: { host: vm_env?.host, id: vm_env?.id },
                     record_success: record_success,
                     record_error: record_error,
                     last_record: {
-                        id: last_record!.id,
-                        branch: last_record!.branch,
-                        vm: { host: vm_env!.host, id: vm_env!.id },
-                        status: last_record!.status,
-                        created_time: last_record!.created_time,
-                        commit_id: last_record!.commit_id,
-                        commit_message: last_record!.commit_message,
-                        commit_html_url: last_record!.commit_html_url,
-                        index: last_record!.index,
-                        end_time: last_record!.end_time,
+                        id: last_record?.id,
+                        branch: last_record?.branch,
+                        vm: { host: vm_env?.host, id: vm_env?.id },
+                        status: last_record?.status,
+                        created_time: last_record?.created_time,
+                        commit_id: last_record?.commit_id,
+                        commit_message: last_record?.commit_message,
+                        commit_html_url: last_record?.commit_html_url,
+                        index: last_record?.index,
+                        end_time: last_record?.end_time,
                     },
                 });
             } else {
