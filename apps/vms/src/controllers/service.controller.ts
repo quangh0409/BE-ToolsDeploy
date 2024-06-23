@@ -151,13 +151,22 @@ export async function updateEnvService(
 export async function addEnvService(
     params: IEnvironment & { id: string }
 ): Promise<ResultSuccess> {
+    console.log("🚀 ~ params:", params);
     const service = await Service.findOneAndUpdate(
         {
             id: params.id,
         },
         {
             $push: {
-                environment: { ...params, id: undefined },
+                environment: {
+                    name: params.name,
+                    vm: params.vm,
+                    branch: params.branch,
+                    docker_file: params.docker_file,
+                    docker_compose: params.docker_compose,
+                    postman: params.postman,
+                    record: [],
+                },
             },
         },
         {
@@ -175,6 +184,51 @@ export async function addEnvService(
             })
         );
     }
+    return success.ok(service);
+}
+
+export async function deleteEnvService(params: {
+    id: string;
+    name: string;
+}): Promise<ResultSuccess> {
+    const service = await Service.findOneAndUpdate(
+        {
+            id: params.id,
+        },
+        {
+            $pull: {
+                environment: {
+                    name: params.name,
+                },
+            },
+        },
+        {
+            new: true,
+        }
+    );
+
+    if (!service) {
+        throw new HttpError(
+            error.notFound({
+                location: "params",
+                param: "service",
+                message: `service not exit`,
+                value: params.id,
+            })
+        );
+    }
+
+    await Vms.updateMany(
+        {
+            services: params.id,
+        },
+        {
+            $pull: {
+                services: params.id,
+            },
+        }
+    );
+
     return success.ok(service);
 }
 

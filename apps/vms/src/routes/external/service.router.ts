@@ -15,6 +15,7 @@ import {
     getAllInfoOfRepos,
     updateEnvService,
     addEnvService,
+    deleteEnvService,
 } from "../../controllers/service.controller";
 import { IRecordReqBodyCreate } from "../../interfaces/request/record.body";
 import { createRecord } from "../../controllers/record.controller";
@@ -122,6 +123,19 @@ router.delete(
     }
 );
 
+router.delete(
+    "/:service/environment",
+    async (req: Request, _: Response, next: NextFunction) => {
+        const service = req.params.service as string;
+        const name = req.query.name as string;
+        const result = await deleteEnvService({
+            id: service,
+            name: name,
+        });
+        next(result);
+    }
+);
+
 router.put(
     "/:service/environment",
     async (req: Request, _: Response, next: NextFunction) => {
@@ -141,8 +155,8 @@ router.put(
     "/:service/add-environment",
     async (req: Request, _: Response, next: NextFunction) => {
         const service = req.params.service as string;
-        const body = req.body as IEnvironment;
-        console.log("🚀 ~ body:", body)
+        const body = req.body.environment as IEnvironment;
+        console.log("🚀 ~ body:", body);
         const result = await addEnvService({
             ...body,
             id: service,
