@@ -882,23 +882,27 @@ export async function getVmsByIds(params: {
                     id: data[i].activities.at(-1)?.service_id,
                 });
 
-                const record = await Record.findOne({
-                    id: service!.activities.at(-1)!.record_id,
-                });
+                if(service){
+                    const record = await Record.findOne({
+                        id: service!.activities.at(-1)!.record_id,
+                    });
+    
+                    last_service = {
+                        service_id: service!.id,
+                        service_name: service!.name,
+                        repo: service!.repo,
+                        source: service!.source,
+                        last_record: {
+                            env_name: service!.activities.at(-1)!.name_env,
+                            ...record!.toJSON(),
+                            ocean: undefined,
+                            logs: undefined,
+                            _id: undefined,
+                        },
+                    };
 
-                last_service = {
-                    service_id: service!.id,
-                    service_name: service!.name,
-                    repo: service!.repo,
-                    source: service!.source,
-                    last_record: {
-                        env_name: service!.activities.at(-1)!.name_env,
-                        ...record!.toJSON(),
-                        ocean: undefined,
-                        logs: undefined,
-                        _id: undefined,
-                    },
-                };
+                }
+
             }
 
             if (data[i].services!.length > 0) {
@@ -962,6 +966,7 @@ export async function getVmsByIds(params: {
 
         return data;
     });
+               
 
     return success.ok(result);
 }
