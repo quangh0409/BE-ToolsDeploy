@@ -682,14 +682,14 @@ export async function getContaninersOfServiceById(params: {
     const ssh = new NodeSSH();
 
     if (service) {
-        const environment = service.environment.find((e) => e.name === params.env);
+        const environment = service.environment.find(
+            (e) => e.name === params.env
+        );
 
         const vm = await Vms.findOne({
             id: environment!.vm,
         });
-        const compose = yaml.parse(
-            environment!.docker_compose[0].content
-        );
+        const compose = yaml.parse(environment!.docker_compose[0].content);
 
         const containerNames = Object.values(compose.services).map(
             (service: any) => service.container_name
@@ -708,18 +708,14 @@ export async function getContaninersOfServiceById(params: {
 
         let log = await ssh.execCommand(command);
         if (log.stdout !== "") {
-            containers = log.stdout
-                .split("\n")
-                .map((r) => JSON.parse(r));
+            containers = log.stdout.split("\n").map((r) => JSON.parse(r));
         }
 
         command = "docker ps -a --format json";
         log = await ssh.execCommand(command);
         let containers_: any[] = [];
         if (log.stdout !== "") {
-            containers_ = log.stdout
-                .split("\n")
-                .map((r) => JSON.parse(r));
+            containers_ = log.stdout.split("\n").map((r) => JSON.parse(r));
 
             containers_ = containers_.map((container_, idx) => {
                 const container = containers.find((container) => {
@@ -2295,4 +2291,162 @@ export async function getAllInfoOfRepos(params: {
     }
 
     return success.ok(result);
+}
+
+export async function getAllInfoOfReposForDashboard(params: {
+    userId: string;
+}): Promise<ResultSuccess> {
+    const repos = await GetReposGitByAccessToken(params);
+
+    if (repos.status !== 200 && !repos?.body) {
+        throw new HttpError({
+            status: HttpStatus.INTERNAL_SERVER,
+            errors: [
+                {
+                    message: "Error call api internal of service git",
+                },
+            ],
+        });
+    }
+
+    const repositorys: {
+        name: string;
+        full_name: string;
+        html_url: string;
+        language: string;
+    }[] = repos.body.data.map((repo: any) => {
+        return {
+            name: repo.name,
+            full_name: repo.full_name,
+            html_url: repo.html_url,
+            language: repo.language,
+        };
+    });
+
+    let result: any[] = [];
+    let total_deployed: number = 0;
+    let total_undeveloped: number = 0;
+
+    for (const repo of repositorys) {
+        const [service, branchs] = await Promise.all([
+            await Service.findOne({ repo: repo.name }),
+            await GetBranchesByAccessToken({
+                userId: params.userId,
+                repository: repo.name,
+            }),
+        ]);
+
+        if (service) {
+            total_deployed++;
+            const environments = service?.environment;
+            let total_success: number = 0;
+            let total_failed: number = 0;
+
+            let activities: any[] = [];
+
+            for (const activity of service.activities) {
+                const [record, vm] = await Promise.all([
+                    Record.findOne(
+                        { id: activity.record_id },
+                        {
+                            _id: 0,
+                            status: 1,
+                            index: 1,
+                            created_time: 1,
+                            end_time: 1,
+                            id: 1,
+                        }
+                    ),
+                    Vms.findOne(
+                        { id: activity.vm },
+                        { _id: 0, id: 1, host: 1 }
+                    ),
+                ]);
+
+                if (record?.status === "SUCCESSFULLY") {
+                    total_success++;
+                } else {
+                    total_failed++;
+                }
+
+                activities.push({
+                    name_env: activity.name_env,
+                    modify_time: activity.modify_time,
+                    record: record,
+                    vm: vm,
+                });
+                // Object.assign(activity, record, vm);
+            }
+
+            const branchs_custom: any[] = [];
+
+            for (const { branch: b } of branchs.body.data) {
+                const env = environments?.find((env) => {
+                    return env.branch === b;
+                });
+                if (env) {
+                    const [record_success, record_error, records] =
+                        await Promise.all([
+                            Record.find({
+                                id: {
+                                    $in: env.record,
+                                },
+                                status: EStatus.SUCCESSFULLY,
+                            }).count(),
+                            Record.find({
+                                id: {
+                                    $in: env.record,
+                                },
+                                status: EStatus.ERROR,
+                            }).count(),
+                            Record.find(
+                                {
+                                    id: {
+                                        $in: env.record,
+                                    },
+                                },
+                                {
+                                    _id: 0,
+                                    status: 1,
+                                    index: 1,
+                                    created_time: 1,
+                                    end_time: 1,
+                                    id: 1,
+                                }
+                            ),
+                        ]);
+
+                    branchs_custom.push({
+                        name: env.name,
+                        branch: env.branch,
+                        record_success: record_success,
+                        record_error: record_error,
+                        records: records,
+                    });
+                } else {
+                    branchs_custom.push({
+                        branch: b,
+                    });
+                }
+            }
+
+            result.push({
+                service_id: service?.id,
+                ...repo,
+                branchs: branchs_custom,
+                activities: activities,
+                total_success: total_success,
+                total_failed: total_failed,
+            });
+        } else {
+            total_undeveloped++;
+        }
+    }
+
+    return success.ok({
+        total: repositorys.length,
+        total_deployed: total_deployed,
+        total_undeveloped: total_undeveloped,
+        repos: result,
+    });
 }

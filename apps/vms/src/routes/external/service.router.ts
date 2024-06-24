@@ -18,6 +18,7 @@ import {
     deleteEnvService,
     deleteServiceInAllVm,
     getContaninersOfServiceById,
+    getAllInfoOfReposForDashboard,
 } from "../../controllers/service.controller";
 import { IRecordReqBodyCreate } from "../../interfaces/request/record.body";
 import { createRecord } from "../../controllers/record.controller";
@@ -83,6 +84,17 @@ router.get(
     }
 );
 
+router.get(
+    "/dashboard",
+    async (req: Request, _: Response, next: NextFunction) => {
+        const { id: userId } = req.payload as Payload;
+        const result = await getAllInfoOfReposForDashboard({
+            userId,
+        });
+        next(result);
+    }
+);
+
 router.get("/images", async (req: Request, _: Response, next: NextFunction) => {
     const service = req.query.service as string;
     const env = req.query.env as string;
@@ -100,7 +112,7 @@ router.get("/vm/:vm", async (req: Request, _: Response, next: NextFunction) => {
     const name = req.query.name as string;
     const result = await getAllService({
         vm,
-        name
+        name,
     });
     next(result);
 });
