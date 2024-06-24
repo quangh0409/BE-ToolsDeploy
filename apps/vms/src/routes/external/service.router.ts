@@ -17,6 +17,7 @@ import {
     addEnvService,
     deleteEnvService,
     deleteServiceInAllVm,
+    getContaninersOfServiceById,
 } from "../../controllers/service.controller";
 import { IRecordReqBodyCreate } from "../../interfaces/request/record.body";
 import { createRecord } from "../../controllers/record.controller";
@@ -35,6 +36,18 @@ router.post(
     async (req: Request, _: Response, next: NextFunction) => {
         const { service, env } = req.body;
         const result = await getImagesOfServiceById({
+            service,
+            env,
+        });
+        next(result);
+    }
+);
+
+router.post(
+    "/containers",
+    async (req: Request, _: Response, next: NextFunction) => {
+        const { service, env } = req.body;
+        const result = await getContaninersOfServiceById({
             service,
             env,
         });

@@ -674,6 +674,93 @@ export async function getImagesOfServiceById(params: {
     );
 }
 
+export async function getContaninersOfServiceById(params: {
+    service: string;
+    env: string;
+}): Promise<ResultSuccess> {
+    const service = await Service.findOne({ id: params.service });
+    const ssh = new NodeSSH();
+
+    if (service) {
+        const environment = service.environment.find((e) => e.name === params.env);
+
+        const vm = await Vms.findOne({
+            id: environment!.vm,
+        });
+        const compose = yaml.parse(
+            environment!.docker_compose[0].content
+        );
+
+        const containerNames = Object.values(compose.services).map(
+            (service: any) => service.container_name
+        );
+
+        await ssh.connect({
+            host: vm!.host,
+            username: vm!.user,
+            password: vm!.pass,
+            port: Number.parseInt(vm!.port),
+            tryKeyboard: true,
+        });
+
+        let containers: any[] = [];
+        let command = "docker stats --format json --no-stream";
+
+        let log = await ssh.execCommand(command);
+        if (log.stdout !== "") {
+            containers = log.stdout
+                .split("\n")
+                .map((r) => JSON.parse(r));
+        }
+
+        command = "docker ps -a --format json";
+        log = await ssh.execCommand(command);
+        let containers_: any[] = [];
+        if (log.stdout !== "") {
+            containers_ = log.stdout
+                .split("\n")
+                .map((r) => JSON.parse(r));
+
+            containers_ = containers_.map((container_, idx) => {
+                const container = containers.find((container) => {
+                    return container?.ID === container_?.ID;
+                });
+                if (container) {
+                    return {
+                        ...container,
+                        Ports: container_?.Ports,
+                        Image: container_?.Image,
+                        Status: container_?.Status,
+                    };
+                } else {
+                    return {
+                        Container: container_?.ID,
+                        ID: container_?.ID,
+                        Name: container_?.Names,
+                        Ports: container_?.Ports,
+                        Image: container_?.Image,
+                        Status: container_?.Status,
+                    };
+                }
+            });
+        }
+
+        containers_ = containers_.filter((element) =>
+            containerNames.includes(element.Name)
+        );
+
+        return success.ok({ containers_ });
+    }
+
+    throw new HttpError(
+        error.notFound({
+            param: "service",
+            value: params.service,
+            message: "service not exit",
+        })
+    );
+}
+
 export async function scanImageOfService(params: {
     service: string;
     env: string;
