@@ -354,6 +354,10 @@ export async function getVmsById(params: {
             { _id: 0 }
         );
 
+        const checkip = await axios.get(
+            `https://ipinfo.io/${check.host}?token=c065c6dd2047b8`
+        );
+
         await check.save();
 
         return success.ok({
@@ -361,6 +365,7 @@ export async function getVmsById(params: {
             _id: undefined,
             landscape_sysinfo: obj,
             standard_info: standard?.toJSON(),
+            checkip: checkip.data.company,
         });
     } catch (error) {
         return success.ok({
@@ -882,11 +887,11 @@ export async function getVmsByIds(params: {
                     id: data[i].activities.at(-1)?.service_id,
                 });
 
-                if(service){
+                if (service) {
                     const record = await Record.findOne({
                         id: service!.activities.at(-1)!.record_id,
                     });
-    
+
                     last_service = {
                         service_id: service!.id,
                         service_name: service!.name,
@@ -900,9 +905,7 @@ export async function getVmsByIds(params: {
                             _id: undefined,
                         },
                     };
-
                 }
-
             }
 
             if (data[i].services!.length > 0) {
@@ -966,7 +969,6 @@ export async function getVmsByIds(params: {
 
         return data;
     });
-               
 
     return success.ok(result);
 }

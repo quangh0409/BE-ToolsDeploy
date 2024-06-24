@@ -84,8 +84,10 @@ router.get("/images", async (req: Request, _: Response, next: NextFunction) => {
 
 router.get("/vm/:vm", async (req: Request, _: Response, next: NextFunction) => {
     const vm = req.params.vm as string;
+    const name = req.query.name as string;
     const result = await getAllService({
         vm,
+        name
     });
     next(result);
 });

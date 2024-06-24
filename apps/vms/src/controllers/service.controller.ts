@@ -22,6 +22,7 @@ import {
     GetReposGitByAccessToken,
 } from "../services/git.service";
 import { SocketServer } from "../utils";
+import * as yaml from "yaml";
 
 export async function createService(
     params: IServiceBody
@@ -313,7 +314,9 @@ export async function deleteServiceInAllVm(params: {
 
 export async function getAllService(params: {
     vm: string;
+    name?: string;
 }): Promise<ResultSuccess> {
+    console.log("🚀 ~ params:", params);
     const vm = await Vms.findOne({ id: params.vm });
     const err: ResultError = {
         status: HttpStatus.BAD_REQUEST,
@@ -329,16 +332,194 @@ export async function getAllService(params: {
         throw new HttpError(err);
     }
 
-    const services = await Service.find(
+    const services = await Service.aggregate([
         {
-            id: {
-                $in: vm.services,
+            $match: {
+                id: {
+                    $in: vm.services,
+                },
+                name: {
+                    $regex: `${params?.name ? params.name : ""}`,
+                    $options: "i",
+                },
             },
         },
         {
-            _id: 0,
+            $project: {
+                _id: 0,
+            },
+        },
+    ]).then(async (res) => {
+        const data = res;
+        let last:
+            | {
+                  id?: string;
+                  service_name?: string;
+                  service_id?: string;
+                  serivce_architecture?: string;
+                  env_name?: string;
+                  branch?: string;
+                  vm?: { host: string; id: string };
+                  status?: EStatus;
+                  created_time?: Date;
+                  commit_id?: string;
+                  commit_message?: string;
+                  commit_html_url?: string;
+                  index?: number;
+                  end_time?: Date;
+              }
+            | undefined;
+        let environment: any | undefined;
+        for (let i = 0; i < data.length; i++) {
+            environment = data[i].environment.find(
+                (env: any) => env.vm === params.vm
+            );
+            console.log("🚀 ~ ).then ~ environment:", !!environment);
+            if (environment) {
+                const [record, vm] = await Promise.all([
+                    Record.findOne({ id: environment.record.at(-1) }),
+                    Vms.findOne({ id: params.vm }),
+                ]);
+
+                if (!record || !vm) {
+                    throw new HttpError(
+                        error.notFound({
+                            message: "record or vm not found",
+                        })
+                    );
+                }
+
+                last = {
+                    id: record.id,
+                    service_name: data[i]?.name,
+                    serivce_architecture: data[i]?.architectura,
+                    service_id: data[i]?.id,
+                    env_name: environment.name,
+                    branch: record.branch,
+                    vm: { host: vm.host, id: vm.id },
+                    status: record.status,
+                    created_time: record.created_time,
+                    commit_id: record.commit_id,
+                    commit_message: record.commit_message,
+                    commit_html_url: record.commit_html_url,
+                    index: record.index,
+                    end_time: record.end_time,
+                };
+
+                const compose = yaml.parse(
+                    environment.docker_compose[0].content
+                );
+
+                const containers_number = Object.keys(compose.services).length;
+                const containerNames = Object.values(compose.services).map(
+                    (service: any) => service.container_name
+                );
+                const images_number = new Set(
+                    Object.values(compose.services).map(
+                        (service: any) => service?.image
+                    )
+                ).size;
+
+                const ssh = new NodeSSH();
+                await ssh.connect({
+                    host: vm!.host,
+                    username: vm!.user,
+                    password: vm!.pass,
+                    port: Number.parseInt(vm!.port),
+                    tryKeyboard: true,
+                });
+
+                let containers: any[] = [];
+                let command = "docker stats --format json --no-stream";
+
+                let log = await ssh.execCommand(command);
+                if (log.stdout !== "") {
+                    containers = log.stdout
+                        .split("\n")
+                        .map((r) => JSON.parse(r));
+                }
+
+                command = "docker ps -a --format json";
+                log = await ssh.execCommand(command);
+                let containers_: any[] = [];
+                if (log.stdout !== "") {
+                    containers_ = log.stdout
+                        .split("\n")
+                        .map((r) => JSON.parse(r));
+
+                    containers_ = containers_.map((container_, idx) => {
+                        const container = containers.find((container) => {
+                            return container?.ID === container_?.ID;
+                        });
+                        if (container) {
+                            return {
+                                ...container,
+                                Ports: container_?.Ports,
+                                Image: container_?.Image,
+                                Status: container_?.Status,
+                            };
+                        } else {
+                            return {
+                                Container: container_?.ID,
+                                ID: container_?.ID,
+                                Name: container_?.Names,
+                                Ports: container_?.Ports,
+                                Image: container_?.Image,
+                                Status: container_?.Status,
+                            };
+                        }
+                    });
+                }
+
+                containers_ = containers_.filter((element) =>
+                    containerNames.includes(element.Name)
+                );
+
+                log = await ssh.execCommand(`docker images --format json`);
+                const images_ = log.stdout
+                    .split("\n")
+                    .map((item) => JSON.parse(item));
+
+                const imageRegex = /image:\s*docker.io\/(.*)/g;
+                let match: RegExpExecArray | null;
+                const images: string[] = [];
+
+                while (
+                    (match = imageRegex.exec(
+                        environment.docker_compose[0].content
+                    )) !== null
+                ) {
+                    images.push(match[1]);
+                }
+
+                const result = images_.filter((element) =>
+                    images.includes(element.Repository)
+                );
+
+                environment = [
+                    {
+                        last: last,
+                        containers: {
+                            number: containers_number,
+                            containers_info: containers_,
+                        },
+                        images: {
+                            number: images_number,
+                            images_info: result,
+                        },
+                    },
+                ];
+            }
+
+            Object.assign(data[i], {
+                environment_info: environment,
+                environment: undefined,
+                activities: undefined,
+            });
         }
-    );
+
+        return data;
+    });
 
     return success.ok(services);
 }
