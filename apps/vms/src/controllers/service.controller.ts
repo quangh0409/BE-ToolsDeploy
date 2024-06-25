@@ -2385,7 +2385,7 @@ export async function getAllInfoOfReposForDashboard(params: {
                     return env.branch === b;
                 });
                 if (env) {
-                    const [record_success, record_error, records] =
+                    const [record_success, record_error, records, vm] =
                         await Promise.all([
                             Record.find({
                                 id: {
@@ -2414,6 +2414,7 @@ export async function getAllInfoOfReposForDashboard(params: {
                                     id: 1,
                                 }
                             ),
+                            Vms.findOne({ id: env.vm }),
                         ]);
 
                     branchs_custom.push({
@@ -2422,6 +2423,7 @@ export async function getAllInfoOfReposForDashboard(params: {
                         record_success: record_success,
                         record_error: record_error,
                         records: records,
+                        vm: { host: vm?.host, id: vm?.id },
                     });
                 } else {
                     branchs_custom.push({
