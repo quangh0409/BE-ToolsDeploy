@@ -33,4 +33,10 @@ export interface IVms {
 export enum EStatus {
     CONNECT = "CONNECTED",
     DISCONNECT = "DISCONNECTED",
+    START = "START",
+    DONE = "DONE",
+    IN_PROGRESS = "IN_PROGRESS",
+    SUCCESSFULLY = "SUCCESSFULLY",
+    ERROR = "ERROR",
 }
+

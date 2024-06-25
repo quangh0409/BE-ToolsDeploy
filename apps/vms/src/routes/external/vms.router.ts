@@ -9,6 +9,7 @@ import {
     findContaninersOfVmById,
     findImagesOfVmById,
     findVmsByHost,
+    getAllInfoForDashboard,
     getVmsById,
     getVmsByIds,
     installDocker,
@@ -181,6 +182,17 @@ router.post("/ids", async (req: Request, _: Response, next: NextFunction) => {
     });
     next(result);
 });
+
+router.post(
+    "/dashboard",
+    async (req: Request, _: Response, next: NextFunction) => {
+        const ids = req.body.ids;
+        const result = await getAllInfoForDashboard({
+            ids,
+        });
+        next(result);
+    }
+);
 
 router.post(
     "/templates",

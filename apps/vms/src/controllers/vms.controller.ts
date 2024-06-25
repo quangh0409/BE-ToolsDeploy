@@ -2023,3 +2023,303 @@ export async function verifyToken(token: string): Promise<Payload> {
         }
     }
 }
+
+export async function getAllInfoForDashboard(params: {
+    ids: string[];
+}): Promise<ResultSuccess> {
+    const connect: {
+        id: any;
+        status: any;
+    }[] = [];
+    const disconnect: {
+        id: any;
+        status: any;
+    }[] = [];
+
+    const vms = await Vms.aggregate([
+        {
+            $match: {
+                id: {
+                    $in: [...params.ids],
+                },
+            },
+        },
+        {
+            $project: {
+                _id: 1,
+                host: 1,
+                user: 1,
+                pass: 1,
+                port: 1,
+                activities: 1,
+                services: 1,
+            },
+        },
+    ]);
+
+    async function connectSSH(vm: {
+        host: any;
+        user: any;
+        pass: any;
+        port: any;
+        id: any;
+    }) {
+        const ssh = new NodeSSH();
+        try {
+            await ssh.connect({
+                host: vm.host,
+                username: vm.user,
+                password: vm.pass,
+                port: Number.parseInt(vm.port),
+                tryKeyboard: true,
+            });
+
+            return {
+                id: vm.id,
+                status: "CONNECTED",
+            }; // Return vm.id if connection is successful
+        } catch (error) {
+            return {
+                id: vm.id,
+                status: "DISCONNECTED",
+            }; // Return null if connection fails
+        } finally {
+            ssh.dispose(); // Close the SSH connection
+        }
+    }
+
+    await Promise.all(
+        vms.map(async (vm) => {
+            const res = await connectSSH(vm);
+            if (res.status === "CONNECTED") {
+                connect.push(res);
+            } else {
+                disconnect.push(res);
+            }
+        })
+    );
+
+    const [con, dis] = await Promise.all([
+        Vms.updateMany(
+            {
+                id: {
+                    $in: [...connect.map((res) => res.id)],
+                },
+            },
+            {
+                $set: {
+                    status: EStatus.CONNECT,
+                    last_connect: new Date(),
+                },
+            }
+        ),
+        Vms.updateMany(
+            {
+                id: {
+                    $in: [...disconnect.map((res) => res.id)],
+                },
+            },
+            {
+                $set: {
+                    status: EStatus.DISCONNECT,
+                    last_connect: new Date(),
+                },
+            }
+        ),
+    ]);
+
+    let result_: any[] = [];
+
+    for (const id of params.ids) {
+        const result = await Vms.aggregate([
+            {
+                $match: {
+                    id: id,
+                },
+            },
+            {
+                $lookup: {
+                    from: "services",
+                    localField: "services",
+                    foreignField: "id",
+                    as: "serviceDetails",
+                },
+            },
+            {
+                $unwind: "$serviceDetails",
+            },
+            {
+                $unwind: "$serviceDetails.environment",
+            },
+            {
+                $match: {
+                    "serviceDetails.environment.vm": id,
+                },
+            },
+            {
+                $unwind: "$serviceDetails.environment.record",
+            },
+            {
+                $lookup: {
+                    from: "records",
+                    localField: "serviceDetails.environment.record",
+                    foreignField: "id",
+                    as: "recordDetails",
+                },
+            },
+            {
+                $unwind: "$recordDetails",
+            },
+            {
+                $group: {
+                    _id: {
+                        vm_id: "$id",
+                        host: "$host",
+                        year: { $year: "$recordDetails.created_time" },
+                        month: { $month: "$recordDetails.created_time" },
+                        day: { $dayOfMonth: "$recordDetails.created_time" },
+                        hour: { $hour: "$recordDetails.created_time" },
+                        service_name: "$serviceDetails.name",
+                    },
+                    total_success: {
+                        $sum: {
+                            $cond: [
+                                {
+                                    $eq: [
+                                        "$recordDetails.status",
+                                        "SUCCESSFULLY",
+                                    ],
+                                },
+                                1,
+                                0,
+                            ],
+                        },
+                    },
+                    total_failed: {
+                        $sum: {
+                            $cond: [
+                                { $eq: ["$recordDetails.status", "ERROR"] },
+                                1,
+                                0,
+                            ],
+                        },
+                    },
+                },
+            },
+            {
+                $group: {
+                    _id: {
+                        vm_id: "$_id.vm_id",
+                        host: "$_id.host",
+                        year: "$_id.year",
+                        month: "$_id.month",
+                        day: "$_id.day",
+                        service_name: "$_id.service_name",
+                    },
+                    hours: {
+                        $push: {
+                            hour: "$_id.hour",
+                            total_success: "$total_success",
+                            total_failed: "$total_failed",
+                        },
+                    },
+                    total_success: { $sum: "$total_success" },
+                    total_failed: { $sum: "$total_failed" },
+                },
+            },
+            {
+                $group: {
+                    _id: {
+                        vm_id: "$_id.vm_id",
+                        host: "$_id.host",
+                        year: "$_id.year",
+                        month: "$_id.month",
+                        service_name: "$_id.service_name",
+                    },
+                    days: {
+                        $push: {
+                            day: "$_id.day",
+                            hours: "$hours",
+                            total_success: "$total_success",
+                            total_failed: "$total_failed",
+                        },
+                    },
+                    total_success: { $sum: "$total_success" },
+                    total_failed: { $sum: "$total_failed" },
+                },
+            },
+            {
+                $group: {
+                    _id: {
+                        vm_id: "$_id.vm_id",
+                        host: "$_id.host",
+                        year: "$_id.year",
+                        service_name: "$_id.service_name",
+                    },
+                    months: {
+                        $push: {
+                            month: "$_id.month",
+                            days: "$days",
+                            total_success: "$total_success",
+                            total_failed: "$total_failed",
+                        },
+                    },
+                    total_success: { $sum: "$total_success" },
+                    total_failed: { $sum: "$total_failed" },
+                },
+            },
+            {
+                $group: {
+                    _id: {
+                        vm_id: "$_id.vm_id",
+                        host: "$_id.host",
+                        year: "$_id.year",
+                    },
+                    services: {
+                        $push: {
+                            service_name: "$_id.service_name",
+                            months: "$months",
+                            total_success: "$total_success",
+                            total_failed: "$total_failed",
+                        },
+                    },
+                    total_success: { $sum: "$total_success" },
+                    total_failed: { $sum: "$total_failed" },
+                },
+            },
+            {
+                $group: {
+                    _id: {
+                        vm_id: "$_id.vm_id",
+                        host: "$_id.host",
+                    },
+                    years: {
+                        $push: {
+                            year: "$_id.year",
+                            services: "$services",
+                            total_success: "$total_success",
+                            total_failed: "$total_failed",
+                        },
+                    },
+                    total_success: { $sum: "$total_success" },
+                    total_failed: { $sum: "$total_failed" },
+                },
+            },
+            {
+                $project: {
+                    _id: 0,
+                    vm_id: "$_id.vm_id",
+                    host: "$_id.host",
+                    years: "$years",
+                    total_success: "$total_success",
+                    total_failed: "$total_failed",
+                },
+            },
+        ]);
+
+        if (result.length > 0) {
+            result_.push(...result);
+        }
+    }
+    return success.ok(result_);
+}
