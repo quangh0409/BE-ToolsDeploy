@@ -950,7 +950,7 @@ export async function getVmsByIds(params: {
             }
 
             const checkip = await axios.get(
-                `https://ipinfo.io/${data[i].host}?token=b01c6276d9cdfc`
+                `https://ipinfo.io/${data[i].host}?token=f752bfe9cb1706`
             );
 
             if (check) {
