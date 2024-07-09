@@ -355,7 +355,7 @@ export async function getVmsById(params: {
         );
 
         const checkip = await axios.get(
-            `https://ipinfo.io/${check.host}?token=c065c6dd2047b8`
+            `https://ipinfo.io/${check.host}?token=f752bfe9cb1706`
         );
 
         await check.save();
