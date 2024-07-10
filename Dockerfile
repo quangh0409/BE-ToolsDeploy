@@ -9,10 +9,11 @@ RUN pnpm fetch
 COPY pnpm-workspace.yaml .
 COPY packages packages
 COPY apps/$module/package.json apps/$module/
-
+RUN pnpm --filter $module^... install
 RUN pnpm --filter $module^... --offline install
 RUN pnpm --filter $module^... build
 
+RUN pnpm --filter $module^... install
 RUN pnpm --filter $module --offline install
 COPY apps/$module apps/$module
 RUN pnpm --filter $module build

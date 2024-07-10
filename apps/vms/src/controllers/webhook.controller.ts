@@ -29,12 +29,14 @@ export async function webhookHandle(params: {
                 },
 
                 repo: repo,
-                source: source,
+                // source: source,
             });
+            console.log("🚀 ~ service:", service)
             if (service) {
                 const env = service.environment.find(
                     (e) => e.branch === branch
                 );
+                console.log("🚀 ~ env:", env)
 
                 if (env) {
                     console.log(
